@@ -14,7 +14,6 @@ import json.decoder
 import requests
 
 # globals
-# TODO: unclear if this is actually required
 ERROR_CODES = {
     400: {
         "error": "CLIENT_ERROR_BAD_REQUEST",
@@ -46,8 +45,6 @@ ERROR_CODES = {
     }
 }
 
-log = logging.getLogger("sepsesam")
-
 
 class SEPSesamAPIError(Exception):
     """ error from the API """
@@ -61,7 +58,11 @@ class SEPSesamAPIError(Exception):
         self.url = url
 
 
-class SEPSeasam:
+class V1:
+    """
+    Implements version 1 of the SEP sesam API.
+    This is required until all functions are moved to API v2
+    """
 
     def __init__(self, url, username, password, verify=True, log_level="INFO"):
         """
@@ -78,8 +79,34 @@ class SEPSeasam:
         self.password = password
         self.logged_in = False
         self.verify = verify
+        self.log = logging.getLogger("sepsesam.v1")
         level = logging.getLevelName(log_level)
-        log.setLevel(level)
+        self.log.setLevel(level)
+
+
+class V2:
+    """
+    Implements version 2 of the SEP sesam API
+    """
+
+    def __init__(self, url, username, password, verify=True, log_level="INFO"):
+        """
+        Initialize API
+
+        :param url: URL of the SEP sesam server including protocol and port, e.g https://sesam.my.domain:11401
+        :param username: Username used for operations
+        :param password: Password user for logon
+        :param verify: Boolean if the SEP server certificate should be verified (default: True)
+        :param log_level: Log level for the logger "sepsesam" as uppercase string (default: INFO)
+        """
+        self.url = url
+        self.username = username
+        self.password = password
+        self.logged_in = False
+        self.verify = verify
+        self.log = logging.getLogger("sepsesam.v2")
+        level = logging.getLevelName(log_level)
+        self.log.setLevel(level)
 
     def __process_error(self, response):
         """
@@ -92,7 +119,7 @@ class SEPSeasam:
             data = response.json()
             data["status_code"] = response.status_code
         except json.decoder.JSONDecodeError:
-            # could not retrieve error description
+            self.log.debug("Could not retrieve error description")
             sc = response.status_code
             data = {
                 "status_code": sc,
@@ -103,14 +130,14 @@ class SEPSeasam:
                 "url": response.request.url,
             }
         data["status_code"] = response.status_code
-        log.error("An error occured:\n{}".format(pprint.pformat(data)))
+        self.log.error("An error occured:\n{}".format(pprint.pformat(data)))
         raise SEPSesamAPIError(**data)
 
     def login(self, type_="WEB"):
         """
         Logon to the SEP sesam v2 API
         """
-        log.debug("Running function")
+        self.log.debug("Running function")
         endpoint = "sep/api/v2/auth/login"
         data = {
             "username": self.username,
@@ -124,7 +151,7 @@ class SEPSeasam:
         response = requests.post(url=url, data=data, verify=self.verify)
         self.__process_errors(response)
         resp_data = response.json()
-        log.debug("Got response:\n{}".format(resp_data))
+        self.log.debug("Got response:\n{}".format(resp_data))
         return True
 
     def get_server_info():
