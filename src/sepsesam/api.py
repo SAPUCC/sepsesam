@@ -1,25 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-
---- SEP Sesam API ---
-
-Example:
-
-    import pprint
-    import sepsesam.api
-
-    cred = {
-        "url": "http://sesam.my.doamin:11401",
-        "username": "Administrator",
-        "password": "Abcd1234!"
-    }
-
-    data = {}
-
-    with sepsesam.api.Api(**cred) as api:
-        data = api.location_list()
-
-    pprint.pprint(data)
+SEP Sesam REST API Wrapper
 """
 
 # import python libraries
@@ -1221,3 +1202,102 @@ class Api:
         data = response.json()
         self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
+
+    ### SCHEDULE HANDLING ###
+
+    def schedule_list(self):
+        """
+        List all schedules
+        """
+        self.log.debug("Running function")
+        endpoint = "/sep/api/schedules"
+        url = "{}{}".format(
+            self.url if self.url[-1] == "/" else self.url + "/",
+            endpoint if endpoint[0] != "/" else endpoint[1:],
+        )
+        response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
+        self._process_error(response)
+        data = response.json()
+        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        return data
+
+    def schedule_get(self, id):
+        """
+        Get a schedule
+        """
+        self.log.debug("Running function")
+        endpoint = "/sep/api/schedules/{}".format(id)
+        url = "{}{}".format(
+            self.url if self.url[-1] == "/" else self.url + "/",
+            endpoint if endpoint[0] != "/" else endpoint[1:],
+        )
+        response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
+        self._process_error(response)
+        data = response.json()
+        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        return data
+
+    def schedule_find(self, **kwargs):
+        """
+        Find a schedule. Based on list due to missing support in API v1
+        """
+        self.log.debug("Running function")
+        data = []
+        for group in self.schedule_list():
+            valid_entry = True
+            for k, v in kwargs.items():
+                if group.get(k) != v:
+                    valid_entry = False
+                    break
+            if valid_entry:
+                data.append(group)
+        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        return data
+
+    def schedule_upsert(self, **kwargs):
+        """
+        Create/Update a schedule
+        """
+        self.log.debug("Running function")
+        endpoint = "/sep/api/schedules"
+        url = "{}{}".format(
+            self.url if self.url[-1] == "/" else self.url + "/",
+            endpoint if endpoint[0] != "/" else endpoint[1:],
+        )
+        response = requests.post(url=url, auth=(self.username, self.password), json=kwargs, verify=self.verify)
+        self._process_error(response)
+        data = response.json()
+        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        return data
+
+    def schedule_delete(self, id):
+        """
+        Delete a schedule
+        """
+        self.log.debug("Running function")
+        endpoint = "/sep/api/schedules/{}/delete".format(id)
+        url = "{}{}".format(
+            self.url if self.url[-1] == "/" else self.url + "/",
+            endpoint if endpoint[0] != "/" else endpoint[1:],
+        )
+        response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
+        self._process_error(response)
+        data = response.json()
+        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        return data
+
+
+    ### TASK HANDLING ###
+
+    # TODO: Implement
+
+    ### TASK EVENT HANDLING ###
+
+    # TODO: Implement
+
+    ### COMMAND HANDLING ###
+
+    # TODO: Implement
+
+    ### COMMAND EVENT HANDLING ###
+
