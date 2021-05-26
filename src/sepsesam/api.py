@@ -1289,15 +1289,332 @@ class Api:
 
     ### TASK HANDLING ###
 
-    # TODO: Implement
+    def task_list(self):
+        """
+        List all tasks
+        """
+        self.log.debug("Running function")
+        endpoint = "/sep/api/tasks"
+        url = "{}{}".format(
+            self.url if self.url[-1] == "/" else self.url + "/",
+            endpoint if endpoint[0] != "/" else endpoint[1:],
+        )
+        response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
+        self._process_error(response)
+        data = response.json()
+        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        return data
+
+    def task_get(self, name):
+        """
+        Get a task
+        """
+        self.log.debug("Running function")
+        endpoint = "/sep/api/tasks/{}".format(name)
+        url = "{}{}".format(
+            self.url if self.url[-1] == "/" else self.url + "/",
+            endpoint if endpoint[0] != "/" else endpoint[1:],
+        )
+        response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
+        self._process_error(response)
+        data = response.json()
+        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        return data
+
+    def task_find(self, **kwargs):
+        """
+        Find a task
+        """
+        self.log.debug("Running function")
+        endpoint = "/sep/api/tasks"
+        url = "{}{}".format(
+            self.url if self.url[-1] == "/" else self.url + "/",
+            endpoint if endpoint[0] != "/" else endpoint[1:],
+        )
+        response = requests.post(url=url, json=kwargs, auth=(self.username, self.password), verify=self.verify)
+        self._process_error(response)
+        data = response.json()
+        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        return data
+
+    def task_upsert(self, **kwargs):
+        """
+        Create/Update a task
+        """
+        self.log.debug("Running function")
+        endpoint = "/sep/api/tasks"
+        url = "{}{}".format(
+            self.url if self.url[-1] == "/" else self.url + "/",
+            endpoint if endpoint[0] != "/" else endpoint[1:],
+        )
+        response = requests.post(url=url, auth=(self.username, self.password), json=kwargs, verify=self.verify)
+        self._process_error(response)
+        data = response.json()
+        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        return data
+
+    def task_delete(self, name):
+        """
+        Delete a task
+        """
+        self.log.debug("Running function")
+        endpoint = "/sep/api/tasks/{}/delete".format(id)
+        url = "{}{}".format(
+            self.url if self.url[-1] == "/" else self.url + "/",
+            endpoint if endpoint[0] != "/" else endpoint[1:],
+        )
+        response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
+        self._process_error(response)
+        data = response.json()
+        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        return data
 
     ### TASK EVENT HANDLING ###
 
-    # TODO: Implement
+    def task_event_list(self):
+        """
+        List all task events
+        """
+        self.log.debug("Running function")
+        endpoint = "/sep/api/taskEvents"
+        url = "{}{}".format(
+            self.url if self.url[-1] == "/" else self.url + "/",
+            endpoint if endpoint[0] != "/" else endpoint[1:],
+        )
+        response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
+        self._process_error(response)
+        data = response.json()
+        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        return data
+
+    def task_event_get(self, id):
+        """
+        Get a task event
+        """
+        self.log.debug("Running function")
+        endpoint = "/sep/api/taskEvents/{}".format(id)
+        url = "{}{}".format(
+            self.url if self.url[-1] == "/" else self.url + "/",
+            endpoint if endpoint[0] != "/" else endpoint[1:],
+        )
+        response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
+        self._process_error(response)
+        data = response.json()
+        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        return data
+
+    def task_event_find(self, **kwargs):
+        """
+        Find a task event. Based on list due to missing support in API v1
+        """
+        self.log.debug("Running function")
+        data = []
+        for group in self.task_event_list():
+            valid_entry = True
+            for k, v in kwargs.items():
+                if group.get(k) != v:
+                    valid_entry = False
+                    break
+            if valid_entry:
+                data.append(group)
+        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        return data
+
+    def task_event_upsert(self, **kwargs):
+        """
+        Create/Update a task event
+        """
+        self.log.debug("Running function")
+        endpoint = "/sep/api/taskEvents"
+        url = "{}{}".format(
+            self.url if self.url[-1] == "/" else self.url + "/",
+            endpoint if endpoint[0] != "/" else endpoint[1:],
+        )
+        response = requests.post(url=url, auth=(self.username, self.password), json=kwargs, verify=self.verify)
+        self._process_error(response)
+        data = response.json()
+        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        return data
+
+    def task_event_delete(self, id):
+        """
+        Delete a task event
+        """
+        self.log.debug("Running function")
+        endpoint = "/sep/api/taskEvents/{}/delete".format(id)
+        url = "{}{}".format(
+            self.url if self.url[-1] == "/" else self.url + "/",
+            endpoint if endpoint[0] != "/" else endpoint[1:],
+        )
+        response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
+        self._process_error(response)
+        data = response.json()
+        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        return data
 
     ### COMMAND HANDLING ###
 
-    # TODO: Implement
+    def command_list(self):
+        """
+        List all commands
+        """
+        self.log.debug("Running function")
+        endpoint = "/sep/api/commands"
+        url = "{}{}".format(
+            self.url if self.url[-1] == "/" else self.url + "/",
+            endpoint if endpoint[0] != "/" else endpoint[1:],
+        )
+        response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
+        self._process_error(response)
+        data = response.json()
+        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        return data
+
+    def command_get(self, id):
+        """
+        Get a command
+        """
+        self.log.debug("Running function")
+        endpoint = "/sep/api/commands/{}".format(id)
+        url = "{}{}".format(
+            self.url if self.url[-1] == "/" else self.url + "/",
+            endpoint if endpoint[0] != "/" else endpoint[1:],
+        )
+        response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
+        self._process_error(response)
+        data = response.json()
+        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        return data
+
+    def command_find(self, **kwargs):
+        """
+        Find a command. Based on list due to missing support in API v1
+        """
+        self.log.debug("Running function")
+        data = []
+        for group in self.command_list():
+            valid_entry = True
+            for k, v in kwargs.items():
+                if group.get(k) != v:
+                    valid_entry = False
+                    break
+            if valid_entry:
+                data.append(group)
+        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        return data
+
+    def command_upsert(self, **kwargs):
+        """
+        Create/Update a command
+        """
+        self.log.debug("Running function")
+        endpoint = "/sep/api/commands"
+        url = "{}{}".format(
+            self.url if self.url[-1] == "/" else self.url + "/",
+            endpoint if endpoint[0] != "/" else endpoint[1:],
+        )
+        response = requests.post(url=url, auth=(self.username, self.password), json=kwargs, verify=self.verify)
+        self._process_error(response)
+        data = response.json()
+        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        return data
+
+    def command_delete(self, id):
+        """
+        Delete a command
+        """
+        self.log.debug("Running function")
+        endpoint = "/sep/api/commands/{}/delete".format(id)
+        url = "{}{}".format(
+            self.url if self.url[-1] == "/" else self.url + "/",
+            endpoint if endpoint[0] != "/" else endpoint[1:],
+        )
+        response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
+        self._process_error(response)
+        data = response.json()
+        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        return data
 
     ### COMMAND EVENT HANDLING ###
+
+    def command_event_list(self):
+        """
+        List all command events
+        """
+        self.log.debug("Running function")
+        endpoint = "/sep/api/commandEvents"
+        url = "{}{}".format(
+            self.url if self.url[-1] == "/" else self.url + "/",
+            endpoint if endpoint[0] != "/" else endpoint[1:],
+        )
+        response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
+        self._process_error(response)
+        data = response.json()
+        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        return data
+
+    def command_event_get(self, id):
+        """
+        Get a command event
+        """
+        self.log.debug("Running function")
+        endpoint = "/sep/api/commandEvents/{}".format(id)
+        url = "{}{}".format(
+            self.url if self.url[-1] == "/" else self.url + "/",
+            endpoint if endpoint[0] != "/" else endpoint[1:],
+        )
+        response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
+        self._process_error(response)
+        data = response.json()
+        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        return data
+
+    def command_event_find(self, **kwargs):
+        """
+        Find a command event. Based on list due to missing support in API v1
+        """
+        self.log.debug("Running function")
+        data = []
+        for group in self.command_event_list():
+            valid_entry = True
+            for k, v in kwargs.items():
+                if group.get(k) != v:
+                    valid_entry = False
+                    break
+            if valid_entry:
+                data.append(group)
+        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        return data
+
+    def command_event_upsert(self, **kwargs):
+        """
+        Create/Update a command event
+        """
+        self.log.debug("Running function")
+        endpoint = "/sep/api/commandEvents"
+        url = "{}{}".format(
+            self.url if self.url[-1] == "/" else self.url + "/",
+            endpoint if endpoint[0] != "/" else endpoint[1:],
+        )
+        response = requests.post(url=url, auth=(self.username, self.password), json=kwargs, verify=self.verify)
+        self._process_error(response)
+        data = response.json()
+        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        return data
+
+    def command_event_delete(self, id):
+        """
+        Delete a command event
+        """
+        self.log.debug("Running function")
+        endpoint = "/sep/api/commandEvents/{}/delete".format(id)
+        url = "{}{}".format(
+            self.url if self.url[-1] == "/" else self.url + "/",
+            endpoint if endpoint[0] != "/" else endpoint[1:],
+        )
+        response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
+        self._process_error(response)
+        data = response.json()
+        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        return data
 
