@@ -325,8 +325,6 @@ class Api:
         self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
-    # TODO: implement client tasks
-
     ### v2 LOCATION HANDLING ###
 
     def location_list(self):
@@ -474,8 +472,8 @@ class Api:
             endpoint if endpoint[0] != "/" else endpoint[1:],
         )
         headers = {"X-SEP-Session": self.session_id}
-        data = {"name": name}
-        response = requests.post(url=url, json=data, headers=headers, verify=self.verify)
+        # data is provided as is, but with a strange formatting
+        response = requests.post(url=url, data='"{}"'.format(name), headers=headers, verify=self.verify)
         self._process_error(response)
         data = response.json()
         self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
@@ -622,7 +620,7 @@ class Api:
         self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
-    ### CREDENTIAL HANDLING ###
+    ### v2 CREDENTIAL HANDLING ###
 
     def credential_list(self):
         """
@@ -797,39 +795,144 @@ class Api:
         self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
-    ### DATASTORE HANDLING ###
-
-    # TODO: check if this should be implemented
+    ### v2 DATASTORE HANDLING ###
 
     def datastore_list(self):
+        """
+        List datastores
+        """
+        self.log.debug("Running function")
         endpoint = "/sep/api/v2/datastores"
-        # GET
-        pass
+        if not self.session_id:
+            self.login()
+        url = "{}{}".format(
+            self.url if self.url[-1] == "/" else self.url + "/",
+            endpoint if endpoint[0] != "/" else endpoint[1:],
+        )
+        headers = {"X-SEP-Session": self.session_id}
+        response = requests.get(url=url, headers=headers, verify=self.verify)
+        self._process_error(response)
+        data = response.json()
+        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        return data
 
     def datastore_get(self, id):
+        """
+        Get a datastore
+        """
+        self.log.debug("Running function")
         endpoint = "/sep/api/v2/datastores/{}".format(id)
-        # GET
-        pass
+        if not self.session_id:
+            self.login()
+        url = "{}{}".format(
+            self.url if self.url[-1] == "/" else self.url + "/",
+            endpoint if endpoint[0] != "/" else endpoint[1:],
+        )
+        headers = {"X-SEP-Session": self.session_id}
+        response = requests.get(url=url, headers=headers, verify=self.verify)
+        self._process_error(response)
+        data = response.json()
+        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        return data
 
-    def datastore_find(self):
+    def datastore_find(self, **kwargs):
+        """
+        Find a datastore
+
+        :param name:            The unique data store name. (string)
+        :param types:           The list of data store types to match. ([JSON object])
+        :param driveGroupNames: The list of drive group names to match. ([string])
+        :param mediaPoolNames:  The list of media pool names to match. ([string])
+        """
+        self.log.debug("Running function")
         endpoint = "/sep/api/v2/datastores/find"
-        # POST
-        pass
+        if not self.session_id:
+            self.login()
+        url = "{}{}".format(
+            self.url if self.url[-1] == "/" else self.url + "/",
+            endpoint if endpoint[0] != "/" else endpoint[1:],
+        )
+        headers = {"X-SEP-Session": self.session_id}
+        data = {}
+        for param in ["name", "types", "driveGroupNames", "mediaPoolNames"]:
+            if param in kwargs:
+                data[param] = kwargs[param]
+        response = requests.post(url=url, json=data, headers=headers, verify=self.verify)
+        self._process_error(response)
+        data = response.json()
+        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        return data
 
-    def datastore_create(self):
+    def datastore_create(self, name, **kwargs):
+        """
+        Create a datastore
+     
+        Check the SEP Sesam REST API documentation for applicable parameters:
+        https://wiki.sep.de/wiki/index.php/4_4_3_Beefalo:Using_SEP_sesam_REST_API
+        """
+        self.log.debug("Running function")
         endpoint = "/sep/api/v2/datastores/create"
-        # POST
-        pass
+        if len(name) > 32:
+            log.error("Datastore name has a maximum length of 32")
+            raise Exception("Datastore name has a maximum length of 32")
+        kwargs["name"] = name
+        if not self.session_id:
+            self.login()
+        url = "{}{}".format(
+            self.url if self.url[-1] == "/" else self.url + "/",
+            endpoint if endpoint[0] != "/" else endpoint[1:],
+        )
+        headers = {"X-SEP-Session": self.session_id}
+        response = requests.post(url=url, json=kwargs, headers=headers, verify=self.verify)
+        self._process_error(response)
+        data = response.json()
+        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        return data
 
-    def datastore_update(self):
+    def datastore_update(self, name, **kwargs):
+        """
+        Update a datastore
+
+        Check the SEP Sesam REST API documentation for applicable parameters:
+        https://wiki.sep.de/wiki/index.php/4_4_3_Beefalo:Using_SEP_sesam_REST_API
+        """
+        self.log.debug("Running function")
+        kwargs["name"] = name
         endpoint = "/sep/api/v2/datastores/update"
-        # POST
-        pass
+        if not self.session_id:
+            self.login()
+        url = "{}{}".format(
+            self.url if self.url[-1] == "/" else self.url + "/",
+            endpoint if endpoint[0] != "/" else endpoint[1:],
+        )
+        headers = {"X-SEP-Session": self.session_id}
+        response = requests.post(url=url, json=kwargs, headers=headers, verify=self.verify)
+        self._process_error(response)
+        data = response.json()
+        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        return data
 
-    def datastore_delete(self):
+    def datastore_delete(self, name):
+        """
+        Delete a datastore
+        """
+        self.log.debug("Running function")
         endpoint = "/sep/api/v2/datastores/delete"
-        # POST
-        pass
+        if not self.session_id:
+            self.login()
+        url = "{}{}".format(
+            self.url if self.url[-1] == "/" else self.url + "/",
+            endpoint if endpoint[0] != "/" else endpoint[1:],
+        )
+        headers = {"X-SEP-Session": self.session_id}
+        # for delete, we need to provide the data as a string and not form / json encoded
+        response = requests.post(url=url, data=str(name), headers=headers, verify=self.verify)
+        self._process_error(response)
+        data = response.json()
+        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        return data
+
+    # TODO: check if this should be implemented
 
     def datastore_drives_list(self):
         endpoint = "/sep/api/v2/datastores/<name>/drives"
@@ -863,7 +966,7 @@ class Api:
 
     #################### Version 1 API ####################
 
-    ### GROUP HANDLING ###
+    ### v1 GROUP HANDLING ###
 
     def group_list(self):
         """
@@ -946,7 +1049,7 @@ class Api:
         self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
-    ### ROLE RELATION HANDLING ###
+    ### v1 ROLE RELATION HANDLING ###
 
     def role_relations_list(self):
         """
@@ -1033,7 +1136,7 @@ class Api:
         self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
-    ### EXTERNAL GROUP HANDLING ###
+    ### v1 EXTERNAL GROUP HANDLING ###
 
     def external_group_list(self):
         """
@@ -1116,7 +1219,7 @@ class Api:
         self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
-    ### EXTERNAL GROUP RELATION HANDLING
+    ### v1 EXTERNAL GROUP RELATION HANDLING
 
     def ext_group_relation_list(self):
         """
@@ -1203,7 +1306,7 @@ class Api:
         self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
-    ### SCHEDULE HANDLING ###
+    ### v1 SCHEDULE HANDLING ###
 
     def schedule_list(self):
         """
@@ -1287,7 +1390,7 @@ class Api:
         return data
 
 
-    ### TASK HANDLING ###
+    ### v1 TASK HANDLING ###
 
     def task_list(self):
         """
@@ -1369,7 +1472,7 @@ class Api:
         self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
-    ### TASK EVENT HANDLING ###
+    ### v1 TASK EVENT HANDLING ###
 
     def task_event_list(self):
         """
@@ -1452,7 +1555,7 @@ class Api:
         self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
-    ### COMMAND HANDLING ###
+    ### v1 COMMAND HANDLING ###
 
     def command_list(self):
         """
@@ -1535,7 +1638,7 @@ class Api:
         self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
-    ### COMMAND EVENT HANDLING ###
+    ### v1 COMMAND EVENT HANDLING ###
 
     def command_event_list(self):
         """
@@ -1608,6 +1711,91 @@ class Api:
         """
         self.log.debug("Running function")
         endpoint = "/sep/api/commandEvents/{}/delete".format(id)
+        url = "{}{}".format(
+            self.url if self.url[-1] == "/" else self.url + "/",
+            endpoint if endpoint[0] != "/" else endpoint[1:],
+        )
+        response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
+        self._process_error(response)
+        data = response.json()
+        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        return data
+
+    ### MEDIA POOL HANDLING ###
+   
+    # /sep/api/mediaPools
+    
+    def media_pool_list(self):
+        """
+        List all media pools
+        """
+        self.log.debug("Running function")
+        endpoint = "/sep/api/mediaPools"
+        url = "{}{}".format(
+            self.url if self.url[-1] == "/" else self.url + "/",
+            endpoint if endpoint[0] != "/" else endpoint[1:],
+        )
+        response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
+        self._process_error(response)
+        data = response.json()
+        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        return data
+
+    def media_pool_get(self, id):
+        """
+        Get a media pool
+        """
+        self.log.debug("Running function")
+        endpoint = "/sep/api/mediaPools/{}".format(id)
+        url = "{}{}".format(
+            self.url if self.url[-1] == "/" else self.url + "/",
+            endpoint if endpoint[0] != "/" else endpoint[1:],
+        )
+        response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
+        self._process_error(response)
+        data = response.json()
+        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        return data
+
+    def media_pools_find(self, **kwargs):
+        """
+        Find a media pool. Based on list due to missing support in API v1
+        """
+        self.log.debug("Running function")
+        data = []
+        for group in self.media_pool_list():
+            valid_entry = True
+            for k, v in kwargs.items():
+                if group.get(k) != v:
+                    valid_entry = False
+                    break
+            if valid_entry:
+                data.append(group)
+        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        return data
+
+    def media_pool_upsert(self, **kwargs):
+        """
+        Create/Update a media pool
+        """
+        self.log.debug("Running function")
+        endpoint = "/sep/api/mediaPools"
+        url = "{}{}".format(
+            self.url if self.url[-1] == "/" else self.url + "/",
+            endpoint if endpoint[0] != "/" else endpoint[1:],
+        )
+        response = requests.post(url=url, auth=(self.username, self.password), json=kwargs, verify=self.verify)
+        self._process_error(response)
+        data = response.json()
+        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        return data
+
+    def media_pool_delete(self, id):
+        """
+        Delete a media pool
+        """
+        self.log.debug("Running function")
+        endpoint = "/sep/api/mediaPools/{}/delete".format(id)
         url = "{}{}".format(
             self.url if self.url[-1] == "/" else self.url + "/",
             endpoint if endpoint[0] != "/" else endpoint[1:],
