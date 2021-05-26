@@ -24,6 +24,7 @@ Example:
 
 # import python libraries
 import logging
+import uuid
 import pprint
 import json.decoder
 
@@ -137,7 +138,7 @@ class Api:
         self.log.error("An error occured:\n{}".format(pprint.pformat(data)))
         raise SEPSesamAPIError(**data)
 
-    ##### Version 2 API #####
+    #################### Version 2 API ####################
 
     ### v2 GENERAL FUNCTIONS ###
 
@@ -195,21 +196,6 @@ class Api:
         data = response.json()
         self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data 
-
-    ### v2 CREDENTIAL HANDLING ###
-
-    # /sep/api/v2/credentials
-
-    # /sep/api/v2/credentials/<id>
-
-    # /sep/api/v2/credentials/find
-
-    # /sep/api/v2/credentials/create
-
-    # /sep/api/v2/credentials/update
-
-    # /sep/api/v2/credentials/delete
-
 
     ### v2 CLIENT HANDLING ###
 
@@ -441,9 +427,6 @@ class Api:
         )
         headers = {"X-SEP-Session": self.session_id}
         kwargs["name"] = name
-        #if "parentId" not in kwargs:
-        #     kwargs["parentId"] = 
-        #print("kwargs:{}".format(pprint.pformat(kwargs)))
         response = requests.post(url=url, json=kwargs, headers=headers, verify=self.verify)
         self._process_error(response)
         data = response.json()
@@ -667,6 +650,170 @@ class Api:
         self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
+    ### CREDENTIAL HANDLING ###
+
+    def credential_list(self):
+        """
+        List credentials
+        """
+        self.log.debug("Running function")
+        endpoint = "/sep/api/v2/credentials"
+        if not self.session_id:
+            self.login()
+        url = "{}{}".format(
+            self.url if self.url[-1] == "/" else self.url + "/",
+            endpoint if endpoint[0] != "/" else endpoint[1:]
+        )
+        headers = {"X-SEP-Session": self.session_id}
+        response = requests.get(url=url, headers=headers, verify=self.verify)
+        self._process_error(response)
+        data = response.json()
+        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        return data
+
+    def credential_get(self, id):
+        """
+        Get a credential
+        """
+        self.log.debug("Running function")
+        endpoint = "/sep/api/v2/credentials/{}".format(id)
+        if not self.session_id:
+            self.login()
+        url = "{}{}".format(
+            self.url if self.url[-1] == "/" else self.url + "/",
+            endpoint if endpoint[0] != "/" else endpoint[1:]
+        )
+        headers = {"X-SEP-Session": self.session_id}
+        response = requests.get(url=url, headers=headers, verify=self.verify)
+        self._process_error(response)
+        data = response.json()
+        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        return data
+
+    def credential_find(self, type):
+        """
+        Find a credential
+
+        :param type: The credential type. (string)
+        """
+        self.log.debug("Running function")
+        endpoint = "/sep/api/v2/credentials/find"
+        if not self.session_id:
+            self.login()
+        url = "{}{}".format(
+            self.url if self.url[-1] == "/" else self.url + "/",
+            endpoint if endpoint[0] != "/" else endpoint[1:]
+        )
+        headers = {"X-SEP-Session": self.session_id}
+        data = {
+            "type": type
+        }
+        response = requests.post(url=url, json=data, headers=headers, verify=self.verify)
+        self._process_error(response)
+        data = response.json()
+        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        return data
+
+    def credential_create(self, type, **kwargs):
+        """
+        Create an ACL.
+     
+        :param name:         The name of the credential set. When not specified, an auto name has to be
+                             generated in the format ‘auth.<type>.<uuid>’. (string)
+        :param type:         The credentials type. The following values are currently defined: ‘LDAP’, ‘AD’, ‘HPE
+                             Storeonce’ and ‘AWS S3’. (string)
+        :param enabled:      The credentials enabled flag. This flag is used for ‘LDAP’ or ‘AD’ type credentials only. (boolean)
+        :param accessName:   The access name. For ‘HPE Storeonce’ type credentials, this is the identifier. For
+                             ‘AWS S3’ type credentials, this is the access key. For ‘LDAP’ type credentials, this is
+                             the user base. (string)
+        :param osAccessName: The OS access name. For ‘LDAP’ type credentials, this is the manager user DN to
+                             access the LDAP server. (string)
+        :param secret:       The secret. For ‘HPE Storeonce’ type credentials, this is the password. For ‘AWS S3’
+                             type credentials, this is the secret access key. For ‘LDAP’ type credentials, this is the
+                             password to access the LDAP server. (string)
+        :param privateKey:   The private key. (string)
+        :param publicKey:    The public key. For ‘LDAP’ type credentials, this is the group base. For ‘AD’ type
+                              credentials, this is the root DN. (string)
+        :param hostName:     The host name. For ‘HPE Storeonce’ type credentials, this is the host name of the
+                             HPE Storeonce system. For ‘AWS S3’ type credentials, this is the name of the
+                             endpoint. For ‘AD’ type credentials, this is the domain name. (string)
+        :param port:         The port. (int)
+        :param storeName:    The store name. For ‘AWS S3’ type credentials, this is the bucket name. For ‘LDAP’
+                             type credentials, this is the group filter. For ‘AD’ type credentials, this is the search
+                             filter. (string)
+        :param path:         The path. For ‘AWS S3’ type credentials, this is the prefix. For ‘LDAP’ and ‘AD’ type
+                             credentials, this is the URL. (string)
+        :paaram rank:        The rank. Used to determine the order of credentials of the same type. Only used for
+                             ‘LDAP’ or ‘AD’ type credentials. (int)
+        :param userComment:  The description or users comment. (string)
+        :param id:           The unique ID of the credential. If none is given, one will be created.
+        """
+        self.log.debug("Running function")
+        endpoint = "/sep/api/v2/credentials/create"
+        data = {
+            "type": type
+        }
+        for param in ["name", "enabled", "accessName", "osAccessName", "secret", "privateKey", "publicKey", "hostName", "port", "storeName", "path", "rank", "userComment", "id"]:
+            if param in kwargs:
+                data[param] = kwargs[param]
+        if "name" not in data:
+            data["name"] = "auth.{}.{}".format(type, uuid.uuid4())
+        if not self.session_id:
+            self.login()
+        url = "{}{}".format(
+            self.url if self.url[-1] == "/" else self.url + "/",
+            endpoint if endpoint[0] != "/" else endpoint[1:]
+        )
+        headers = {"X-SEP-Session": self.session_id}
+        response = requests.post(url=url, json=data, headers=headers, verify=self.verify)
+        self._process_error(response)
+        data = response.json()
+        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        return data
+
+    def credential_update(self, id, **kwargs):
+        """
+        Update a credential
+
+        Check the SEP Sesam REST API documentation for applicable parameters:
+        https://wiki.sep.de/wiki/index.php/4_4_3_Beefalo:Using_SEP_sesam_REST_API
+        """
+        self.log.debug("Running function")
+        kwargs["id"] = id
+        endpoint = "/sep/api/v2/credentials/update"
+        if not self.session_id:
+            self.login()
+        url = "{}{}".format(
+            self.url if self.url[-1] == "/" else self.url + "/",
+            endpoint if endpoint[0] != "/" else endpoint[1:]
+        )
+        headers = {"X-SEP-Session": self.session_id}
+        response = requests.post(url=url, json=kwargs, headers=headers, verify=self.verify)
+        self._process_error(response)
+        data = response.json()
+        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        return data
+
+    def credential_delete(self, id):
+        """
+        Delete a credential
+        """
+        self.log.debug("Running function")
+        endpoint = "/sep/api/v2/credentials/delete"
+        if not self.session_id:
+            self.login()
+        url = "{}{}".format(
+            self.url if self.url[-1] == "/" else self.url + "/",
+            endpoint if endpoint[0] != "/" else endpoint[1:]
+        )
+        headers = {"X-SEP-Session": self.session_id}
+        # for delete, we need to provide the data as a string and not form / json encoded
+        response = requests.post(url=url, data=str(id), headers=headers, verify=self.verify)
+        self._process_error(response)
+        data = response.json()
+        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        return data
+
     ### DATASTORE HANDLING ###
 
     # TODO: check if this should be implemented
@@ -732,18 +879,10 @@ class Api:
         pass
 
 
-    ##### Version 1 API #####
+    #################### Version 1 API ####################
 
-    # TODO: /sep/api/groups
-    """
-    {
-        id: 1,
-        name: "ADMIN",
-        enabled: true,
-        usercomment: "Automatically generated administration group with all permissions",
-        mtime: 1621955342000
-    }
-    """
+    ### GROUP HANDLING ###
+
     def group_list(self):
         """
         List all groups
@@ -760,9 +899,42 @@ class Api:
         self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
-    def group_create(self, **kwargs):
+    def group_get(self, id):
         """
-        Create a new group
+        Get a group
+        """
+        self.log.debug("Running function")
+        endpoint = "/sep/api/groups/{}".format(id)
+        url = "{}{}".format(
+            self.url if self.url[-1] == "/" else self.url + "/",
+            endpoint if endpoint[0] != "/" else endpoint[1:]
+        )
+        response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
+        self._process_error(response)
+        data = response.json()
+        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        return data
+
+    def group_find(self, **kwargs):
+        """
+        Find a group. Based on list due to missing support in API v1
+        """
+        self.log.debug("Running function")
+        data = []
+        for group in self.group_list():
+            valid_entry = True
+            for k, v in kwargs.items():
+                if group.get(k) != v:
+                    valid_entry = False
+                    break
+            if valid_entry:
+                data.append(group)
+        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        return data
+
+    def group_upsert(self, **kwargs):
+        """
+        Create/Update a new group
         """
         self.log.debug("Running function")
         endpoint = "/sep/api/groups"
@@ -776,11 +948,76 @@ class Api:
         self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
-    # TODO: /sep/api/roleRelations
-
-    def role_relation_create(self, group_id, role_id):
+    def group_delete(self, id):
         """
-        Create a new role <> group relation
+        Delete a group
+        """
+        self.log.debug("Running function")
+        endpoint = "/sep/api/groups/{}/delete".format(id)
+        url = "{}{}".format(
+            self.url if self.url[-1] == "/" else self.url + "/",
+            endpoint if endpoint[0] != "/" else endpoint[1:]
+        )
+        response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
+        self._process_error(response)
+        data = response.json()
+        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        return data
+
+    ### ROLE RELATION HANDLING ###
+
+    def role_relations_list(self):
+        """
+        List all roleRelations
+        """
+        self.log.debug("Running function")
+        endpoint = "/sep/api/roleRelations"
+        url = "{}{}".format(
+            self.url if self.url[-1] == "/" else self.url + "/",
+            endpoint if endpoint[0] != "/" else endpoint[1:]
+        )
+        response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
+        self._process_error(response)
+        data = response.json()
+        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        return data
+
+    def role_relation_get(self, id):
+        """
+        Get a role relation
+        """
+        self.log.debug("Running function")
+        endpoint = "/sep/api/roleRelations/{}".format(id)
+        url = "{}{}".format(
+            self.url if self.url[-1] == "/" else self.url + "/",
+            endpoint if endpoint[0] != "/" else endpoint[1:]
+        )
+        response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
+        self._process_error(response)
+        data = response.json()
+        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        return data
+
+    def role_relation_find(self, **kwargs):
+        """
+        Find a role relation. Based on list due to missing support in API v1
+        """
+        self.log.debug("Running function")
+        data = []
+        for group in self.role_relation_list():
+            valid_entry = True
+            for k, v in kwargs.items():
+                if group.get(k) != v:
+                    valid_entry = False
+                    break
+            if valid_entry:
+                data.append(group)
+        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        return data
+
+    def role_relation_upsert(self, group_id, role_id):
+        """
+        Create/Update a new role <> group relation
         """
         self.log.debug("Running function")
         endpoint = "/sep/api/roleRelations"
@@ -798,11 +1035,76 @@ class Api:
         self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
-     # TODO: /sep/api/externalGroups
-
-    def external_group_create(self, **kwargs):
+    def role_relation_delete(self, id):
         """
-        Create an external group 
+        Delete a role relation
+        """
+        self.log.debug("Running function")
+        endpoint = "/sep/api/roleRelations/{}/delete".format(id)
+        url = "{}{}".format(
+            self.url if self.url[-1] == "/" else self.url + "/",
+            endpoint if endpoint[0] != "/" else endpoint[1:]
+        )
+        response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
+        self._process_error(response)
+        data = response.json()
+        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        return data
+
+    ### EXTERNAL GROUP HANDLING ###
+
+    def external_group_list(self):
+        """
+        List all external gruops
+        """
+        self.log.debug("Running function")
+        endpoint = "/sep/api/externalGroups"
+        url = "{}{}".format(
+            self.url if self.url[-1] == "/" else self.url + "/",
+            endpoint if endpoint[0] != "/" else endpoint[1:]
+        )
+        response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
+        self._process_error(response)
+        data = response.json()
+        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        return data
+
+    def external_group_get(self, id):
+        """
+        Get an external group
+        """
+        self.log.debug("Running function")
+        endpoint = "/sep/api/externalGroups/{}".format(id)
+        url = "{}{}".format(
+            self.url if self.url[-1] == "/" else self.url + "/",
+            endpoint if endpoint[0] != "/" else endpoint[1:]
+        )
+        response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
+        self._process_error(response)
+        data = response.json()
+        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        return data
+
+    def external_group_find(self, **kwargs):
+        """
+        Find an external group. Based on list due to missing support in API v1
+        """
+        self.log.debug("Running function")
+        data = []
+        for group in self.external_group_list():
+            valid_entry = True
+            for k, v in kwargs.items():
+                if group.get(k) != v:
+                    valid_entry = False
+                    break
+            if valid_entry:
+                data.append(group)
+        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        return data
+
+    def external_group_upsert(self, **kwargs):
+        """
+        Create/Update an external group 
         """
         self.log.debug("Running function")
         endpoint = "/sep/api/externalGroups"
@@ -816,11 +1118,76 @@ class Api:
         self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
-    # TODO: /sep/api/externalGroupRelations
-
-    def ext_group_relation_create(self, internal_group_id, external_group_id):
+    def external_group_delete(self, id):
         """
-        Create a new internal <> external group relation
+        Delete an external group
+        """
+        self.log.debug("Running function")
+        endpoint = "/sep/api/externalGroups/{}/delete".format(id)
+        url = "{}{}".format(
+            self.url if self.url[-1] == "/" else self.url + "/",
+            endpoint if endpoint[0] != "/" else endpoint[1:]
+        )
+        response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
+        self._process_error(response)
+        data = response.json()
+        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        return data
+
+    ### EXTERNAL GROUP RELATION HANDLING
+
+    def ext_group_relation_list(self):
+        """
+        List all internal <> external group relations
+        """
+        self.log.debug("Running function")
+        endpoint = "/sep/api/externalGroupRelations"
+        url = "{}{}".format(
+            self.url if self.url[-1] == "/" else self.url + "/",
+            endpoint if endpoint[0] != "/" else endpoint[1:]
+        )
+        response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
+        self._process_error(response)
+        data = response.json()
+        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        return data
+
+    def ext_group_relation_get(self, id):
+        """
+        Get an internal <> external group relation
+        """
+        self.log.debug("Running function")
+        endpoint = "/sep/api/externalGroupRelations/{}".format(id)
+        url = "{}{}".format(
+            self.url if self.url[-1] == "/" else self.url + "/",
+            endpoint if endpoint[0] != "/" else endpoint[1:]
+        )
+        response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
+        self._process_error(response)
+        data = response.json()
+        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        return data
+
+    def ext_group_relation_find(self, **kwargs):
+        """
+        Find an internal <> external group relation. Based on list due to missing support in API v1
+        """
+        self.log.debug("Running function")
+        data = []
+        for group in self.ext_group_relation_list():
+            valid_entry = True
+            for k, v in kwargs.items():
+                if group.get(k) != v:
+                    valid_entry = False
+                    break
+            if valid_entry:
+                data.append(group)
+        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        return data
+
+    def ext_group_relation_upsert(self, internal_group_id, external_group_id):
+        """
+        Create/Update a new internal <> external group relation
         """
         self.log.debug("Running function")
         endpoint = "/sep/api/externalGroupRelations"
@@ -837,3 +1204,20 @@ class Api:
         data = response.json()
         self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
+
+    def ext_group_relation_delete(self, id):
+        """
+        Delete an internal <> external group relation
+        """
+        self.log.debug("Running function")
+        endpoint = "/sep/api/externalGroupRelations/{}/delete".format(id)
+        url = "{}{}".format(
+            self.url if self.url[-1] == "/" else self.url + "/",
+            endpoint if endpoint[0] != "/" else endpoint[1:]
+        )
+        response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
+        self._process_error(response)
+        data = response.json()
+        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        return data
+
