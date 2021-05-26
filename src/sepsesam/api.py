@@ -16,7 +16,7 @@ Example:
 
     data = {}
 
-    with sepsesam.api.V2(**cred) as api:
+    with sepsesam.api.Api(**cred) as api:
         data = api.location_list()
 
     pprint.pprint(data)
@@ -35,38 +35,32 @@ import requests
 ERROR_CODES = {
     400: {
         "error": "CLIENT_ERROR_BAD_REQUEST",
-        "message": "Something is not correct in the request sent by the client"
+        "message": "Something is not correct in the request sent by the client",
     },
-    401: {
-        "error": "CLIENT_ERROR_UNAUTHORIZED",
-        "messge": "The client is not authenticated to do the request"
-    },
+    401: {"error": "CLIENT_ERROR_UNAUTHORIZED", "messge": "The client is not authenticated to do the request"},
     403: {
         "error": "CLIENT_ERROR_FORBIDDEN",
-        "message": "The authenticated user does not have the required permissions to do the request"
+        "message": "The authenticated user does not have the required permissions to do the request",
     },
-    404: {
-        "error": "CLIENT_ERROR_NOT_FOUND",
-        "message": "The requested endpoint does not exist"
-    },
+    404: {"error": "CLIENT_ERROR_NOT_FOUND", "message": "The requested endpoint does not exist"},
     405: {
         "error": "CLIENT_ERROR_METHOD_NOT_ALLOWED",
-        "message": "The target object is not editable (error type = ‘NOT_EDITABLE’)"
+        "message": "The target object is not editable (error type = ‘NOT_EDITABLE’)",
     },
     500: {
         "error": "SERVER_ERROR_INTERNAL",
-        "message": "A general error occurred on the server while processing the request"
+        "message": "A general error occurred on the server while processing the request",
     },
     503: {
         "error": "SERVER_ERROR_SERVICE_UNAVAILABLE",
-        "message": "The connection to the server is unavailable or got terminated"
-    }
+        "message": "The connection to the server is unavailable or got terminated",
+    },
 }
 
 
 class SEPSesamAPIError(Exception):
-    """ error from the API """
-    
+    """error from the API"""
+
     def __init__(self, status_code, error, message, parameter, type, url):
         self.status_code = status_code
         self.error = error
@@ -148,14 +142,10 @@ class Api:
         """
         self.log.debug("Running function")
         endpoint = "sep/api/v2/auth/login"
-        data = {
-            "username": self.username,
-            "secret": self.password,
-            "type": "CLASSIC"
-        }
+        data = {"username": self.username, "secret": self.password, "type": "CLASSIC"}
         url = "{}{}".format(
             self.url if self.url[-1] == "/" else self.url + "/",
-            endpoint if endpoint[0] != "/" else endpoint[1:]
+            endpoint if endpoint[0] != "/" else endpoint[1:],
         )
         response = requests.post(url=url, json=data, verify=self.verify)
         self._process_error(response)
@@ -173,7 +163,7 @@ class Api:
         if self.session_id:
             url = "{}{}".format(
                 self.url if self.url[-1] == "/" else self.url + "/",
-                endpoint if endpoint[0] != "/" else endpoint[1:]
+                endpoint if endpoint[0] != "/" else endpoint[1:],
             )
             headers = {"X-SEP-Session": self.session_id}
             requests.get(url=url, headers=headers, verify=self.verify)
@@ -188,14 +178,14 @@ class Api:
             self.login()
         url = "{}{}".format(
             self.url if self.url[-1] == "/" else self.url + "/",
-            endpoint if endpoint[0] != "/" else endpoint[1:]
+            endpoint if endpoint[0] != "/" else endpoint[1:],
         )
         headers = {"X-SEP-Session": self.session_id}
         response = requests.get(url=url, headers=headers, verify=self.verify)
         self._process_error(response)
         data = response.json()
         self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
-        return data 
+        return data
 
     ### v2 CLIENT HANDLING ###
 
@@ -209,7 +199,7 @@ class Api:
             self.login()
         url = "{}{}".format(
             self.url if self.url[-1] == "/" else self.url + "/",
-            endpoint if endpoint[0] != "/" else endpoint[1:]
+            endpoint if endpoint[0] != "/" else endpoint[1:],
         )
         headers = {"X-SEP-Session": self.session_id}
         response = requests.get(url=url, headers=headers, verify=self.verify)
@@ -228,16 +218,15 @@ class Api:
             self.login()
         url = "{}{}".format(
             self.url if self.url[-1] == "/" else self.url + "/",
-            endpoint if endpoint[0] != "/" else endpoint[1:]
+            endpoint if endpoint[0] != "/" else endpoint[1:],
         )
         headers = {"X-SEP-Session": self.session_id}
         response = requests.get(url=url, headers=headers, verify=self.verify)
         self._process_error(response)
         data = response.json()
         self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
-        return data        
+        return data
 
-    
     def client_find(self, queryMode="DEFAULT", **kwargs):
         """
         Find a client by properties. Returns a list of clients.
@@ -259,13 +248,23 @@ class Api:
             self.login()
         url = "{}{}".format(
             self.url if self.url[-1] == "/" else self.url + "/",
-            endpoint if endpoint[0] != "/" else endpoint[1:]
+            endpoint if endpoint[0] != "/" else endpoint[1:],
         )
         headers = {"X-SEP-Session": self.session_id}
-        data = {
-            "queryMode": queryMode
-        }
-        for param in ["id", "name", "location", "accessMode", "accessState", "permit", "operSystem", "vmServerType", "vmName", "matchWithSavesetID", "queryMode"]:
+        data = {"queryMode": queryMode}
+        for param in [
+            "id",
+            "name",
+            "location",
+            "accessMode",
+            "accessState",
+            "permit",
+            "operSystem",
+            "vmServerType",
+            "vmName",
+            "matchWithSavesetID",
+            "queryMode",
+        ]:
             if param in kwargs:
                 data[param] = kwargs[param]
         response = requests.post(url=url, json=data, headers=headers, verify=self.verify)
@@ -287,7 +286,7 @@ class Api:
             self.login()
         url = "{}{}".format(
             self.url if self.url[-1] == "/" else self.url + "/",
-            endpoint if endpoint[0] != "/" else endpoint[1:]
+            endpoint if endpoint[0] != "/" else endpoint[1:],
         )
         headers = {"X-SEP-Session": self.session_id}
         kwargs["name"] = name
@@ -316,7 +315,7 @@ class Api:
             self.login()
         url = "{}{}".format(
             self.url if self.url[-1] == "/" else self.url + "/",
-            endpoint if endpoint[0] != "/" else endpoint[1:]
+            endpoint if endpoint[0] != "/" else endpoint[1:],
         )
         headers = {"X-SEP-Session": self.session_id}
         response = requests.post(url=url, json=kwargs, headers=headers, verify=self.verify)
@@ -335,7 +334,7 @@ class Api:
             self.login()
         url = "{}{}".format(
             self.url if self.url[-1] == "/" else self.url + "/",
-            endpoint if endpoint[0] != "/" else endpoint[1:]
+            endpoint if endpoint[0] != "/" else endpoint[1:],
         )
         headers = {"X-SEP-Session": self.session_id}
         # for delete, we need to provide the data as a string and not form / json encoded
@@ -343,8 +342,8 @@ class Api:
         self._process_error(response)
         data = response.json()
         self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
-        return data   
- 
+        return data
+
     # TODO: implement client tasks
 
     ### v2 LOCATION HANDLING ###
@@ -359,7 +358,7 @@ class Api:
             self.login()
         url = "{}{}".format(
             self.url if self.url[-1] == "/" else self.url + "/",
-            endpoint if endpoint[0] != "/" else endpoint[1:]
+            endpoint if endpoint[0] != "/" else endpoint[1:],
         )
         headers = {"X-SEP-Session": self.session_id}
         response = requests.get(url=url, headers=headers, verify=self.verify)
@@ -367,7 +366,7 @@ class Api:
         data = response.json()
         self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
- 
+
     def location_get(self, id):
         """
         Retrieve a location
@@ -378,7 +377,7 @@ class Api:
             self.login()
         url = "{}{}".format(
             self.url if self.url[-1] == "/" else self.url + "/",
-            endpoint if endpoint[0] != "/" else endpoint[1:]
+            endpoint if endpoint[0] != "/" else endpoint[1:],
         )
         headers = {"X-SEP-Session": self.session_id}
         data = {"id": id}
@@ -400,7 +399,7 @@ class Api:
             self.login()
         url = "{}{}".format(
             self.url if self.url[-1] == "/" else self.url + "/",
-            endpoint if endpoint[0] != "/" else endpoint[1:]
+            endpoint if endpoint[0] != "/" else endpoint[1:],
         )
         headers = {"X-SEP-Session": self.session_id}
         data = {"parent": parent}
@@ -414,7 +413,7 @@ class Api:
         """
         Create a location.
 
-        Check the SEP Sesam REST API documentation for applicable parameters: 
+        Check the SEP Sesam REST API documentation for applicable parameters:
         https://wiki.sep.de/wiki/index.php/4_4_3_Beefalo:Using_SEP_sesam_REST_API
         """
         self.log.debug("Running function")
@@ -423,14 +422,14 @@ class Api:
             self.login()
         url = "{}{}".format(
             self.url if self.url[-1] == "/" else self.url + "/",
-            endpoint if endpoint[0] != "/" else endpoint[1:]
+            endpoint if endpoint[0] != "/" else endpoint[1:],
         )
         headers = {"X-SEP-Session": self.session_id}
         kwargs["name"] = name
         response = requests.post(url=url, json=kwargs, headers=headers, verify=self.verify)
         self._process_error(response)
         data = response.json()
-        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))        
+        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
     def location_update(self, id=None, name=None, **kwargs):
@@ -452,7 +451,7 @@ class Api:
             self.login()
         url = "{}{}".format(
             self.url if self.url[-1] == "/" else self.url + "/",
-            endpoint if endpoint[0] != "/" else endpoint[1:]
+            endpoint if endpoint[0] != "/" else endpoint[1:],
         )
         headers = {"X-SEP-Session": self.session_id}
         response = requests.post(url=url, json=kwargs, headers=headers, verify=self.verify)
@@ -460,7 +459,6 @@ class Api:
         data = response.json()
         self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
-
 
     def location_delete(self, id):
         """
@@ -472,7 +470,7 @@ class Api:
             self.login()
         url = "{}{}".format(
             self.url if self.url[-1] == "/" else self.url + "/",
-            endpoint if endpoint[0] != "/" else endpoint[1:]
+            endpoint if endpoint[0] != "/" else endpoint[1:],
         )
         headers = {"X-SEP-Session": self.session_id}
         # for delete, we need to provide the data as a string and not form / json encoded
@@ -482,7 +480,6 @@ class Api:
         self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
-  
     def location_resolve_to_id(self, name):
         """
         Resolve a given name or path to an id
@@ -493,7 +490,7 @@ class Api:
             self.login()
         url = "{}{}".format(
             self.url if self.url[-1] == "/" else self.url + "/",
-            endpoint if endpoint[0] != "/" else endpoint[1:]
+            endpoint if endpoint[0] != "/" else endpoint[1:],
         )
         headers = {"X-SEP-Session": self.session_id}
         data = {"name": name}
@@ -515,7 +512,7 @@ class Api:
             self.login()
         url = "{}{}".format(
             self.url if self.url[-1] == "/" else self.url + "/",
-            endpoint if endpoint[0] != "/" else endpoint[1:]
+            endpoint if endpoint[0] != "/" else endpoint[1:],
         )
         headers = {"X-SEP-Session": self.session_id}
         response = requests.get(url=url, headers=headers, verify=self.verify)
@@ -534,7 +531,7 @@ class Api:
             self.login()
         url = "{}{}".format(
             self.url if self.url[-1] == "/" else self.url + "/",
-            endpoint if endpoint[0] != "/" else endpoint[1:]
+            endpoint if endpoint[0] != "/" else endpoint[1:],
         )
         headers = {"X-SEP-Session": self.session_id}
         response = requests.get(url=url, headers=headers, verify=self.verify)
@@ -556,12 +553,10 @@ class Api:
             self.login()
         url = "{}{}".format(
             self.url if self.url[-1] == "/" else self.url + "/",
-            endpoint if endpoint[0] != "/" else endpoint[1:]
+            endpoint if endpoint[0] != "/" else endpoint[1:],
         )
         headers = {"X-SEP-Session": self.session_id}
-        data = {
-            "queryMode": queryMode
-        }
+        data = {"queryMode": queryMode}
         for param in ["object", "origin"]:
             if param in kwargs:
                 data[param] = kwargs[param]
@@ -575,7 +570,7 @@ class Api:
         """
         Create an ACL.
 
-        :param object: The unique ID of the object the ACL is associated with. If the object ID is ‘-1’, 
+        :param object: The unique ID of the object the ACL is associated with. If the object ID is ‘-1’,
                        then the ACL describes the default permissions set for objects from the origin set. (string)
         :param origin: The object origin. The origin is the name of the database table in capitalized form
                        and without any separator. In example, if the object is a data store (DB:data_stores),
@@ -587,18 +582,14 @@ class Api:
         """
         self.log.debug("Running function")
         endpoint = "/sep/api/v2/acls/create"
-        data = {
-            "object": object,
-            "origin": origin,
-            "value": value
-        }
+        data = {"object": object, "origin": origin, "value": value}
         if id:
             data["id"] = id
         if not self.session_id:
             self.login()
         url = "{}{}".format(
             self.url if self.url[-1] == "/" else self.url + "/",
-            endpoint if endpoint[0] != "/" else endpoint[1:]
+            endpoint if endpoint[0] != "/" else endpoint[1:],
         )
         headers = {"X-SEP-Session": self.session_id}
         response = requests.post(url=url, json=data, headers=headers, verify=self.verify)
@@ -621,7 +612,7 @@ class Api:
             self.login()
         url = "{}{}".format(
             self.url if self.url[-1] == "/" else self.url + "/",
-            endpoint if endpoint[0] != "/" else endpoint[1:]
+            endpoint if endpoint[0] != "/" else endpoint[1:],
         )
         headers = {"X-SEP-Session": self.session_id}
         response = requests.post(url=url, json=kwargs, headers=headers, verify=self.verify)
@@ -640,7 +631,7 @@ class Api:
             self.login()
         url = "{}{}".format(
             self.url if self.url[-1] == "/" else self.url + "/",
-            endpoint if endpoint[0] != "/" else endpoint[1:]
+            endpoint if endpoint[0] != "/" else endpoint[1:],
         )
         headers = {"X-SEP-Session": self.session_id}
         # for delete, we need to provide the data as a string and not form / json encoded
@@ -662,7 +653,7 @@ class Api:
             self.login()
         url = "{}{}".format(
             self.url if self.url[-1] == "/" else self.url + "/",
-            endpoint if endpoint[0] != "/" else endpoint[1:]
+            endpoint if endpoint[0] != "/" else endpoint[1:],
         )
         headers = {"X-SEP-Session": self.session_id}
         response = requests.get(url=url, headers=headers, verify=self.verify)
@@ -681,7 +672,7 @@ class Api:
             self.login()
         url = "{}{}".format(
             self.url if self.url[-1] == "/" else self.url + "/",
-            endpoint if endpoint[0] != "/" else endpoint[1:]
+            endpoint if endpoint[0] != "/" else endpoint[1:],
         )
         headers = {"X-SEP-Session": self.session_id}
         response = requests.get(url=url, headers=headers, verify=self.verify)
@@ -702,12 +693,10 @@ class Api:
             self.login()
         url = "{}{}".format(
             self.url if self.url[-1] == "/" else self.url + "/",
-            endpoint if endpoint[0] != "/" else endpoint[1:]
+            endpoint if endpoint[0] != "/" else endpoint[1:],
         )
         headers = {"X-SEP-Session": self.session_id}
-        data = {
-            "type": type
-        }
+        data = {"type": type}
         response = requests.post(url=url, json=data, headers=headers, verify=self.verify)
         self._process_error(response)
         data = response.json()
@@ -717,7 +706,7 @@ class Api:
     def credential_create(self, type, **kwargs):
         """
         Create an ACL.
-     
+
         :param name:         The name of the credential set. When not specified, an auto name has to be
                              generated in the format ‘auth.<type>.<uuid>’. (string)
         :param type:         The credentials type. The following values are currently defined: ‘LDAP’, ‘AD’, ‘HPE
@@ -750,10 +739,23 @@ class Api:
         """
         self.log.debug("Running function")
         endpoint = "/sep/api/v2/credentials/create"
-        data = {
-            "type": type
-        }
-        for param in ["name", "enabled", "accessName", "osAccessName", "secret", "privateKey", "publicKey", "hostName", "port", "storeName", "path", "rank", "userComment", "id"]:
+        data = {"type": type}
+        for param in [
+            "name",
+            "enabled",
+            "accessName",
+            "osAccessName",
+            "secret",
+            "privateKey",
+            "publicKey",
+            "hostName",
+            "port",
+            "storeName",
+            "path",
+            "rank",
+            "userComment",
+            "id",
+        ]:
             if param in kwargs:
                 data[param] = kwargs[param]
         if "name" not in data:
@@ -762,7 +764,7 @@ class Api:
             self.login()
         url = "{}{}".format(
             self.url if self.url[-1] == "/" else self.url + "/",
-            endpoint if endpoint[0] != "/" else endpoint[1:]
+            endpoint if endpoint[0] != "/" else endpoint[1:],
         )
         headers = {"X-SEP-Session": self.session_id}
         response = requests.post(url=url, json=data, headers=headers, verify=self.verify)
@@ -785,7 +787,7 @@ class Api:
             self.login()
         url = "{}{}".format(
             self.url if self.url[-1] == "/" else self.url + "/",
-            endpoint if endpoint[0] != "/" else endpoint[1:]
+            endpoint if endpoint[0] != "/" else endpoint[1:],
         )
         headers = {"X-SEP-Session": self.session_id}
         response = requests.post(url=url, json=kwargs, headers=headers, verify=self.verify)
@@ -804,7 +806,7 @@ class Api:
             self.login()
         url = "{}{}".format(
             self.url if self.url[-1] == "/" else self.url + "/",
-            endpoint if endpoint[0] != "/" else endpoint[1:]
+            endpoint if endpoint[0] != "/" else endpoint[1:],
         )
         headers = {"X-SEP-Session": self.session_id}
         # for delete, we need to provide the data as a string and not form / json encoded
@@ -878,7 +880,6 @@ class Api:
         # POST
         pass
 
-
     #################### Version 1 API ####################
 
     ### GROUP HANDLING ###
@@ -891,7 +892,7 @@ class Api:
         endpoint = "/sep/api/groups"
         url = "{}{}".format(
             self.url if self.url[-1] == "/" else self.url + "/",
-            endpoint if endpoint[0] != "/" else endpoint[1:]
+            endpoint if endpoint[0] != "/" else endpoint[1:],
         )
         response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
         self._process_error(response)
@@ -907,7 +908,7 @@ class Api:
         endpoint = "/sep/api/groups/{}".format(id)
         url = "{}{}".format(
             self.url if self.url[-1] == "/" else self.url + "/",
-            endpoint if endpoint[0] != "/" else endpoint[1:]
+            endpoint if endpoint[0] != "/" else endpoint[1:],
         )
         response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
         self._process_error(response)
@@ -940,7 +941,7 @@ class Api:
         endpoint = "/sep/api/groups"
         url = "{}{}".format(
             self.url if self.url[-1] == "/" else self.url + "/",
-            endpoint if endpoint[0] != "/" else endpoint[1:]
+            endpoint if endpoint[0] != "/" else endpoint[1:],
         )
         response = requests.post(url=url, auth=(self.username, self.password), json=kwargs, verify=self.verify)
         self._process_error(response)
@@ -956,7 +957,7 @@ class Api:
         endpoint = "/sep/api/groups/{}/delete".format(id)
         url = "{}{}".format(
             self.url if self.url[-1] == "/" else self.url + "/",
-            endpoint if endpoint[0] != "/" else endpoint[1:]
+            endpoint if endpoint[0] != "/" else endpoint[1:],
         )
         response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
         self._process_error(response)
@@ -974,7 +975,7 @@ class Api:
         endpoint = "/sep/api/roleRelations"
         url = "{}{}".format(
             self.url if self.url[-1] == "/" else self.url + "/",
-            endpoint if endpoint[0] != "/" else endpoint[1:]
+            endpoint if endpoint[0] != "/" else endpoint[1:],
         )
         response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
         self._process_error(response)
@@ -990,7 +991,7 @@ class Api:
         endpoint = "/sep/api/roleRelations/{}".format(id)
         url = "{}{}".format(
             self.url if self.url[-1] == "/" else self.url + "/",
-            endpoint if endpoint[0] != "/" else endpoint[1:]
+            endpoint if endpoint[0] != "/" else endpoint[1:],
         )
         response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
         self._process_error(response)
@@ -1023,7 +1024,7 @@ class Api:
         endpoint = "/sep/api/roleRelations"
         url = "{}{}".format(
             self.url if self.url[-1] == "/" else self.url + "/",
-            endpoint if endpoint[0] != "/" else endpoint[1:]
+            endpoint if endpoint[0] != "/" else endpoint[1:],
         )
         data = {
             "groupId": group_id,
@@ -1043,7 +1044,7 @@ class Api:
         endpoint = "/sep/api/roleRelations/{}/delete".format(id)
         url = "{}{}".format(
             self.url if self.url[-1] == "/" else self.url + "/",
-            endpoint if endpoint[0] != "/" else endpoint[1:]
+            endpoint if endpoint[0] != "/" else endpoint[1:],
         )
         response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
         self._process_error(response)
@@ -1061,7 +1062,7 @@ class Api:
         endpoint = "/sep/api/externalGroups"
         url = "{}{}".format(
             self.url if self.url[-1] == "/" else self.url + "/",
-            endpoint if endpoint[0] != "/" else endpoint[1:]
+            endpoint if endpoint[0] != "/" else endpoint[1:],
         )
         response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
         self._process_error(response)
@@ -1077,7 +1078,7 @@ class Api:
         endpoint = "/sep/api/externalGroups/{}".format(id)
         url = "{}{}".format(
             self.url if self.url[-1] == "/" else self.url + "/",
-            endpoint if endpoint[0] != "/" else endpoint[1:]
+            endpoint if endpoint[0] != "/" else endpoint[1:],
         )
         response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
         self._process_error(response)
@@ -1104,13 +1105,13 @@ class Api:
 
     def external_group_upsert(self, **kwargs):
         """
-        Create/Update an external group 
+        Create/Update an external group
         """
         self.log.debug("Running function")
         endpoint = "/sep/api/externalGroups"
         url = "{}{}".format(
             self.url if self.url[-1] == "/" else self.url + "/",
-            endpoint if endpoint[0] != "/" else endpoint[1:]
+            endpoint if endpoint[0] != "/" else endpoint[1:],
         )
         response = requests.post(url=url, auth=(self.username, self.password), json=kwargs, verify=self.verify)
         self._process_error(response)
@@ -1126,7 +1127,7 @@ class Api:
         endpoint = "/sep/api/externalGroups/{}/delete".format(id)
         url = "{}{}".format(
             self.url if self.url[-1] == "/" else self.url + "/",
-            endpoint if endpoint[0] != "/" else endpoint[1:]
+            endpoint if endpoint[0] != "/" else endpoint[1:],
         )
         response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
         self._process_error(response)
@@ -1144,7 +1145,7 @@ class Api:
         endpoint = "/sep/api/externalGroupRelations"
         url = "{}{}".format(
             self.url if self.url[-1] == "/" else self.url + "/",
-            endpoint if endpoint[0] != "/" else endpoint[1:]
+            endpoint if endpoint[0] != "/" else endpoint[1:],
         )
         response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
         self._process_error(response)
@@ -1160,7 +1161,7 @@ class Api:
         endpoint = "/sep/api/externalGroupRelations/{}".format(id)
         url = "{}{}".format(
             self.url if self.url[-1] == "/" else self.url + "/",
-            endpoint if endpoint[0] != "/" else endpoint[1:]
+            endpoint if endpoint[0] != "/" else endpoint[1:],
         )
         response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
         self._process_error(response)
@@ -1193,7 +1194,7 @@ class Api:
         endpoint = "/sep/api/externalGroupRelations"
         url = "{}{}".format(
             self.url if self.url[-1] == "/" else self.url + "/",
-            endpoint if endpoint[0] != "/" else endpoint[1:]
+            endpoint if endpoint[0] != "/" else endpoint[1:],
         )
         data = {
             "groupId": internal_group_id,
@@ -1213,11 +1214,10 @@ class Api:
         endpoint = "/sep/api/externalGroupRelations/{}/delete".format(id)
         url = "{}{}".format(
             self.url if self.url[-1] == "/" else self.url + "/",
-            endpoint if endpoint[0] != "/" else endpoint[1:]
+            endpoint if endpoint[0] != "/" else endpoint[1:],
         )
         response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
         self._process_error(response)
         data = response.json()
         self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
-
