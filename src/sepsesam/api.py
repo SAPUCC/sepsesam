@@ -1721,10 +1721,8 @@ class Api:
         self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
-    ### MEDIA POOL HANDLING ###
+    ### v1 MEDIA POOL HANDLING ###
    
-    # /sep/api/mediaPools
-    
     def media_pool_list(self):
         """
         List all media pools
@@ -1803,6 +1801,57 @@ class Api:
         response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
         self._process_error(response)
         data = response.json()
+        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        return data
+
+    ### v1 DRIVE GROUPS ###
+
+    def drive_group_list(self):
+        """
+        List all drive groups
+        """
+        self.log.debug("Running function")
+        endpoint = "/sep/api/driveGroups"
+        url = "{}{}".format(
+            self.url if self.url[-1] == "/" else self.url + "/",
+            endpoint if endpoint[0] != "/" else endpoint[1:],
+        )
+        response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
+        self._process_error(response)
+        data = response.json()
+        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        return data
+
+    def drive_group_get(self, id):
+        """
+        Get a drive group
+        """
+        self.log.debug("Running function")
+        endpoint = "/sep/api/driveGroups/{}".format(id)
+        url = "{}{}".format(
+            self.url if self.url[-1] == "/" else self.url + "/",
+            endpoint if endpoint[0] != "/" else endpoint[1:],
+        )
+        response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
+        self._process_error(response)
+        data = response.json()
+        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        return data
+
+    def drive_group_find(self, **kwargs):
+        """
+        Find a drive group. Based on list due to missing support in API v1
+        """
+        self.log.debug("Running function")
+        data = []
+        for group in self.drive_group_list():
+            valid_entry = True
+            for k, v in kwargs.items():
+                if group.get(k) != v:
+                    valid_entry = False
+                    break
+            if valid_entry:
+                data.append(group)
         self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
