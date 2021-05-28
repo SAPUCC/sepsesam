@@ -8,6 +8,7 @@ import logging
 import uuid
 import pprint
 import json.decoder
+import collections.abc
 
 # import third-party libraries
 import requests
@@ -37,6 +38,19 @@ ERROR_CODES = {
         "message": "The connection to the server is unavailable or got terminated",
     },
 }
+
+
+def update(d, u):
+    """ 
+    Recursivly update a dictionary, taken from 
+    https://stackoverflow.com/questions/3232943/update-value-of-a-nested-dictionary-of-varying-depth
+    """
+    for k, v in u.items():
+        if isinstance(v, collections.abc.Mapping):
+            d[k] = update(d.get(k, {}), v)
+        else:
+            d[k] = v
+    return d
 
 
 class SEPSesamAPIError(Exception):
@@ -1017,9 +1031,9 @@ class Api:
         self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
-    def group_upsert(self, **kwargs):
+    def group_create(self, id=None, **kwargs):
         """
-        Create/Update a new group
+        Create a new group
         """
         self.log.debug("Running function")
         endpoint = "/sep/api/groups"
@@ -1027,11 +1041,23 @@ class Api:
             self.url if self.url[-1] == "/" else self.url + "/",
             endpoint if endpoint[0] != "/" else endpoint[1:],
         )
+        if id:
+            kwargs["id"] = id
         response = requests.post(url=url, auth=(self.username, self.password), json=kwargs, verify=self.verify)
         self._process_error(response)
         data = response.json()
         self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
+
+    def group_update(self, id, **kwargs):
+        """
+        Update group
+        """
+        self.log.debug("Running function")
+        data = self.group_get(id=id)
+        kwargs = update(data, kwargs)
+        self.group_delete(id=id)
+        return self.group_create(id=id, **kwargs)
 
     def group_delete(self, id):
         """
@@ -1049,9 +1075,45 @@ class Api:
         self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
+    ### v1 ROLE HANDLING ###
+
+    def role_list(self):
+        """
+        List all roles
+        """
+        self.log.debug("Running function")
+        endpoint = "/sep/api/roles"
+        url = "{}{}".format(
+            self.url if self.url[-1] == "/" else self.url + "/",
+            endpoint if endpoint[0] != "/" else endpoint[1:],
+        )
+        response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
+        self._process_error(response)
+        data = response.json()
+        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        return data
+
+    def role_find(self, **kwargs):
+        """
+        Find a role. Based on list due to missing support in API v1
+        """
+        self.log.debug("Running function")
+        data = []
+        for group in self.role_list():
+            valid_entry = True
+            for k, v in kwargs.items():
+                if group.get(k) != v:
+                    valid_entry = False
+                    break
+            if valid_entry:
+                data.append(group)
+        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        return data
+
+
     ### v1 ROLE RELATION HANDLING ###
 
-    def role_relations_list(self):
+    def role_relation_list(self):
         """
         List all roleRelations
         """
@@ -1100,9 +1162,9 @@ class Api:
         self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
-    def role_relation_upsert(self, group_id, role_id):
+    def role_relation_create(self, group_id, role_id, id=None):
         """
-        Create/Update a new role <> group relation
+        Create a new role <> group relation
         """
         self.log.debug("Running function")
         endpoint = "/sep/api/roleRelations"
@@ -1114,11 +1176,23 @@ class Api:
             "groupId": group_id,
             "roleId": role_id,
         }
-        response = requests.post(url=url, auth=(self.username, self.password), json=data, verify=self.verify)
+        if id:
+            data["id"] = id
+        response = requests.patch(url=url, auth=(self.username, self.password), json=data, verify=self.verify)
         self._process_error(response)
         data = response.json()
         self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
+
+    def role_relation_update(self, id, group_id, role_id):
+        """
+        Update a role <> group relation.
+        """
+        self.log.debug("Running function")
+        data = self.role_relation_get(id=id)
+        kwargs = update(data, kwargs)
+        self.role_relation_delete(id=id)
+        return self.role_relation_create(id=id, group_id=group_id, role_id=role_id)
 
     def role_relation_delete(self, id):
         """
@@ -1187,9 +1261,9 @@ class Api:
         self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
-    def external_group_upsert(self, **kwargs):
+    def external_group_create(self, id=None, **kwargs):
         """
-        Create/Update an external group
+        Create an external group
         """
         self.log.debug("Running function")
         endpoint = "/sep/api/externalGroups"
@@ -1197,11 +1271,21 @@ class Api:
             self.url if self.url[-1] == "/" else self.url + "/",
             endpoint if endpoint[0] != "/" else endpoint[1:],
         )
+        if id:
+            kwargs["id"] = id
         response = requests.post(url=url, auth=(self.username, self.password), json=kwargs, verify=self.verify)
         self._process_error(response)
         data = response.json()
         self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
+
+    def external_group_upsert(self, id, **kwargs):
+        """
+        Create/Update an external group
+        """
+        self.log.debug("Running function")
+        self.external_group_delete(id=id)
+        return self.external_group_create(id=id, **kwargs)
 
     def external_group_delete(self, id):
         """
@@ -1270,9 +1354,9 @@ class Api:
         self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
-    def ext_group_relation_upsert(self, internal_group_id, external_group_id):
+    def ext_group_relation_create(self, internal_group_id, external_group_id, id=None):
         """
-        Create/Update a new internal <> external group relation
+        Create a new internal <> external group relation
         """
         self.log.debug("Running function")
         endpoint = "/sep/api/externalGroupRelations"
@@ -1284,11 +1368,25 @@ class Api:
             "groupId": internal_group_id,
             "externalGroupId": external_group_id,
         }
+        if id:
+            data["id"] = id
         response = requests.post(url=url, auth=(self.username, self.password), json=data, verify=self.verify)
         self._process_error(response)
         data = response.json()
         self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
+
+    def ext_group_relation_update(self, id, internal_group_id, external_group_id):
+        """
+        Update a internal <> external group relation
+        """
+        self.log.debug("Running function")
+        self.ext_group_relation_delete(id=id)
+        return self.ext_group_relation_create(
+            id=id,
+            internal_group_id=internal_group_id,
+            external_group_id=external_group_id
+        )
 
     def ext_group_relation_delete(self, id):
         """
@@ -1324,12 +1422,12 @@ class Api:
         self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
-    def schedule_get(self, id):
+    def schedule_get(self, name):
         """
         Get a schedule
         """
         self.log.debug("Running function")
-        endpoint = "/sep/api/schedules/{}".format(id)
+        endpoint = "/sep/api/schedules/{}".format(name)
         url = "{}{}".format(
             self.url if self.url[-1] == "/" else self.url + "/",
             endpoint if endpoint[0] != "/" else endpoint[1:],
@@ -1357,9 +1455,9 @@ class Api:
         self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
-    def schedule_upsert(self, **kwargs):
+    def schedule_create(self, id=None, **kwargs):
         """
-        Create/Update a schedule
+        Create a schedule
         """
         self.log.debug("Running function")
         endpoint = "/sep/api/schedules"
@@ -1367,11 +1465,23 @@ class Api:
             self.url if self.url[-1] == "/" else self.url + "/",
             endpoint if endpoint[0] != "/" else endpoint[1:],
         )
+        if id:
+            kwargs["id"] = id
         response = requests.post(url=url, auth=(self.username, self.password), json=kwargs, verify=self.verify)
         self._process_error(response)
         data = response.json()
         self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
+
+    def schedule_update(self, id, **kwargs):
+        """
+        Update a schedule
+        """
+        self.log.debug("Running function")
+        data = self.schedule_get(id=id)
+        kwargs = update(data, kwargs)
+        self.schedule_delete(id=id)
+        return self.schedule_create(id=id, **kwargs)
 
     def schedule_delete(self, id):
         """
@@ -1388,7 +1498,6 @@ class Api:
         data = response.json()
         self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
-
 
     ### v1 TASK HANDLING ###
 
@@ -1440,9 +1549,9 @@ class Api:
         self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
-    def task_upsert(self, **kwargs):
+    def task_create(self, name, **kwargs):
         """
-        Create/Update a task
+        Create a task
         """
         self.log.debug("Running function")
         endpoint = "/sep/api/tasks"
@@ -1450,11 +1559,22 @@ class Api:
             self.url if self.url[-1] == "/" else self.url + "/",
             endpoint if endpoint[0] != "/" else endpoint[1:],
         )
+        kwargs["name"] = name
         response = requests.post(url=url, auth=(self.username, self.password), json=kwargs, verify=self.verify)
         self._process_error(response)
         data = response.json()
         self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
+
+    def task_update(self, name, **kwargs):
+        """
+        Update a task
+        """
+        self.log.debug("Running function")
+        data = self.task_get(name=name)
+        kwargs = update(data, kwargs)
+        self.task_delete(name=name)
+        return self.task_create(name=name, **kwargs)
 
     def task_delete(self, name):
         """
@@ -1523,7 +1643,7 @@ class Api:
         self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
-    def task_event_upsert(self, **kwargs):
+    def task_event_create(self, id=None, **kwargs):
         """
         Create/Update a task event
         """
@@ -1533,11 +1653,23 @@ class Api:
             self.url if self.url[-1] == "/" else self.url + "/",
             endpoint if endpoint[0] != "/" else endpoint[1:],
         )
+        if id:
+            kwargs["id"] = id
         response = requests.post(url=url, auth=(self.username, self.password), json=kwargs, verify=self.verify)
         self._process_error(response)
         data = response.json()
         self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
+
+    def task_event_update(self, id, **kwargs):
+        """
+        Update a task event
+        """
+        self.log.debug("Running function")
+        data = self.task_event_get(id=id)
+        kwargs = update(data, kwargs)
+        self.task_event_delete(id=id)
+        return self.task_event_create(id=id, **kwargs)
 
     def task_event_delete(self, id):
         """
@@ -1606,9 +1738,9 @@ class Api:
         self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
-    def command_upsert(self, **kwargs):
+    def command_create(self, id=None, **kwargs):
         """
-        Create/Update a command
+        Update a command
         """
         self.log.debug("Running function")
         endpoint = "/sep/api/commands"
@@ -1616,11 +1748,23 @@ class Api:
             self.url if self.url[-1] == "/" else self.url + "/",
             endpoint if endpoint[0] != "/" else endpoint[1:],
         )
+        if id:
+            kwargs["id"] = id
         response = requests.post(url=url, auth=(self.username, self.password), json=kwargs, verify=self.verify)
         self._process_error(response)
         data = response.json()
         self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
+
+    def command_update(self, **kwargs):
+        """
+        Update a command
+        """
+        self.log.debug("Running function")
+        data = self.command_get(id=id)
+        kwargs = update(data, kwargs)
+        self.command_delete(id=id)
+        return self.command_create(id=id, **kwargs)
 
     def command_delete(self, id):
         """
@@ -1689,9 +1833,9 @@ class Api:
         self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
-    def command_event_upsert(self, **kwargs):
+    def command_event_create(self, id=None, **kwargs):
         """
-        Create/Update a command event
+        Create a command event
         """
         self.log.debug("Running function")
         endpoint = "/sep/api/commandEvents"
@@ -1699,11 +1843,23 @@ class Api:
             self.url if self.url[-1] == "/" else self.url + "/",
             endpoint if endpoint[0] != "/" else endpoint[1:],
         )
+        if id:
+            kwargs["id"] = id
         response = requests.post(url=url, auth=(self.username, self.password), json=kwargs, verify=self.verify)
         self._process_error(response)
         data = response.json()
         self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
+
+    def command_event_update(self, id, **kwargs):
+        """
+        Update a command event
+        """
+        self.log.debug("Running function")
+        data = self.command_event_get(id=id)
+        kwargs = update(data, kwargs)
+        self.command_event_delete(id=id)
+        return self.command_event_create(id=id, **kwargs)
 
     def command_event_delete(self, id):
         """
@@ -1755,7 +1911,7 @@ class Api:
         self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
-    def media_pools_find(self, **kwargs):
+    def media_pool_find(self, **kwargs):
         """
         Find a media pool. Based on list due to missing support in API v1
         """
@@ -1772,9 +1928,9 @@ class Api:
         self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
-    def media_pool_upsert(self, **kwargs):
+    def media_pool_create(self, id=None, **kwargs):
         """
-        Create/Update a media pool
+        Create a media pool
         """
         self.log.debug("Running function")
         endpoint = "/sep/api/mediaPools"
@@ -1782,11 +1938,23 @@ class Api:
             self.url if self.url[-1] == "/" else self.url + "/",
             endpoint if endpoint[0] != "/" else endpoint[1:],
         )
+        if id:
+            kwargs["id"] = id
         response = requests.post(url=url, auth=(self.username, self.password), json=kwargs, verify=self.verify)
         self._process_error(response)
         data = response.json()
         self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
+
+    def media_pool_update(self, id, **kwargs):
+        """
+        Create/Update a media pool
+        """
+        self.log.debug("Running function")
+        data = self.media_pool_get(id=id)
+        kwargs = update(data, kwargs)
+        self.media_pool_delete(id=id)
+        return self.media_pool_create(id=id, **kwargs)
 
     def media_pool_delete(self, id):
         """
