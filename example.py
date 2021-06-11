@@ -12,7 +12,7 @@ cred = {
 with sepsesam.api.Api(**cred) as api:
     # create default space
     api.location_create(name="GERMANY")
-    
+
     # create schedule
     api.schedule_create(
         name="WEEKLY_00_SUNDAY",
@@ -39,14 +39,14 @@ with sepsesam.api.Api(**cred) as api:
         name="FULL",
         typeId="Path",
     )
-    
+
     # corresponding drive groups "ds-<datastore name>" are created automatically
-    
+
     # create further topology
     loc_id_root = api.location_resolve_to_id(name="GERMANY")
     data = api.location_create(name="MUC", parentId=loc_id_root)
     loc_id_muc = data["id"]
-    
+
     # create internal / external groups and mapping
     group = {
         "name": "MUC_ADM",
@@ -55,7 +55,7 @@ with sepsesam.api.Api(**cred) as api:
     }
     data = api.group_create(**group)
     internal_group_id = data["id"]
-    data = api.role_relation_create(group_id=internal_group_id, role_id=2) # 2=All    
+    data = api.role_relation_create(group_id=internal_group_id, role_id=2) # 2=All
     ext_group = {
         "externalId": "de_muc_admins",
         "enabled": True
@@ -63,7 +63,7 @@ with sepsesam.api.Api(**cred) as api:
     data = api.external_group_create(**ext_group)
     external_group_id = data["id"]
     api.ext_group_relation_create(internal_group_id=internal_group_id, external_group_id=external_group_id)
-    
+
     # create ACLs
     permission = [
         {
@@ -79,7 +79,7 @@ with sepsesam.api.Api(**cred) as api:
     # get drive groups IDs")
     data = api.drive_group_find(name="ds-FULL")
     full_dg_id = data[0]["id"]
-    
+
     # create media pools
     api.media_pool_create(
         name="MUC_FULL_28",
@@ -91,7 +91,7 @@ with sepsesam.api.Api(**cred) as api:
     loc_id_root = api.location_resolve_to_id(name="GERMANY/MUC")
     data = api.client_create(name="db2.prod.muc", location={"id": loc_id_root}, accessmode="SMSSH")
     client_id = data["id"]
-    
+
     # create ACLs
     permission = [
         {
@@ -127,9 +127,9 @@ with sepsesam.api.Api(**cred) as api:
         },
         source="DB2"
     )
-    
+
     # add task event and schedule
-    data = api.media_pools_find(name="MUC_FULL_28")
+    data = api.media_pool_find(name="MUC_FULL_28")
     media_pool_id = data[0]["id"]
     api.task_event_create(
         mediaPool=media_pool_id,
@@ -137,5 +137,5 @@ with sepsesam.api.Api(**cred) as api:
         scheduleName="DE_MUC_db2_ARCHIVE",
         fdiType="F"
     )
-    
+
 
