@@ -955,7 +955,7 @@ class Api:
         data = self.group_get(id=id)
         kwargs = update(data, kwargs)
         self.group_delete(id=id)
-        return self.group_create(id=id, **kwargs)
+        return self.group_create(**kwargs)
 
     def group_delete(self, id):
         """
@@ -1327,7 +1327,7 @@ class Api:
         data = self.schedule_get(name=name)
         kwargs = update(data, kwargs)
         self.schedule_delete(name=name)
-        return self.schedule_create(name=name, **kwargs)
+        return self.schedule_create(**kwargs)
 
     def schedule_delete(self, name):
         """
@@ -1405,7 +1405,7 @@ class Api:
         data = self.task_get(name=name)
         kwargs = update(data, kwargs)
         self.task_delete(name=name)
-        return self.task_create(name=name, **kwargs)
+        return self.task_create(**kwargs)
 
     def task_delete(self, name):
         """
@@ -1488,7 +1488,7 @@ class Api:
         data = self.task_event_get(id=id)
         kwargs = update(data, kwargs)
         self.task_event_delete(id=id)
-        return self.task_event_create(id=id, **kwargs)
+        return self.task_event_create(**kwargs)
 
     def task_event_delete(self, id):
         """
@@ -1571,7 +1571,7 @@ class Api:
         data = self.command_get(id=id)
         kwargs = update(data, kwargs)
         self.command_delete(id=id)
-        return self.command_create(id=id, **kwargs)
+        return self.command_create(**kwargs)
 
     def command_delete(self, id):
         """
@@ -1654,7 +1654,7 @@ class Api:
         data = self.command_event_get(id=id)
         kwargs = update(data, kwargs)
         self.command_event_delete(id=id)
-        return self.command_event_create(id=id, **kwargs)
+        return self.command_event_create(**kwargs)
 
     def command_event_delete(self, id):
         """
@@ -1737,7 +1737,7 @@ class Api:
         data = self.media_pool_get(id=id)
         kwargs = update(data, kwargs)
         self.media_pool_delete(id=id)
-        return self.media_pool_create(id=id, **kwargs)
+        return self.media_pool_create(**kwargs)
 
     def media_pool_delete(self, id):
         """
