@@ -501,7 +501,9 @@ class Api:
             self.login()
         url = self._urlexpand(endpoint)
         headers = {"X-SEP-Session": self.session_id}
-        data = {"queryMode": queryMode}
+        data = {}
+        if "queryMode" in kwargs:
+            data = {"queryMode": queryMode}
         for param in ["object", "origin"]:
             if param in kwargs:
                 data[param] = kwargs[param]
