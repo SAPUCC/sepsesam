@@ -1334,7 +1334,7 @@ class Api:
         Delete a schedule
         """
         log.debug("Running function")
-        endpoint = "/sep/api/schedules/{}/delete".format(name.lower())
+        endpoint = "/sep/api/schedules/{}/delete".format(name)
         url = self._urlexpand(endpoint)
         response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
         self._process_error(response)
