@@ -39,6 +39,9 @@ ERROR_CODES = {
     },
 }
 
+# set logger
+log = logging.getLogger("sepsesam")
+
 
 def update(d, u):
     """ 
@@ -70,7 +73,7 @@ class Api:
     Implements version 2 of the SEP sesam API
     """
 
-    def __init__(self, url, username, password, verify=True, log_level="INFO"):
+    def __init__(self, url, username, password, verify=True):
         """
         Initialize API
 
@@ -85,9 +88,6 @@ class Api:
         self.password = password
         self.session_id = None
         self.verify = verify
-        self.log = logging.getLogger("sepsesam")
-        level = logging.getLevelName(log_level)
-        self.log.setLevel(level)
 
     def __enter__(self):
         """
@@ -113,7 +113,7 @@ class Api:
             data = response.json()
             data["status_code"] = response.status_code
         except json.decoder.JSONDecodeError:
-            self.log.debug("Could not retrieve error description")
+            log.debug("Could not retrieve error description")
             sc = response.status_code
             data = {
                 "status_code": sc,
@@ -124,7 +124,7 @@ class Api:
                 "url": response.request.url,
             }
         data["status_code"] = response.status_code
-        self.log.error("An error occured:\n{}".format(pprint.pformat(data)))
+        log.error("An error occured:\n{}".format(pprint.pformat(data)))
         raise SEPSesamAPIError(**data)
 
     #################### Version 2 API ####################
@@ -135,7 +135,7 @@ class Api:
         """
         Logon to the SEP sesam v2 API
         """
-        self.log.debug("Running function")
+        log.debug("Running function")
         endpoint = "sep/api/v2/auth/login"
         data = {"username": self.username, "secret": self.password, "type": "CLASSIC"}
         url = "{}{}".format(
@@ -146,14 +146,14 @@ class Api:
         self._process_error(response)
         resp_data = response.json()
         self.session_id = resp_data
-        self.log.debug("Got response:\n{}".format(pprint.pformat(resp_data)))
+        log.debug("Got response:\n{}".format(pprint.pformat(resp_data)))
         return True
 
     def logout(self):
         """
         Logout and cleanup session
         """
-        self.log.debug("Running function")
+        log.debug("Running function")
         endpoint = "sep/api/v2/auth/logout"
         if self.session_id:
             url = "{}{}".format(
@@ -167,7 +167,7 @@ class Api:
         """
         Retrieve server information
         """
-        self.log.debug("Running function")
+        log.debug("Running function")
         endpoint = "sep/api/v2/server/info"
         if not self.session_id:
             self.login()
@@ -179,7 +179,7 @@ class Api:
         response = requests.get(url=url, headers=headers, verify=self.verify)
         self._process_error(response)
         data = response.json()
-        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
     ### v2 CLIENT HANDLING ###
@@ -188,7 +188,7 @@ class Api:
         """
         Return a list of clients
         """
-        self.log.debug("Running function")
+        log.debug("Running function")
         endpoint = "/sep/api/v2/clients"
         if not self.session_id:
             self.login()
@@ -200,14 +200,14 @@ class Api:
         response = requests.get(url=url, headers=headers, verify=self.verify)
         self._process_error(response)
         data = response.json()
-        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
     def client_get(self, id):
         """
         Return a client for a given ID
         """
-        self.log.debug("Running function")
+        log.debug("Running function")
         endpoint = "/sep/api/v2/clients/{}".format(id)
         if not self.session_id:
             self.login()
@@ -219,7 +219,7 @@ class Api:
         response = requests.get(url=url, headers=headers, verify=self.verify)
         self._process_error(response)
         data = response.json()
-        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
     def client_find(self, queryMode="DEFAULT", **kwargs):
@@ -237,7 +237,7 @@ class Api:
         :param matchWithSavesetID: A save set ID. When specified, the filter returns a list of clients compatible with the backup’s type. (string)
         :param queryMode:          The query mode. Valid values are DEFAULT or RESTORE. When omitted, the query mode defaults to DEFAULT. (string)
         """
-        self.log.debug("Running function")
+        log.debug("Running function")
         endpoint = "/sep/api/v2/clients/find"
         if not self.session_id:
             self.login()
@@ -265,7 +265,7 @@ class Api:
         response = requests.post(url=url, json=data, headers=headers, verify=self.verify)
         self._process_error(response)
         data = response.json()
-        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
     def client_create(self, name, **kwargs):
@@ -275,7 +275,7 @@ class Api:
         Check the SEP Sesam REST API documentation for applicable parameters:
         https://wiki.sep.de/wiki/index.php/4_4_3_Beefalo:Using_SEP_sesam_REST_API
         """
-        self.log.debug("Running function")
+        log.debug("Running function")
         endpoint = "/sep/api/v2/clients/create"
         if not self.session_id:
             self.login()
@@ -288,7 +288,7 @@ class Api:
         response = requests.post(url=url, json=kwargs, headers=headers, verify=self.verify)
         self._process_error(response)
         data = response.json()
-        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
     def client_update(self, id=None, name=None, **kwargs):
@@ -298,7 +298,7 @@ class Api:
         Check the SEP Sesam REST API documentation for applicable parameters:
         https://wiki.sep.de/wiki/index.php/4_4_3_Beefalo:Using_SEP_sesam_REST_API
         """
-        self.log.debug("Running function")
+        log.debug("Running function")
         if id:
             kwargs["id"] = id
         elif name:
@@ -316,14 +316,14 @@ class Api:
         response = requests.post(url=url, json=kwargs, headers=headers, verify=self.verify)
         self._process_error(response)
         data = response.json()
-        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
     def client_delete(self, id):
         """
         Delete a client
         """
-        self.log.debug("Running function")
+        log.debug("Running function")
         endpoint = "/sep/api/v2/clients/delete"
         if not self.session_id:
             self.login()
@@ -336,7 +336,7 @@ class Api:
         response = requests.post(url=url, data=str(id), headers=headers, verify=self.verify)
         self._process_error(response)
         data = response.json()
-        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
     ### v2 LOCATION HANDLING ###
@@ -345,7 +345,7 @@ class Api:
         """
         List all locations
         """
-        self.log.debug("Running function")
+        log.debug("Running function")
         endpoint = "/sep/api/v2/locations"
         if not self.session_id:
             self.login()
@@ -357,14 +357,14 @@ class Api:
         response = requests.get(url=url, headers=headers, verify=self.verify)
         self._process_error(response)
         data = response.json()
-        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
     def location_get(self, id):
         """
         Retrieve a location
         """
-        self.log.debug("Running function")
+        log.debug("Running function")
         endpoint = "/sep/api/v2/locations/{}".format(id)
         if not self.session_id:
             self.login()
@@ -377,7 +377,7 @@ class Api:
         response = requests.get(url=url, json=data, headers=headers, verify=self.verify)
         self._process_error(response)
         data = response.json()
-        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
     def location_find(self, parent):
@@ -386,7 +386,7 @@ class Api:
 
         :param parent: The ID of the parent location. (int)
         """
-        self.log.debug("Running function")
+        log.debug("Running function")
         endpoint = "/sep/api/v2/locations/find/"
         if not self.session_id:
             self.login()
@@ -399,7 +399,7 @@ class Api:
         response = requests.post(url=url, json=data, headers=headers, verify=self.verify)
         self._process_error(response)
         data = response.json()
-        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
     def location_create(self, name, **kwargs):
@@ -409,7 +409,7 @@ class Api:
         Check the SEP Sesam REST API documentation for applicable parameters:
         https://wiki.sep.de/wiki/index.php/4_4_3_Beefalo:Using_SEP_sesam_REST_API
         """
-        self.log.debug("Running function")
+        log.debug("Running function")
         endpoint = "/sep/api/v2/locations/create"
         if not self.session_id:
             self.login()
@@ -422,7 +422,7 @@ class Api:
         response = requests.post(url=url, json=kwargs, headers=headers, verify=self.verify)
         self._process_error(response)
         data = response.json()
-        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
     def location_update(self, id=None, name=None, **kwargs):
@@ -432,7 +432,7 @@ class Api:
         Check the SEP Sesam REST API documentation for applicable parameters:
         https://wiki.sep.de/wiki/index.php/4_4_3_Beefalo:Using_SEP_sesam_REST_API
         """
-        self.log.debug("Running function")
+        log.debug("Running function")
         if id:
             kwargs["id"] = id
         elif name:
@@ -450,14 +450,14 @@ class Api:
         response = requests.post(url=url, json=kwargs, headers=headers, verify=self.verify)
         self._process_error(response)
         data = response.json()
-        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
     def location_delete(self, id):
         """
         Deletes a location
         """
-        self.log.debug("Running function")
+        log.debug("Running function")
         endpoint = "/sep/api/v2/locations/delete"
         if not self.session_id:
             self.login()
@@ -470,14 +470,14 @@ class Api:
         response = requests.post(url=url, data=str(id), headers=headers, verify=self.verify)
         self._process_error(response)
         data = response.json()
-        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
     def location_resolve_to_id(self, name):
         """
         Resolve a given name or path to an id
         """
-        self.log.debug("Running function")
+        log.debug("Running function")
         endpoint = "/sep/api/v2/locations/resolveLocationToId"
         if not self.session_id:
             self.login()
@@ -490,7 +490,7 @@ class Api:
         response = requests.post(url=url, data='"{}"'.format(name), headers=headers, verify=self.verify)
         self._process_error(response)
         data = response.json()
-        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
     ### v2 ACL HANDLING ###
@@ -499,7 +499,7 @@ class Api:
         """
         List ACLs
         """
-        self.log.debug("Running function")
+        log.debug("Running function")
         endpoint = "/sep/api/v2/acls"
         if not self.session_id:
             self.login()
@@ -511,14 +511,14 @@ class Api:
         response = requests.get(url=url, headers=headers, verify=self.verify)
         self._process_error(response)
         data = response.json()
-        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
     def acl_get(self, id):
         """
         Get an ACL
         """
-        self.log.debug("Running function")
+        log.debug("Running function")
         endpoint = "/sep/api/v2/acls/{}".format(id)
         if not self.session_id:
             self.login()
@@ -530,7 +530,7 @@ class Api:
         response = requests.get(url=url, headers=headers, verify=self.verify)
         self._process_error(response)
         data = response.json()
-        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
     def acl_find(self, **kwargs):
@@ -540,7 +540,7 @@ class Api:
         :param object: The object ID. (string)
         :param origin: The object origin (string)
         """
-        self.log.debug("Running function")
+        log.debug("Running function")
         endpoint = "/sep/api/v2/acls/find"
         if not self.session_id:
             self.login()
@@ -556,7 +556,7 @@ class Api:
         response = requests.post(url=url, json=data, headers=headers, verify=self.verify)
         self._process_error(response)
         data = response.json()
-        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
     def acl_create(self, object, origin, value, id=None):
@@ -573,7 +573,7 @@ class Api:
                        group. (string)
         :param id:     The unique ID of the ACL. If none is given, one will be created.
         """
-        self.log.debug("Running function")
+        log.debug("Running function")
         endpoint = "/sep/api/v2/acls/create"
         data = {"object": object, "origin": origin, "value": value}
         if id:
@@ -588,7 +588,7 @@ class Api:
         response = requests.post(url=url, json=data, headers=headers, verify=self.verify)
         self._process_error(response)
         data = response.json()
-        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
     def acl_update(self, id, **kwargs):
@@ -598,7 +598,7 @@ class Api:
         Check the SEP Sesam REST API documentation for applicable parameters:
         https://wiki.sep.de/wiki/index.php/4_4_3_Beefalo:Using_SEP_sesam_REST_API
         """
-        self.log.debug("Running function")
+        log.debug("Running function")
         kwargs["id"] = id
         endpoint = "/sep/api/v2/acls/update"
         if not self.session_id:
@@ -611,14 +611,14 @@ class Api:
         response = requests.post(url=url, json=kwargs, headers=headers, verify=self.verify)
         self._process_error(response)
         data = response.json()
-        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
     def acl_delete(self, id):
         """
         Delete an ACL
         """
-        self.log.debug("Running function")
+        log.debug("Running function")
         endpoint = "/sep/api/v2/acls/delete"
         if not self.session_id:
             self.login()
@@ -631,7 +631,7 @@ class Api:
         response = requests.post(url=url, data=str(id), headers=headers, verify=self.verify)
         self._process_error(response)
         data = response.json()
-        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
     ### v2 CREDENTIAL HANDLING ###
@@ -640,7 +640,7 @@ class Api:
         """
         List credentials
         """
-        self.log.debug("Running function")
+        log.debug("Running function")
         endpoint = "/sep/api/v2/credentials"
         if not self.session_id:
             self.login()
@@ -652,14 +652,14 @@ class Api:
         response = requests.get(url=url, headers=headers, verify=self.verify)
         self._process_error(response)
         data = response.json()
-        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
     def credential_get(self, id):
         """
         Get a credential
         """
-        self.log.debug("Running function")
+        log.debug("Running function")
         endpoint = "/sep/api/v2/credentials/{}".format(id)
         if not self.session_id:
             self.login()
@@ -671,7 +671,7 @@ class Api:
         response = requests.get(url=url, headers=headers, verify=self.verify)
         self._process_error(response)
         data = response.json()
-        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
     def credential_find(self, type):
@@ -680,7 +680,7 @@ class Api:
 
         :param type: The credential type. (string)
         """
-        self.log.debug("Running function")
+        log.debug("Running function")
         endpoint = "/sep/api/v2/credentials/find"
         if not self.session_id:
             self.login()
@@ -693,7 +693,7 @@ class Api:
         response = requests.post(url=url, json=data, headers=headers, verify=self.verify)
         self._process_error(response)
         data = response.json()
-        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
     def credential_create(self, type, **kwargs):
@@ -730,7 +730,7 @@ class Api:
         :param userComment:  The description or users comment. (string)
         :param id:           The unique ID of the credential. If none is given, one will be created.
         """
-        self.log.debug("Running function")
+        log.debug("Running function")
         endpoint = "/sep/api/v2/credentials/create"
         data = {"type": type}
         for param in [
@@ -763,7 +763,7 @@ class Api:
         response = requests.post(url=url, json=data, headers=headers, verify=self.verify)
         self._process_error(response)
         data = response.json()
-        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
     def credential_update(self, id, **kwargs):
@@ -773,7 +773,7 @@ class Api:
         Check the SEP Sesam REST API documentation for applicable parameters:
         https://wiki.sep.de/wiki/index.php/4_4_3_Beefalo:Using_SEP_sesam_REST_API
         """
-        self.log.debug("Running function")
+        log.debug("Running function")
         kwargs["id"] = id
         endpoint = "/sep/api/v2/credentials/update"
         if not self.session_id:
@@ -786,14 +786,14 @@ class Api:
         response = requests.post(url=url, json=kwargs, headers=headers, verify=self.verify)
         self._process_error(response)
         data = response.json()
-        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
     def credential_delete(self, id):
         """
         Delete a credential
         """
-        self.log.debug("Running function")
+        log.debug("Running function")
         endpoint = "/sep/api/v2/credentials/delete"
         if not self.session_id:
             self.login()
@@ -806,7 +806,7 @@ class Api:
         response = requests.post(url=url, data=str(id), headers=headers, verify=self.verify)
         self._process_error(response)
         data = response.json()
-        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
     ### v2 DATASTORE HANDLING ###
@@ -815,7 +815,7 @@ class Api:
         """
         List datastores
         """
-        self.log.debug("Running function")
+        log.debug("Running function")
         endpoint = "/sep/api/v2/datastores"
         if not self.session_id:
             self.login()
@@ -827,14 +827,14 @@ class Api:
         response = requests.get(url=url, headers=headers, verify=self.verify)
         self._process_error(response)
         data = response.json()
-        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
     def datastore_get(self, id):
         """
         Get a datastore
         """
-        self.log.debug("Running function")
+        log.debug("Running function")
         endpoint = "/sep/api/v2/datastores/{}".format(id)
         if not self.session_id:
             self.login()
@@ -846,7 +846,7 @@ class Api:
         response = requests.get(url=url, headers=headers, verify=self.verify)
         self._process_error(response)
         data = response.json()
-        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
     def datastore_find(self, **kwargs):
@@ -858,7 +858,7 @@ class Api:
         :param driveGroupNames: The list of drive group names to match. ([string])
         :param mediaPoolNames:  The list of media pool names to match. ([string])
         """
-        self.log.debug("Running function")
+        log.debug("Running function")
         endpoint = "/sep/api/v2/datastores/find"
         if not self.session_id:
             self.login()
@@ -874,7 +874,7 @@ class Api:
         response = requests.post(url=url, json=data, headers=headers, verify=self.verify)
         self._process_error(response)
         data = response.json()
-        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
     def datastore_create(self, name, **kwargs):
@@ -884,7 +884,7 @@ class Api:
         Check the SEP Sesam REST API documentation for applicable parameters:
         https://wiki.sep.de/wiki/index.php/4_4_3_Beefalo:Using_SEP_sesam_REST_API
         """
-        self.log.debug("Running function")
+        log.debug("Running function")
         endpoint = "/sep/api/v2/datastores/create"
         if len(name) > 32:
             log.error("Datastore name has a maximum length of 32")
@@ -900,7 +900,7 @@ class Api:
         response = requests.post(url=url, json=kwargs, headers=headers, verify=self.verify)
         self._process_error(response)
         data = response.json()
-        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
     def datastore_update(self, name, **kwargs):
@@ -910,7 +910,7 @@ class Api:
         Check the SEP Sesam REST API documentation for applicable parameters:
         https://wiki.sep.de/wiki/index.php/4_4_3_Beefalo:Using_SEP_sesam_REST_API
         """
-        self.log.debug("Running function")
+        log.debug("Running function")
         kwargs["name"] = name
         endpoint = "/sep/api/v2/datastores/update"
         if not self.session_id:
@@ -923,14 +923,14 @@ class Api:
         response = requests.post(url=url, json=kwargs, headers=headers, verify=self.verify)
         self._process_error(response)
         data = response.json()
-        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
     def datastore_delete(self, name):
         """
         Delete a datastore
         """
-        self.log.debug("Running function")
+        log.debug("Running function")
         endpoint = "/sep/api/v2/datastores/delete"
         if not self.session_id:
             self.login()
@@ -943,7 +943,7 @@ class Api:
         response = requests.post(url=url, data=str(name), headers=headers, verify=self.verify)
         self._process_error(response)
         data = response.json()
-        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
     # TODO: check if this should be implemented
@@ -986,7 +986,7 @@ class Api:
         """
         List all groups
         """
-        self.log.debug("Running function")
+        log.debug("Running function")
         endpoint = "/sep/api/groups"
         url = "{}{}".format(
             self.url if self.url[-1] == "/" else self.url + "/",
@@ -995,14 +995,14 @@ class Api:
         response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
         self._process_error(response)
         data = response.json()
-        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
     def group_get(self, id):
         """
         Get a group
         """
-        self.log.debug("Running function")
+        log.debug("Running function")
         endpoint = "/sep/api/groups/{}".format(id)
         url = "{}{}".format(
             self.url if self.url[-1] == "/" else self.url + "/",
@@ -1011,14 +1011,14 @@ class Api:
         response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
         self._process_error(response)
         data = response.json()
-        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
     def group_find(self, **kwargs):
         """
         Find a group. Based on list due to missing support in API v1
         """
-        self.log.debug("Running function")
+        log.debug("Running function")
         data = []
         for group in self.group_list():
             valid_entry = True
@@ -1028,14 +1028,14 @@ class Api:
                     break
             if valid_entry:
                 data.append(group)
-        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
     def group_create(self, id=None, **kwargs):
         """
         Create a new group
         """
-        self.log.debug("Running function")
+        log.debug("Running function")
         endpoint = "/sep/api/groups"
         url = "{}{}".format(
             self.url if self.url[-1] == "/" else self.url + "/",
@@ -1046,14 +1046,14 @@ class Api:
         response = requests.post(url=url, auth=(self.username, self.password), json=kwargs, verify=self.verify)
         self._process_error(response)
         data = response.json()
-        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
     def group_update(self, id, **kwargs):
         """
         Update group
         """
-        self.log.debug("Running function")
+        log.debug("Running function")
         data = self.group_get(id=id)
         kwargs = update(data, kwargs)
         self.group_delete(id=id)
@@ -1063,7 +1063,7 @@ class Api:
         """
         Delete a group
         """
-        self.log.debug("Running function")
+        log.debug("Running function")
         endpoint = "/sep/api/groups/{}/delete".format(id)
         url = "{}{}".format(
             self.url if self.url[-1] == "/" else self.url + "/",
@@ -1072,7 +1072,7 @@ class Api:
         response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
         self._process_error(response)
         data = response.json()
-        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
     ### v1 ROLE HANDLING ###
@@ -1081,7 +1081,7 @@ class Api:
         """
         List all roles
         """
-        self.log.debug("Running function")
+        log.debug("Running function")
         endpoint = "/sep/api/roles"
         url = "{}{}".format(
             self.url if self.url[-1] == "/" else self.url + "/",
@@ -1090,14 +1090,14 @@ class Api:
         response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
         self._process_error(response)
         data = response.json()
-        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
     def role_find(self, **kwargs):
         """
         Find a role. Based on list due to missing support in API v1
         """
-        self.log.debug("Running function")
+        log.debug("Running function")
         data = []
         for group in self.role_list():
             valid_entry = True
@@ -1107,7 +1107,7 @@ class Api:
                     break
             if valid_entry:
                 data.append(group)
-        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
 
@@ -1117,7 +1117,7 @@ class Api:
         """
         List all roleRelations
         """
-        self.log.debug("Running function")
+        log.debug("Running function")
         endpoint = "/sep/api/roleRelations"
         url = "{}{}".format(
             self.url if self.url[-1] == "/" else self.url + "/",
@@ -1126,14 +1126,14 @@ class Api:
         response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
         self._process_error(response)
         data = response.json()
-        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
     def role_relation_get(self, id):
         """
         Get a role relation
         """
-        self.log.debug("Running function")
+        log.debug("Running function")
         endpoint = "/sep/api/roleRelations/{}".format(id)
         url = "{}{}".format(
             self.url if self.url[-1] == "/" else self.url + "/",
@@ -1142,14 +1142,14 @@ class Api:
         response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
         self._process_error(response)
         data = response.json()
-        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
     def role_relation_find(self, **kwargs):
         """
         Find a role relation. Based on list due to missing support in API v1
         """
-        self.log.debug("Running function")
+        log.debug("Running function")
         data = []
         for group in self.role_relation_list():
             valid_entry = True
@@ -1159,14 +1159,14 @@ class Api:
                     break
             if valid_entry:
                 data.append(group)
-        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
     def role_relation_create(self, group_id, role_id, id=None):
         """
         Create a new role <> group relation
         """
-        self.log.debug("Running function")
+        log.debug("Running function")
         endpoint = "/sep/api/roleRelations"
         url = "{}{}".format(
             self.url if self.url[-1] == "/" else self.url + "/",
@@ -1181,14 +1181,14 @@ class Api:
         response = requests.patch(url=url, auth=(self.username, self.password), json=data, verify=self.verify)
         self._process_error(response)
         data = response.json()
-        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
     def role_relation_update(self, id, group_id, role_id):
         """
         Update a role <> group relation.
         """
-        self.log.debug("Running function")
+        log.debug("Running function")
         data = self.role_relation_get(id=id)
         kwargs = update(data, kwargs)
         self.role_relation_delete(id=id)
@@ -1198,7 +1198,7 @@ class Api:
         """
         Delete a role relation
         """
-        self.log.debug("Running function")
+        log.debug("Running function")
         endpoint = "/sep/api/roleRelations/{}/delete".format(id)
         url = "{}{}".format(
             self.url if self.url[-1] == "/" else self.url + "/",
@@ -1207,7 +1207,7 @@ class Api:
         response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
         self._process_error(response)
         data = response.json()
-        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
     ### v1 EXTERNAL GROUP HANDLING ###
@@ -1216,7 +1216,7 @@ class Api:
         """
         List all external gruops
         """
-        self.log.debug("Running function")
+        log.debug("Running function")
         endpoint = "/sep/api/externalGroups"
         url = "{}{}".format(
             self.url if self.url[-1] == "/" else self.url + "/",
@@ -1225,14 +1225,14 @@ class Api:
         response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
         self._process_error(response)
         data = response.json()
-        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
     def external_group_get(self, id):
         """
         Get an external group
         """
-        self.log.debug("Running function")
+        log.debug("Running function")
         endpoint = "/sep/api/externalGroups/{}".format(id)
         url = "{}{}".format(
             self.url if self.url[-1] == "/" else self.url + "/",
@@ -1241,14 +1241,14 @@ class Api:
         response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
         self._process_error(response)
         data = response.json()
-        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
     def external_group_find(self, **kwargs):
         """
         Find an external group. Based on list due to missing support in API v1
         """
-        self.log.debug("Running function")
+        log.debug("Running function")
         data = []
         for group in self.external_group_list():
             valid_entry = True
@@ -1258,14 +1258,14 @@ class Api:
                     break
             if valid_entry:
                 data.append(group)
-        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
     def external_group_create(self, id=None, **kwargs):
         """
         Create an external group
         """
-        self.log.debug("Running function")
+        log.debug("Running function")
         endpoint = "/sep/api/externalGroups"
         url = "{}{}".format(
             self.url if self.url[-1] == "/" else self.url + "/",
@@ -1276,14 +1276,14 @@ class Api:
         response = requests.post(url=url, auth=(self.username, self.password), json=kwargs, verify=self.verify)
         self._process_error(response)
         data = response.json()
-        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
     def external_group_upsert(self, id, **kwargs):
         """
         Create/Update an external group
         """
-        self.log.debug("Running function")
+        log.debug("Running function")
         self.external_group_delete(id=id)
         return self.external_group_create(id=id, **kwargs)
 
@@ -1291,7 +1291,7 @@ class Api:
         """
         Delete an external group
         """
-        self.log.debug("Running function")
+        log.debug("Running function")
         endpoint = "/sep/api/externalGroups/{}/delete".format(id)
         url = "{}{}".format(
             self.url if self.url[-1] == "/" else self.url + "/",
@@ -1300,7 +1300,7 @@ class Api:
         response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
         self._process_error(response)
         data = response.json()
-        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
     ### v1 EXTERNAL GROUP RELATION HANDLING
@@ -1309,7 +1309,7 @@ class Api:
         """
         List all internal <> external group relations
         """
-        self.log.debug("Running function")
+        log.debug("Running function")
         endpoint = "/sep/api/externalGroupRelations"
         url = "{}{}".format(
             self.url if self.url[-1] == "/" else self.url + "/",
@@ -1318,14 +1318,14 @@ class Api:
         response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
         self._process_error(response)
         data = response.json()
-        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
     def ext_group_relation_get(self, id):
         """
         Get an internal <> external group relation
         """
-        self.log.debug("Running function")
+        log.debug("Running function")
         endpoint = "/sep/api/externalGroupRelations/{}".format(id)
         url = "{}{}".format(
             self.url if self.url[-1] == "/" else self.url + "/",
@@ -1334,14 +1334,14 @@ class Api:
         response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
         self._process_error(response)
         data = response.json()
-        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
     def ext_group_relation_find(self, **kwargs):
         """
         Find an internal <> external group relation. Based on list due to missing support in API v1
         """
-        self.log.debug("Running function")
+        log.debug("Running function")
         data = []
         for group in self.ext_group_relation_list():
             valid_entry = True
@@ -1351,14 +1351,14 @@ class Api:
                     break
             if valid_entry:
                 data.append(group)
-        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
     def ext_group_relation_create(self, internal_group_id, external_group_id, id=None):
         """
         Create a new internal <> external group relation
         """
-        self.log.debug("Running function")
+        log.debug("Running function")
         endpoint = "/sep/api/externalGroupRelations"
         url = "{}{}".format(
             self.url if self.url[-1] == "/" else self.url + "/",
@@ -1373,14 +1373,14 @@ class Api:
         response = requests.post(url=url, auth=(self.username, self.password), json=data, verify=self.verify)
         self._process_error(response)
         data = response.json()
-        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
     def ext_group_relation_update(self, id, internal_group_id, external_group_id):
         """
         Update a internal <> external group relation
         """
-        self.log.debug("Running function")
+        log.debug("Running function")
         self.ext_group_relation_delete(id=id)
         return self.ext_group_relation_create(
             id=id,
@@ -1392,7 +1392,7 @@ class Api:
         """
         Delete an internal <> external group relation
         """
-        self.log.debug("Running function")
+        log.debug("Running function")
         endpoint = "/sep/api/externalGroupRelations/{}/delete".format(id)
         url = "{}{}".format(
             self.url if self.url[-1] == "/" else self.url + "/",
@@ -1401,7 +1401,7 @@ class Api:
         response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
         self._process_error(response)
         data = response.json()
-        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
     ### v1 SCHEDULE HANDLING ###
@@ -1410,7 +1410,7 @@ class Api:
         """
         List all schedules
         """
-        self.log.debug("Running function")
+        log.debug("Running function")
         endpoint = "/sep/api/schedules"
         url = "{}{}".format(
             self.url if self.url[-1] == "/" else self.url + "/",
@@ -1419,14 +1419,14 @@ class Api:
         response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
         self._process_error(response)
         data = response.json()
-        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
     def schedule_get(self, name):
         """
         Get a schedule
         """
-        self.log.debug("Running function")
+        log.debug("Running function")
         endpoint = "/sep/api/schedules/{}".format(name)
         url = "{}{}".format(
             self.url if self.url[-1] == "/" else self.url + "/",
@@ -1435,14 +1435,14 @@ class Api:
         response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
         self._process_error(response)
         data = response.json()
-        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
     def schedule_find(self, **kwargs):
         """
         Find a schedule. Based on list due to missing support in API v1
         """
-        self.log.debug("Running function")
+        log.debug("Running function")
         data = []
         for group in self.schedule_list():
             valid_entry = True
@@ -1452,43 +1452,43 @@ class Api:
                     break
             if valid_entry:
                 data.append(group)
-        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
-    def schedule_create(self, id=None, **kwargs):
+    def schedule_create(self, name, **kwargs):
         """
         Create a schedule
         """
-        self.log.debug("Running function")
+        log.debug("Running function")
         endpoint = "/sep/api/schedules"
         url = "{}{}".format(
             self.url if self.url[-1] == "/" else self.url + "/",
             endpoint if endpoint[0] != "/" else endpoint[1:],
         )
-        if id:
-            kwargs["id"] = id
+        
+        kwargs["name"] = name
         response = requests.post(url=url, auth=(self.username, self.password), json=kwargs, verify=self.verify)
         self._process_error(response)
         data = response.json()
-        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
-    def schedule_update(self, id, **kwargs):
+    def schedule_update(self, name, **kwargs):
         """
         Update a schedule
         """
-        self.log.debug("Running function")
-        data = self.schedule_get(id=id)
+        log.debug("Running function")
+        data = self.schedule_get(name=name)
         kwargs = update(data, kwargs)
-        self.schedule_delete(id=id)
-        return self.schedule_create(id=id, **kwargs)
+        self.schedule_delete(name=name)
+        return self.schedule_create(name=name, **kwargs)
 
-    def schedule_delete(self, id):
+    def schedule_delete(self, name):
         """
         Delete a schedule
         """
-        self.log.debug("Running function")
-        endpoint = "/sep/api/schedules/{}/delete".format(id)
+        log.debug("Running function")
+        endpoint = "/sep/api/schedules/{}/delete".format(name.lower())
         url = "{}{}".format(
             self.url if self.url[-1] == "/" else self.url + "/",
             endpoint if endpoint[0] != "/" else endpoint[1:],
@@ -1496,7 +1496,7 @@ class Api:
         response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
         self._process_error(response)
         data = response.json()
-        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
     ### v1 TASK HANDLING ###
@@ -1505,7 +1505,7 @@ class Api:
         """
         List all tasks
         """
-        self.log.debug("Running function")
+        log.debug("Running function")
         endpoint = "/sep/api/tasks"
         url = "{}{}".format(
             self.url if self.url[-1] == "/" else self.url + "/",
@@ -1514,14 +1514,14 @@ class Api:
         response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
         self._process_error(response)
         data = response.json()
-        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
     def task_get(self, name):
         """
         Get a task
         """
-        self.log.debug("Running function")
+        log.debug("Running function")
         endpoint = "/sep/api/tasks/{}".format(name)
         url = "{}{}".format(
             self.url if self.url[-1] == "/" else self.url + "/",
@@ -1530,14 +1530,14 @@ class Api:
         response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
         self._process_error(response)
         data = response.json()
-        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
     def task_find(self, **kwargs):
         """
         Find a task
         """
-        self.log.debug("Running function")
+        log.debug("Running function")
         endpoint = "/sep/api/tasks"
         url = "{}{}".format(
             self.url if self.url[-1] == "/" else self.url + "/",
@@ -1546,14 +1546,14 @@ class Api:
         response = requests.post(url=url, json=kwargs, auth=(self.username, self.password), verify=self.verify)
         self._process_error(response)
         data = response.json()
-        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
     def task_create(self, name, **kwargs):
         """
         Create a task
         """
-        self.log.debug("Running function")
+        log.debug("Running function")
         endpoint = "/sep/api/tasks"
         url = "{}{}".format(
             self.url if self.url[-1] == "/" else self.url + "/",
@@ -1563,14 +1563,14 @@ class Api:
         response = requests.post(url=url, auth=(self.username, self.password), json=kwargs, verify=self.verify)
         self._process_error(response)
         data = response.json()
-        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
     def task_update(self, name, **kwargs):
         """
         Update a task
         """
-        self.log.debug("Running function")
+        log.debug("Running function")
         data = self.task_get(name=name)
         kwargs = update(data, kwargs)
         self.task_delete(name=name)
@@ -1580,7 +1580,7 @@ class Api:
         """
         Delete a task
         """
-        self.log.debug("Running function")
+        log.debug("Running function")
         endpoint = "/sep/api/tasks/{}/delete".format(id)
         url = "{}{}".format(
             self.url if self.url[-1] == "/" else self.url + "/",
@@ -1589,7 +1589,7 @@ class Api:
         response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
         self._process_error(response)
         data = response.json()
-        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
     ### v1 TASK EVENT HANDLING ###
@@ -1598,7 +1598,7 @@ class Api:
         """
         List all task events
         """
-        self.log.debug("Running function")
+        log.debug("Running function")
         endpoint = "/sep/api/taskEvents"
         url = "{}{}".format(
             self.url if self.url[-1] == "/" else self.url + "/",
@@ -1607,14 +1607,14 @@ class Api:
         response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
         self._process_error(response)
         data = response.json()
-        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
     def task_event_get(self, id):
         """
         Get a task event
         """
-        self.log.debug("Running function")
+        log.debug("Running function")
         endpoint = "/sep/api/taskEvents/{}".format(id)
         url = "{}{}".format(
             self.url if self.url[-1] == "/" else self.url + "/",
@@ -1623,14 +1623,14 @@ class Api:
         response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
         self._process_error(response)
         data = response.json()
-        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
     def task_event_find(self, **kwargs):
         """
         Find a task event. Based on list due to missing support in API v1
         """
-        self.log.debug("Running function")
+        log.debug("Running function")
         data = []
         for group in self.task_event_list():
             valid_entry = True
@@ -1640,14 +1640,14 @@ class Api:
                     break
             if valid_entry:
                 data.append(group)
-        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
     def task_event_create(self, id=None, **kwargs):
         """
         Create/Update a task event
         """
-        self.log.debug("Running function")
+        log.debug("Running function")
         endpoint = "/sep/api/taskEvents"
         url = "{}{}".format(
             self.url if self.url[-1] == "/" else self.url + "/",
@@ -1658,14 +1658,14 @@ class Api:
         response = requests.post(url=url, auth=(self.username, self.password), json=kwargs, verify=self.verify)
         self._process_error(response)
         data = response.json()
-        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
     def task_event_update(self, id, **kwargs):
         """
         Update a task event
         """
-        self.log.debug("Running function")
+        log.debug("Running function")
         data = self.task_event_get(id=id)
         kwargs = update(data, kwargs)
         self.task_event_delete(id=id)
@@ -1675,7 +1675,7 @@ class Api:
         """
         Delete a task event
         """
-        self.log.debug("Running function")
+        log.debug("Running function")
         endpoint = "/sep/api/taskEvents/{}/delete".format(id)
         url = "{}{}".format(
             self.url if self.url[-1] == "/" else self.url + "/",
@@ -1684,7 +1684,7 @@ class Api:
         response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
         self._process_error(response)
         data = response.json()
-        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
     ### v1 COMMAND HANDLING ###
@@ -1693,7 +1693,7 @@ class Api:
         """
         List all commands
         """
-        self.log.debug("Running function")
+        log.debug("Running function")
         endpoint = "/sep/api/commands"
         url = "{}{}".format(
             self.url if self.url[-1] == "/" else self.url + "/",
@@ -1702,14 +1702,14 @@ class Api:
         response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
         self._process_error(response)
         data = response.json()
-        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
     def command_get(self, id):
         """
         Get a command
         """
-        self.log.debug("Running function")
+        log.debug("Running function")
         endpoint = "/sep/api/commands/{}".format(id)
         url = "{}{}".format(
             self.url if self.url[-1] == "/" else self.url + "/",
@@ -1718,14 +1718,14 @@ class Api:
         response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
         self._process_error(response)
         data = response.json()
-        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
     def command_find(self, **kwargs):
         """
         Find a command. Based on list due to missing support in API v1
         """
-        self.log.debug("Running function")
+        log.debug("Running function")
         data = []
         for group in self.command_list():
             valid_entry = True
@@ -1735,14 +1735,14 @@ class Api:
                     break
             if valid_entry:
                 data.append(group)
-        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
     def command_create(self, id=None, **kwargs):
         """
         Update a command
         """
-        self.log.debug("Running function")
+        log.debug("Running function")
         endpoint = "/sep/api/commands"
         url = "{}{}".format(
             self.url if self.url[-1] == "/" else self.url + "/",
@@ -1753,14 +1753,14 @@ class Api:
         response = requests.post(url=url, auth=(self.username, self.password), json=kwargs, verify=self.verify)
         self._process_error(response)
         data = response.json()
-        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
     def command_update(self, **kwargs):
         """
         Update a command
         """
-        self.log.debug("Running function")
+        log.debug("Running function")
         data = self.command_get(id=id)
         kwargs = update(data, kwargs)
         self.command_delete(id=id)
@@ -1770,7 +1770,7 @@ class Api:
         """
         Delete a command
         """
-        self.log.debug("Running function")
+        log.debug("Running function")
         endpoint = "/sep/api/commands/{}/delete".format(id)
         url = "{}{}".format(
             self.url if self.url[-1] == "/" else self.url + "/",
@@ -1779,7 +1779,7 @@ class Api:
         response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
         self._process_error(response)
         data = response.json()
-        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
     ### v1 COMMAND EVENT HANDLING ###
@@ -1788,7 +1788,7 @@ class Api:
         """
         List all command events
         """
-        self.log.debug("Running function")
+        log.debug("Running function")
         endpoint = "/sep/api/commandEvents"
         url = "{}{}".format(
             self.url if self.url[-1] == "/" else self.url + "/",
@@ -1797,14 +1797,14 @@ class Api:
         response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
         self._process_error(response)
         data = response.json()
-        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
     def command_event_get(self, id):
         """
         Get a command event
         """
-        self.log.debug("Running function")
+        log.debug("Running function")
         endpoint = "/sep/api/commandEvents/{}".format(id)
         url = "{}{}".format(
             self.url if self.url[-1] == "/" else self.url + "/",
@@ -1813,14 +1813,14 @@ class Api:
         response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
         self._process_error(response)
         data = response.json()
-        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
     def command_event_find(self, **kwargs):
         """
         Find a command event. Based on list due to missing support in API v1
         """
-        self.log.debug("Running function")
+        log.debug("Running function")
         data = []
         for group in self.command_event_list():
             valid_entry = True
@@ -1830,14 +1830,14 @@ class Api:
                     break
             if valid_entry:
                 data.append(group)
-        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
     def command_event_create(self, id=None, **kwargs):
         """
         Create a command event
         """
-        self.log.debug("Running function")
+        log.debug("Running function")
         endpoint = "/sep/api/commandEvents"
         url = "{}{}".format(
             self.url if self.url[-1] == "/" else self.url + "/",
@@ -1848,14 +1848,14 @@ class Api:
         response = requests.post(url=url, auth=(self.username, self.password), json=kwargs, verify=self.verify)
         self._process_error(response)
         data = response.json()
-        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
     def command_event_update(self, id, **kwargs):
         """
         Update a command event
         """
-        self.log.debug("Running function")
+        log.debug("Running function")
         data = self.command_event_get(id=id)
         kwargs = update(data, kwargs)
         self.command_event_delete(id=id)
@@ -1865,7 +1865,7 @@ class Api:
         """
         Delete a command event
         """
-        self.log.debug("Running function")
+        log.debug("Running function")
         endpoint = "/sep/api/commandEvents/{}/delete".format(id)
         url = "{}{}".format(
             self.url if self.url[-1] == "/" else self.url + "/",
@@ -1874,7 +1874,7 @@ class Api:
         response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
         self._process_error(response)
         data = response.json()
-        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
     ### v1 MEDIA POOL HANDLING ###
@@ -1883,7 +1883,7 @@ class Api:
         """
         List all media pools
         """
-        self.log.debug("Running function")
+        log.debug("Running function")
         endpoint = "/sep/api/mediaPools"
         url = "{}{}".format(
             self.url if self.url[-1] == "/" else self.url + "/",
@@ -1892,14 +1892,14 @@ class Api:
         response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
         self._process_error(response)
         data = response.json()
-        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
     def media_pool_get(self, id):
         """
         Get a media pool
         """
-        self.log.debug("Running function")
+        log.debug("Running function")
         endpoint = "/sep/api/mediaPools/{}".format(id)
         url = "{}{}".format(
             self.url if self.url[-1] == "/" else self.url + "/",
@@ -1908,14 +1908,14 @@ class Api:
         response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
         self._process_error(response)
         data = response.json()
-        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
     def media_pool_find(self, **kwargs):
         """
         Find a media pool. Based on list due to missing support in API v1
         """
-        self.log.debug("Running function")
+        log.debug("Running function")
         data = []
         for group in self.media_pool_list():
             valid_entry = True
@@ -1925,14 +1925,14 @@ class Api:
                     break
             if valid_entry:
                 data.append(group)
-        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
     def media_pool_create(self, id=None, **kwargs):
         """
         Create a media pool
         """
-        self.log.debug("Running function")
+        log.debug("Running function")
         endpoint = "/sep/api/mediaPools"
         url = "{}{}".format(
             self.url if self.url[-1] == "/" else self.url + "/",
@@ -1943,14 +1943,14 @@ class Api:
         response = requests.post(url=url, auth=(self.username, self.password), json=kwargs, verify=self.verify)
         self._process_error(response)
         data = response.json()
-        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
     def media_pool_update(self, id, **kwargs):
         """
         Create/Update a media pool
         """
-        self.log.debug("Running function")
+        log.debug("Running function")
         data = self.media_pool_get(id=id)
         kwargs = update(data, kwargs)
         self.media_pool_delete(id=id)
@@ -1960,7 +1960,7 @@ class Api:
         """
         Delete a media pool
         """
-        self.log.debug("Running function")
+        log.debug("Running function")
         endpoint = "/sep/api/mediaPools/{}/delete".format(id)
         url = "{}{}".format(
             self.url if self.url[-1] == "/" else self.url + "/",
@@ -1969,7 +1969,7 @@ class Api:
         response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
         self._process_error(response)
         data = response.json()
-        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
     ### v1 DRIVE GROUPS ###
@@ -1978,7 +1978,7 @@ class Api:
         """
         List all drive groups
         """
-        self.log.debug("Running function")
+        log.debug("Running function")
         endpoint = "/sep/api/driveGroups"
         url = "{}{}".format(
             self.url if self.url[-1] == "/" else self.url + "/",
@@ -1987,14 +1987,14 @@ class Api:
         response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
         self._process_error(response)
         data = response.json()
-        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
     def drive_group_get(self, id):
         """
         Get a drive group
         """
-        self.log.debug("Running function")
+        log.debug("Running function")
         endpoint = "/sep/api/driveGroups/{}".format(id)
         url = "{}{}".format(
             self.url if self.url[-1] == "/" else self.url + "/",
@@ -2003,14 +2003,14 @@ class Api:
         response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
         self._process_error(response)
         data = response.json()
-        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
     def drive_group_find(self, **kwargs):
         """
         Find a drive group. Based on list due to missing support in API v1
         """
-        self.log.debug("Running function")
+        log.debug("Running function")
         data = []
         for group in self.drive_group_list():
             valid_entry = True
@@ -2020,6 +2020,6 @@ class Api:
                     break
             if valid_entry:
                 data.append(group)
-        self.log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
