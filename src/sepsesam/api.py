@@ -1063,7 +1063,7 @@ class Api:
         }
         if id:
             data["id"] = id
-        response = requests.patch(url=url, auth=(self.username, self.password), json=data, verify=self.verify)
+        response = requests.post(url=url, auth=(self.username, self.password), json=data, verify=self.verify)
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
