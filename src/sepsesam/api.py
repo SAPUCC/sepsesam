@@ -1074,8 +1074,6 @@ class Api:
         Update a role <> group relation.
         """
         log.debug("Running function")
-        data = self.role_relation_get(id=id)
-        kwargs = update(data, kwargs)
         self.role_relation_delete(id=id)
         return self.role_relation_create(id=id, group_id=group_id, role_id=role_id)
 
