@@ -136,6 +136,24 @@ class Api:
             endpoint if endpoint[0] != "/" else endpoint[1:],
         )
 
+    def _filter(self, obj_list, kwargs):
+        """
+        Find an object based on attributes. Based on list due to missing support in API v1
+        """
+        log.debug("Running function")
+        data = []
+        for obj in obj_list:
+            valid_entry = True
+            for k, v in kwargs.items():
+                if obj.get(k) != v:
+                    valid_entry = False
+                    break
+            if valid_entry:
+                data.append(obj)
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        return data
+
+
     #################### Version 2 API ####################
 
     ### v2 GENERAL FUNCTIONS ###
@@ -921,18 +939,7 @@ class Api:
         """
         Find a group. Based on list due to missing support in API v1
         """
-        log.debug("Running function")
-        data = []
-        for group in self.group_list():
-            valid_entry = True
-            for k, v in kwargs.items():
-                if group.get(k) != v:
-                    valid_entry = False
-                    break
-            if valid_entry:
-                data.append(group)
-        log.debug("Got response:\n{}".format(pprint.pformat(data)))
-        return data
+        return self._filter(self.group_list(), kwargs)
 
     def group_create(self, id=None, **kwargs):
         """
@@ -991,19 +998,7 @@ class Api:
         """
         Find a role. Based on list due to missing support in API v1
         """
-        log.debug("Running function")
-        data = []
-        for group in self.role_list():
-            valid_entry = True
-            for k, v in kwargs.items():
-                if group.get(k) != v:
-                    valid_entry = False
-                    break
-            if valid_entry:
-                data.append(group)
-        log.debug("Got response:\n{}".format(pprint.pformat(data)))
-        return data
-
+        return self._filter(self.role_list(), kwargs)
 
     ### v1 ROLE RELATION HANDLING ###
 
@@ -1037,18 +1032,7 @@ class Api:
         """
         Find a role relation. Based on list due to missing support in API v1
         """
-        log.debug("Running function")
-        data = []
-        for group in self.role_relation_list():
-            valid_entry = True
-            for k, v in kwargs.items():
-                if group.get(k) != v:
-                    valid_entry = False
-                    break
-            if valid_entry:
-                data.append(group)
-        log.debug("Got response:\n{}".format(pprint.pformat(data)))
-        return data
+        return self._filter(self.role_relation_list(), kwargs)
 
     def role_relation_create(self, group_id, role_id, id=None):
         """
@@ -1075,7 +1059,9 @@ class Api:
         """
         log.debug("Running function")
         self.role_relation_delete(id=id)
-        return self.role_relation_create(id=id, group_id=group_id, role_id=role_id)
+        # it looks like the delete command is async
+        # since we do not reference the role relation id somewhere else, we just do not care
+        return self.role_relation_create(group_id=group_id, role_id=role_id)
 
     def role_relation_delete(self, id):
         """
@@ -1122,18 +1108,7 @@ class Api:
         """
         Find an external group. Based on list due to missing support in API v1
         """
-        log.debug("Running function")
-        data = []
-        for group in self.external_group_list():
-            valid_entry = True
-            for k, v in kwargs.items():
-                if group.get(k) != v:
-                    valid_entry = False
-                    break
-            if valid_entry:
-                data.append(group)
-        log.debug("Got response:\n{}".format(pprint.pformat(data)))
-        return data
+        return self._filter(self.external_group_list(), kwargs)
 
     def external_group_create(self, id=None, **kwargs):
         """
@@ -1203,18 +1178,7 @@ class Api:
         """
         Find an internal <> external group relation. Based on list due to missing support in API v1
         """
-        log.debug("Running function")
-        data = []
-        for group in self.ext_group_relation_list():
-            valid_entry = True
-            for k, v in kwargs.items():
-                if group.get(k) != v:
-                    valid_entry = False
-                    break
-            if valid_entry:
-                data.append(group)
-        log.debug("Got response:\n{}".format(pprint.pformat(data)))
-        return data
+        return self._filter(self.ext_group_relation_list(), kwargs)
 
     def ext_group_relation_create(self, internal_group_id, external_group_id, id=None):
         """
@@ -1292,18 +1256,7 @@ class Api:
         """
         Find a schedule. Based on list due to missing support in API v1
         """
-        log.debug("Running function")
-        data = []
-        for group in self.schedule_list():
-            valid_entry = True
-            for k, v in kwargs.items():
-                if group.get(k) != v:
-                    valid_entry = False
-                    break
-            if valid_entry:
-                data.append(group)
-        log.debug("Got response:\n{}".format(pprint.pformat(data)))
-        return data
+        return self._filter(self.schedule_list(), kwargs)
 
     def schedule_create(self, name, **kwargs):
         """
@@ -1372,16 +1325,9 @@ class Api:
 
     def task_find(self, **kwargs):
         """
-        Find a task
+        Find a task. Based on list due to missing support in API v1
         """
-        log.debug("Running function")
-        endpoint = "/sep/api/tasks"
-        url = self._urlexpand(endpoint)
-        response = requests.post(url=url, json=kwargs, auth=(self.username, self.password), verify=self.verify)
-        self._process_error(response)
-        data = response.json()
-        log.debug("Got response:\n{}".format(pprint.pformat(data)))
-        return data
+        return self._filter(self.task_list(), kwargs)
 
     def task_create(self, name, **kwargs):
         """
@@ -1412,7 +1358,7 @@ class Api:
         Delete a task
         """
         log.debug("Running function")
-        endpoint = "/sep/api/tasks/{}/delete".format(id)
+        endpoint = "/sep/api/tasks/{}/delete".format(name)
         url = self._urlexpand(endpoint)
         response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
         self._process_error(response)
@@ -1452,18 +1398,7 @@ class Api:
         """
         Find a task event. Based on list due to missing support in API v1
         """
-        log.debug("Running function")
-        data = []
-        for group in self.task_event_list():
-            valid_entry = True
-            for k, v in kwargs.items():
-                if group.get(k) != v:
-                    valid_entry = False
-                    break
-            if valid_entry:
-                data.append(group)
-        log.debug("Got response:\n{}".format(pprint.pformat(data)))
-        return data
+        return self._filter(self.task_event_list(), kwargs)
 
     def task_event_create(self, id=None, **kwargs):
         """
@@ -1535,18 +1470,7 @@ class Api:
         """
         Find a command. Based on list due to missing support in API v1
         """
-        log.debug("Running function")
-        data = []
-        for group in self.command_list():
-            valid_entry = True
-            for k, v in kwargs.items():
-                if group.get(k) != v:
-                    valid_entry = False
-                    break
-            if valid_entry:
-                data.append(group)
-        log.debug("Got response:\n{}".format(pprint.pformat(data)))
-        return data
+        return self._filter(self.command_list(), kwargs)
 
     def command_create(self, id=None, **kwargs):
         """
@@ -1618,18 +1542,7 @@ class Api:
         """
         Find a command event. Based on list due to missing support in API v1
         """
-        log.debug("Running function")
-        data = []
-        for group in self.command_event_list():
-            valid_entry = True
-            for k, v in kwargs.items():
-                if group.get(k) != v:
-                    valid_entry = False
-                    break
-            if valid_entry:
-                data.append(group)
-        log.debug("Got response:\n{}".format(pprint.pformat(data)))
-        return data
+        return self._filter(self.command_event_list(), kwargs)
 
     def command_event_create(self, id=None, **kwargs):
         """
@@ -1701,18 +1614,7 @@ class Api:
         """
         Find a media pool. Based on list due to missing support in API v1
         """
-        log.debug("Running function")
-        data = []
-        for group in self.media_pool_list():
-            valid_entry = True
-            for k, v in kwargs.items():
-                if group.get(k) != v:
-                    valid_entry = False
-                    break
-            if valid_entry:
-                data.append(group)
-        log.debug("Got response:\n{}".format(pprint.pformat(data)))
-        return data
+        return self._filter(self.media_pool_list(), kwargs)
 
     def media_pool_create(self, id=None, **kwargs):
         """
@@ -1784,15 +1686,5 @@ class Api:
         """
         Find a drive group. Based on list due to missing support in API v1
         """
-        log.debug("Running function")
-        data = []
-        for group in self.drive_group_list():
-            valid_entry = True
-            for k, v in kwargs.items():
-                if group.get(k) != v:
-                    valid_entry = False
-                    break
-            if valid_entry:
-                data.append(group)
-        log.debug("Got response:\n{}".format(pprint.pformat(data)))
-        return data
+        return self._filter(self.drive_group_list(), kwargs)
+
