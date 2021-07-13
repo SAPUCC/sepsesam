@@ -88,6 +88,7 @@ class Api:
         self.password = password
         self.session_id = None
         self.verify = verify
+        self.headers = None
 
     def __enter__(self):
         """
@@ -170,6 +171,7 @@ class Api:
         self._process_error(response)
         resp_data = response.json()
         self.session_id = resp_data
+        self.headers = {"X-SEP-Session": self.session_id}
         log.debug("Got response:\n{}".format(pprint.pformat(resp_data)))
         return True
 
@@ -181,8 +183,7 @@ class Api:
         endpoint = "sep/api/v2/auth/logout"
         if self.session_id:
             url = self._urlexpand(endpoint)
-            headers = {"X-SEP-Session": self.session_id}
-            requests.get(url=url, headers=headers, verify=self.verify)
+            requests.get(url=url, headers=self.headers, verify=self.verify)
 
     def get_server_info(self):
         """
@@ -193,8 +194,7 @@ class Api:
         if not self.session_id:
             self.login()
         url = self._urlexpand(endpoint)
-        headers = {"X-SEP-Session": self.session_id}
-        response = requests.get(url=url, headers=headers, verify=self.verify)
+        response = requests.get(url=url, headers=self.headers, verify=self.verify)
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
@@ -211,8 +211,7 @@ class Api:
         if not self.session_id:
             self.login()
         url = self._urlexpand(endpoint)
-        headers = {"X-SEP-Session": self.session_id}
-        response = requests.get(url=url, headers=headers, verify=self.verify)
+        response = requests.get(url=url, headers=self.headers, verify=self.verify)
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
@@ -227,8 +226,7 @@ class Api:
         if not self.session_id:
             self.login()
         url = self._urlexpand(endpoint)
-        headers = {"X-SEP-Session": self.session_id}
-        response = requests.get(url=url, headers=headers, verify=self.verify)
+        response = requests.get(url=url, headers=self.headers, verify=self.verify)
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
@@ -254,7 +252,6 @@ class Api:
         if not self.session_id:
             self.login()
         url = self._urlexpand(endpoint)
-        headers = {"X-SEP-Session": self.session_id}
         data = {"queryMode": queryMode}
         for param in [
             "id",
@@ -271,7 +268,7 @@ class Api:
         ]:
             if param in kwargs:
                 data[param] = kwargs[param]
-        response = requests.post(url=url, json=data, headers=headers, verify=self.verify)
+        response = requests.post(url=url, json=data, headers=self.headers, verify=self.verify)
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
@@ -289,9 +286,8 @@ class Api:
         if not self.session_id:
             self.login()
         url = self._urlexpand(endpoint)
-        headers = {"X-SEP-Session": self.session_id}
         kwargs["name"] = name
-        response = requests.post(url=url, json=kwargs, headers=headers, verify=self.verify)
+        response = requests.post(url=url, json=kwargs, headers=self.headers, verify=self.verify)
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
@@ -315,8 +311,7 @@ class Api:
         if not self.session_id:
             self.login()
         url = self._urlexpand(endpoint)
-        headers = {"X-SEP-Session": self.session_id}
-        response = requests.post(url=url, json=kwargs, headers=headers, verify=self.verify)
+        response = requests.post(url=url, json=kwargs, headers=self.headers, verify=self.verify)
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
@@ -331,9 +326,8 @@ class Api:
         if not self.session_id:
             self.login()
         url = self._urlexpand(endpoint)
-        headers = {"X-SEP-Session": self.session_id}
         # for delete, we need to provide the data as a string and not form / json encoded
-        response = requests.post(url=url, data=str(id), headers=headers, verify=self.verify)
+        response = requests.post(url=url, data=str(id), headers=self.headers, verify=self.verify)
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
@@ -350,8 +344,7 @@ class Api:
         if not self.session_id:
             self.login()
         url = self._urlexpand(endpoint)
-        headers = {"X-SEP-Session": self.session_id}
-        response = requests.get(url=url, headers=headers, verify=self.verify)
+        response = requests.get(url=url, headers=self.headers, verify=self.verify)
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
@@ -366,9 +359,8 @@ class Api:
         if not self.session_id:
             self.login()
         url = self._urlexpand(endpoint)
-        headers = {"X-SEP-Session": self.session_id}
         data = {"id": id}
-        response = requests.get(url=url, json=data, headers=headers, verify=self.verify)
+        response = requests.get(url=url, json=data, headers=self.headers, verify=self.verify)
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
@@ -385,9 +377,8 @@ class Api:
         if not self.session_id:
             self.login()
         url = self._urlexpand(endpoint)
-        headers = {"X-SEP-Session": self.session_id}
         data = {"parent": parent}
-        response = requests.post(url=url, json=data, headers=headers, verify=self.verify)
+        response = requests.post(url=url, json=data, headers=self.headers, verify=self.verify)
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
@@ -405,9 +396,8 @@ class Api:
         if not self.session_id:
             self.login()
         url = self._urlexpand(endpoint)
-        headers = {"X-SEP-Session": self.session_id}
         kwargs["name"] = name
-        response = requests.post(url=url, json=kwargs, headers=headers, verify=self.verify)
+        response = requests.post(url=url, json=kwargs, headers=self.headers, verify=self.verify)
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
@@ -431,8 +421,7 @@ class Api:
         if not self.session_id:
             self.login()
         url = self._urlexpand(endpoint)
-        headers = {"X-SEP-Session": self.session_id}
-        response = requests.post(url=url, json=kwargs, headers=headers, verify=self.verify)
+        response = requests.post(url=url, json=kwargs, headers=self.headers, verify=self.verify)
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
@@ -447,9 +436,8 @@ class Api:
         if not self.session_id:
             self.login()
         url = self._urlexpand(endpoint)
-        headers = {"X-SEP-Session": self.session_id}
         # for delete, we need to provide the data as a string and not form / json encoded
-        response = requests.post(url=url, data=str(id), headers=headers, verify=self.verify)
+        response = requests.post(url=url, data=str(id), headers=self.headers, verify=self.verify)
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
@@ -464,9 +452,8 @@ class Api:
         if not self.session_id:
             self.login()
         url = self._urlexpand(endpoint)
-        headers = {"X-SEP-Session": self.session_id}
         # data is provided as is, but with a strange formatting
-        response = requests.post(url=url, data='"{}"'.format(name), headers=headers, verify=self.verify)
+        response = requests.post(url=url, data='"{}"'.format(name), headers=self.headers, verify=self.verify)
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
@@ -483,8 +470,7 @@ class Api:
         if not self.session_id:
             self.login()
         url = self._urlexpand(endpoint)
-        headers = {"X-SEP-Session": self.session_id}
-        response = requests.get(url=url, headers=headers, verify=self.verify)
+        response = requests.get(url=url, headers=self.headers, verify=self.verify)
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
@@ -499,8 +485,7 @@ class Api:
         if not self.session_id:
             self.login()
         url = self._urlexpand(endpoint)
-        headers = {"X-SEP-Session": self.session_id}
-        response = requests.get(url=url, headers=headers, verify=self.verify)
+        response = requests.get(url=url, headers=self.headers, verify=self.verify)
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
@@ -518,14 +503,13 @@ class Api:
         if not self.session_id:
             self.login()
         url = self._urlexpand(endpoint)
-        headers = {"X-SEP-Session": self.session_id}
         data = {}
         if "queryMode" in kwargs:
             data = {"queryMode": queryMode}
         for param in ["object", "origin"]:
             if param in kwargs:
                 data[param] = kwargs[param]
-        response = requests.post(url=url, json=data, headers=headers, verify=self.verify)
+        response = requests.post(url=url, json=data, headers=self.headers, verify=self.verify)
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
@@ -553,8 +537,7 @@ class Api:
         if not self.session_id:
             self.login()
         url = self._urlexpand(endpoint)
-        headers = {"X-SEP-Session": self.session_id}
-        response = requests.post(url=url, json=data, headers=headers, verify=self.verify)
+        response = requests.post(url=url, json=data, headers=self.headers, verify=self.verify)
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
@@ -573,8 +556,7 @@ class Api:
         if not self.session_id:
             self.login()
         url = self._urlexpand(endpoint)
-        headers = {"X-SEP-Session": self.session_id}
-        response = requests.post(url=url, json=kwargs, headers=headers, verify=self.verify)
+        response = requests.post(url=url, json=kwargs, headers=self.headers, verify=self.verify)
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
@@ -589,9 +571,8 @@ class Api:
         if not self.session_id:
             self.login()
         url = self._urlexpand(endpoint)
-        headers = {"X-SEP-Session": self.session_id}
         # for delete, we need to provide the data as a string and not form / json encoded
-        response = requests.post(url=url, data=str(id), headers=headers, verify=self.verify)
+        response = requests.post(url=url, data=str(id), headers=self.headers, verify=self.verify)
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
@@ -608,8 +589,7 @@ class Api:
         if not self.session_id:
             self.login()
         url = self._urlexpand(endpoint)
-        headers = {"X-SEP-Session": self.session_id}
-        response = requests.get(url=url, headers=headers, verify=self.verify)
+        response = requests.get(url=url, headers=self.headers, verify=self.verify)
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
@@ -624,8 +604,7 @@ class Api:
         if not self.session_id:
             self.login()
         url = self._urlexpand(endpoint)
-        headers = {"X-SEP-Session": self.session_id}
-        response = requests.get(url=url, headers=headers, verify=self.verify)
+        response = requests.get(url=url, headers=self.headers, verify=self.verify)
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
@@ -642,9 +621,8 @@ class Api:
         if not self.session_id:
             self.login()
         url = self._urlexpand(endpoint)
-        headers = {"X-SEP-Session": self.session_id}
         data = {"type": type}
-        response = requests.post(url=url, json=data, headers=headers, verify=self.verify)
+        response = requests.post(url=url, json=data, headers=self.headers, verify=self.verify)
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
@@ -710,8 +688,7 @@ class Api:
         if not self.session_id:
             self.login()
         url = self._urlexpand(endpoint)
-        headers = {"X-SEP-Session": self.session_id}
-        response = requests.post(url=url, json=data, headers=headers, verify=self.verify)
+        response = requests.post(url=url, json=data, headers=self.headers, verify=self.verify)
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
@@ -730,8 +707,7 @@ class Api:
         if not self.session_id:
             self.login()
         url = self._urlexpand(endpoint)
-        headers = {"X-SEP-Session": self.session_id}
-        response = requests.post(url=url, json=kwargs, headers=headers, verify=self.verify)
+        response = requests.post(url=url, json=kwargs, headers=self.headers, verify=self.verify)
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
@@ -746,9 +722,8 @@ class Api:
         if not self.session_id:
             self.login()
         url = self._urlexpand(endpoint)
-        headers = {"X-SEP-Session": self.session_id}
         # for delete, we need to provide the data as a string and not form / json encoded
-        response = requests.post(url=url, data=str(id), headers=headers, verify=self.verify)
+        response = requests.post(url=url, data=str(id), headers=self.headers, verify=self.verify)
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
@@ -765,8 +740,7 @@ class Api:
         if not self.session_id:
             self.login()
         url = self._urlexpand(endpoint)
-        headers = {"X-SEP-Session": self.session_id}
-        response = requests.get(url=url, headers=headers, verify=self.verify)
+        response = requests.get(url=url, headers=self.headers, verify=self.verify)
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
@@ -781,8 +755,7 @@ class Api:
         if not self.session_id:
             self.login()
         url = self._urlexpand(endpoint)
-        headers = {"X-SEP-Session": self.session_id}
-        response = requests.get(url=url, headers=headers, verify=self.verify)
+        response = requests.get(url=url, headers=self.headers, verify=self.verify)
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
@@ -802,12 +775,11 @@ class Api:
         if not self.session_id:
             self.login()
         url = self._urlexpand(endpoint)
-        headers = {"X-SEP-Session": self.session_id}
         data = {}
         for param in ["name", "types", "driveGroupNames", "mediaPoolNames"]:
             if param in kwargs:
                 data[param] = kwargs[param]
-        response = requests.post(url=url, json=data, headers=headers, verify=self.verify)
+        response = requests.post(url=url, json=data, headers=self.headers, verify=self.verify)
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
@@ -829,8 +801,7 @@ class Api:
         if not self.session_id:
             self.login()
         url = self._urlexpand(endpoint)
-        headers = {"X-SEP-Session": self.session_id}
-        response = requests.post(url=url, json=kwargs, headers=headers, verify=self.verify)
+        response = requests.post(url=url, json=kwargs, headers=self.headers, verify=self.verify)
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
@@ -849,8 +820,7 @@ class Api:
         if not self.session_id:
             self.login()
         url = self._urlexpand(endpoint)
-        headers = {"X-SEP-Session": self.session_id}
-        response = requests.post(url=url, json=kwargs, headers=headers, verify=self.verify)
+        response = requests.post(url=url, json=kwargs, headers=self.headers, verify=self.verify)
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
@@ -865,9 +835,8 @@ class Api:
         if not self.session_id:
             self.login()
         url = self._urlexpand(endpoint)
-        headers = {"X-SEP-Session": self.session_id}
         # for delete, we need to provide the data as a string and not form / json encoded
-        response = requests.post(url=url, data=str(name), headers=headers, verify=self.verify)
+        response = requests.post(url=url, data=str(name), headers=self.headers, verify=self.verify)
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
