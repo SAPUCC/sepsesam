@@ -1358,7 +1358,7 @@ class Api:
         Delete a task
         """
         log.debug("Running function")
-        endpoint = "/sep/api/tasks/{}/delete".format(name)
+        endpoint = "/sep/api/tasks/{}/forceRemove".format(name)  # this will NOT take care of references
         url = self._urlexpand(endpoint)
         response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
         self._process_error(response)
