@@ -1,0 +1,23 @@
+name: sepsesam api CI on ubuntu-latest
+
+on: [push, pull_request]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Add sesam repository key
+      run: curl https://download.sep.de/linux/repositories/debian/key.asc | sudo apt-key add -
+    - name: Configure sesam apt sources
+      run: echo 'deb https://download.sep.de/linux/repositories/debian/ buster main' | sudo tee -a /etc/apt/sources.list
+    - name: Update apt sources
+      run: sudo apt-get update -y
+    - name: Install sesam server
+      run: sudo apt-get install sesam-srv python3 -y
+    - name: Install sepsesam module
+      run: sudo python3 -m pip install .
+    - name: Execute pyunit tests
+      run: python3 t/tests.py

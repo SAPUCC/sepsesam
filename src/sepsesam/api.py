@@ -42,7 +42,6 @@ ERROR_CODES = {
 # set logger
 log = logging.getLogger("sepsesam")
 
-
 def update(d, u):
     """
     Recursivly update a dictionary, taken from
@@ -137,6 +136,17 @@ class Api:
             endpoint if endpoint[0] != "/" else endpoint[1:],
         )
 
+    def _auth(func):
+        """ Check if session is set, and if not, authenticate before
+            executing function
+        """
+        def _doauth(*args, **kwargs):
+            self = args[0]
+            if not self.session_id:
+                self.login()
+            return func(*args, **kwargs)
+        return _doauth
+
     def _filter(self, obj_list, kwargs):
         """
         Find an object based on attributes. Based on list due to missing support in API v1
@@ -153,7 +163,6 @@ class Api:
                 data.append(obj)
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
-
 
     #################### Version 2 API ####################
 
@@ -185,14 +194,13 @@ class Api:
             url = self._urlexpand(endpoint)
             requests.get(url=url, headers=self.headers, verify=self.verify)
 
+    @_auth
     def get_server_info(self):
         """
         Retrieve server information
         """
         log.debug("Running function")
         endpoint = "sep/api/v2/server/info"
-        if not self.session_id:
-            self.login()
         url = self._urlexpand(endpoint)
         response = requests.get(url=url, headers=self.headers, verify=self.verify)
         self._process_error(response)
@@ -202,14 +210,13 @@ class Api:
 
     ### v2 CLIENT HANDLING ###
 
+    @_auth
     def client_list(self):
         """
         Return a list of clients
         """
         log.debug("Running function")
         endpoint = "/sep/api/v2/clients"
-        if not self.session_id:
-            self.login()
         url = self._urlexpand(endpoint)
         response = requests.get(url=url, headers=self.headers, verify=self.verify)
         self._process_error(response)
@@ -217,14 +224,13 @@ class Api:
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
+    @_auth
     def client_get(self, id):
         """
         Return a client for a given ID
         """
         log.debug("Running function")
         endpoint = "/sep/api/v2/clients/{}".format(id)
-        if not self.session_id:
-            self.login()
         url = self._urlexpand(endpoint)
         response = requests.get(url=url, headers=self.headers, verify=self.verify)
         self._process_error(response)
@@ -232,6 +238,7 @@ class Api:
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
+    @_auth
     def client_find(self, queryMode="DEFAULT", **kwargs):
         """
         Find a client by properties. Returns a list of clients.
@@ -249,8 +256,6 @@ class Api:
         """
         log.debug("Running function")
         endpoint = "/sep/api/v2/clients/find"
-        if not self.session_id:
-            self.login()
         url = self._urlexpand(endpoint)
         data = {"queryMode": queryMode}
         for param in [
@@ -274,6 +279,7 @@ class Api:
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
+    @_auth
     def client_create(self, name, **kwargs):
         """
         Create a client with the given parameters.
@@ -283,8 +289,6 @@ class Api:
         """
         log.debug("Running function")
         endpoint = "/sep/api/v2/clients/create"
-        if not self.session_id:
-            self.login()
         url = self._urlexpand(endpoint)
         kwargs["name"] = name
         response = requests.post(url=url, json=kwargs, headers=self.headers, verify=self.verify)
@@ -293,6 +297,7 @@ class Api:
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
+    @_auth
     def client_update(self, id=None, name=None, **kwargs):
         """
         Update a client with the given parameters. Either "id" or "name" must be given.
@@ -308,8 +313,6 @@ class Api:
         else:
             raise Exception("Either 'id' or 'name' must be specified")
         endpoint = "/sep/api/v2/clients/update"
-        if not self.session_id:
-            self.login()
         url = self._urlexpand(endpoint)
         response = requests.post(url=url, json=kwargs, headers=self.headers, verify=self.verify)
         self._process_error(response)
@@ -317,14 +320,13 @@ class Api:
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
+    @_auth
     def client_delete(self, id):
         """
         Delete a client
         """
         log.debug("Running function")
         endpoint = "/sep/api/v2/clients/delete"
-        if not self.session_id:
-            self.login()
         url = self._urlexpand(endpoint)
         # for delete, we need to provide the data as a string and not form / json encoded
         response = requests.post(url=url, data=str(id), headers=self.headers, verify=self.verify)
@@ -335,14 +337,13 @@ class Api:
 
     ### v2 LOCATION HANDLING ###
 
+    @_auth
     def location_list(self):
         """
         List all locations
         """
         log.debug("Running function")
         endpoint = "/sep/api/v2/locations"
-        if not self.session_id:
-            self.login()
         url = self._urlexpand(endpoint)
         response = requests.get(url=url, headers=self.headers, verify=self.verify)
         self._process_error(response)
@@ -350,14 +351,13 @@ class Api:
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
+    @_auth
     def location_get(self, id):
         """
         Retrieve a location
         """
         log.debug("Running function")
         endpoint = "/sep/api/v2/locations/{}".format(id)
-        if not self.session_id:
-            self.login()
         url = self._urlexpand(endpoint)
         data = {"id": id}
         response = requests.get(url=url, json=data, headers=self.headers, verify=self.verify)
@@ -366,6 +366,7 @@ class Api:
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
+    @_auth
     def location_find(self, parent):
         """
         Find a location.
@@ -374,8 +375,6 @@ class Api:
         """
         log.debug("Running function")
         endpoint = "/sep/api/v2/locations/find/"
-        if not self.session_id:
-            self.login()
         url = self._urlexpand(endpoint)
         data = {"parent": parent}
         response = requests.post(url=url, json=data, headers=self.headers, verify=self.verify)
@@ -384,6 +383,7 @@ class Api:
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
+    @_auth
     def location_create(self, name, **kwargs):
         """
         Create a location.
@@ -393,8 +393,6 @@ class Api:
         """
         log.debug("Running function")
         endpoint = "/sep/api/v2/locations/create"
-        if not self.session_id:
-            self.login()
         url = self._urlexpand(endpoint)
         kwargs["name"] = name
         response = requests.post(url=url, json=kwargs, headers=self.headers, verify=self.verify)
@@ -403,6 +401,7 @@ class Api:
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
+    @_auth
     def location_update(self, id=None, name=None, **kwargs):
         """
         Update a location. Either id or name must be specified.
@@ -418,8 +417,6 @@ class Api:
         else:
             raise Exception("Either 'id' or 'name' must be specified")
         endpoint = "/sep/api/v2/locations/update"
-        if not self.session_id:
-            self.login()
         url = self._urlexpand(endpoint)
         response = requests.post(url=url, json=kwargs, headers=self.headers, verify=self.verify)
         self._process_error(response)
@@ -427,14 +424,13 @@ class Api:
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
+    @_auth
     def location_delete(self, id):
         """
         Deletes a location
         """
         log.debug("Running function")
         endpoint = "/sep/api/v2/locations/delete"
-        if not self.session_id:
-            self.login()
         url = self._urlexpand(endpoint)
         # for delete, we need to provide the data as a string and not form / json encoded
         response = requests.post(url=url, data=str(id), headers=self.headers, verify=self.verify)
@@ -443,14 +439,13 @@ class Api:
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
+    @_auth
     def location_resolve_to_id(self, name):
         """
         Resolve a given name or path to an id
         """
         log.debug("Running function")
         endpoint = "/sep/api/v2/locations/resolveLocationToId"
-        if not self.session_id:
-            self.login()
         url = self._urlexpand(endpoint)
         # data is provided as is, but with a strange formatting
         response = requests.post(url=url, data='"{}"'.format(name), headers=self.headers, verify=self.verify)
@@ -461,14 +456,13 @@ class Api:
 
     ### v2 ACL HANDLING ###
 
+    @_auth
     def acl_list(self):
         """
         List ACLs
         """
         log.debug("Running function")
         endpoint = "/sep/api/v2/acls"
-        if not self.session_id:
-            self.login()
         url = self._urlexpand(endpoint)
         response = requests.get(url=url, headers=self.headers, verify=self.verify)
         self._process_error(response)
@@ -476,14 +470,13 @@ class Api:
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
+    @_auth
     def acl_get(self, id):
         """
         Get an ACL
         """
         log.debug("Running function")
         endpoint = "/sep/api/v2/acls/{}".format(id)
-        if not self.session_id:
-            self.login()
         url = self._urlexpand(endpoint)
         response = requests.get(url=url, headers=self.headers, verify=self.verify)
         self._process_error(response)
@@ -491,6 +484,7 @@ class Api:
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
+    @_auth
     def acl_find(self, **kwargs):
         """
         Find an ACL
@@ -500,8 +494,6 @@ class Api:
         """
         log.debug("Running function")
         endpoint = "/sep/api/v2/acls/find"
-        if not self.session_id:
-            self.login()
         url = self._urlexpand(endpoint)
         data = {}
         if "queryMode" in kwargs:
@@ -515,6 +507,7 @@ class Api:
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
+    @_auth
     def acl_create(self, object, origin, value, id=None):
         """
         Create an ACL.
@@ -534,8 +527,6 @@ class Api:
         data = {"object": object, "origin": origin, "value": value}
         if id:
             data["id"] = id
-        if not self.session_id:
-            self.login()
         url = self._urlexpand(endpoint)
         response = requests.post(url=url, json=data, headers=self.headers, verify=self.verify)
         self._process_error(response)
@@ -543,6 +534,7 @@ class Api:
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
+    @_auth
     def acl_update(self, id, **kwargs):
         """
         Update an ACL
@@ -553,8 +545,6 @@ class Api:
         log.debug("Running function")
         kwargs["id"] = id
         endpoint = "/sep/api/v2/acls/update"
-        if not self.session_id:
-            self.login()
         url = self._urlexpand(endpoint)
         response = requests.post(url=url, json=kwargs, headers=self.headers, verify=self.verify)
         self._process_error(response)
@@ -562,14 +552,13 @@ class Api:
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
+    @_auth
     def acl_delete(self, id):
         """
         Delete an ACL
         """
         log.debug("Running function")
         endpoint = "/sep/api/v2/acls/delete"
-        if not self.session_id:
-            self.login()
         url = self._urlexpand(endpoint)
         # for delete, we need to provide the data as a string and not form / json encoded
         response = requests.post(url=url, data=str(id), headers=self.headers, verify=self.verify)
@@ -580,14 +569,13 @@ class Api:
 
     ### v2 CREDENTIAL HANDLING ###
 
+    @_auth
     def credential_list(self):
         """
         List credentials
         """
         log.debug("Running function")
         endpoint = "/sep/api/v2/credentials"
-        if not self.session_id:
-            self.login()
         url = self._urlexpand(endpoint)
         response = requests.get(url=url, headers=self.headers, verify=self.verify)
         self._process_error(response)
@@ -595,14 +583,13 @@ class Api:
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
+    @_auth
     def credential_get(self, id):
         """
         Get a credential
         """
         log.debug("Running function")
         endpoint = "/sep/api/v2/credentials/{}".format(id)
-        if not self.session_id:
-            self.login()
         url = self._urlexpand(endpoint)
         response = requests.get(url=url, headers=self.headers, verify=self.verify)
         self._process_error(response)
@@ -610,6 +597,7 @@ class Api:
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
+    @_auth
     def credential_find(self, type):
         """
         Find a credential
@@ -618,8 +606,6 @@ class Api:
         """
         log.debug("Running function")
         endpoint = "/sep/api/v2/credentials/find"
-        if not self.session_id:
-            self.login()
         url = self._urlexpand(endpoint)
         data = {"type": type}
         response = requests.post(url=url, json=data, headers=self.headers, verify=self.verify)
@@ -628,6 +614,7 @@ class Api:
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
+    @_auth
     def credential_create(self, type, **kwargs):
         """
         Create an ACL.
@@ -685,8 +672,6 @@ class Api:
                 data[param] = kwargs[param]
         if "name" not in data:
             data["name"] = "auth.{}.{}".format(type, uuid.uuid4())
-        if not self.session_id:
-            self.login()
         url = self._urlexpand(endpoint)
         response = requests.post(url=url, json=data, headers=self.headers, verify=self.verify)
         self._process_error(response)
@@ -694,6 +679,7 @@ class Api:
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
+    @_auth
     def credential_update(self, id, **kwargs):
         """
         Update a credential
@@ -704,8 +690,6 @@ class Api:
         log.debug("Running function")
         kwargs["id"] = id
         endpoint = "/sep/api/v2/credentials/update"
-        if not self.session_id:
-            self.login()
         url = self._urlexpand(endpoint)
         response = requests.post(url=url, json=kwargs, headers=self.headers, verify=self.verify)
         self._process_error(response)
@@ -713,14 +697,13 @@ class Api:
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
+    @_auth
     def credential_delete(self, id):
         """
         Delete a credential
         """
         log.debug("Running function")
         endpoint = "/sep/api/v2/credentials/delete"
-        if not self.session_id:
-            self.login()
         url = self._urlexpand(endpoint)
         # for delete, we need to provide the data as a string and not form / json encoded
         response = requests.post(url=url, data=str(id), headers=self.headers, verify=self.verify)
@@ -731,14 +714,13 @@ class Api:
 
     ### v2 DATASTORE HANDLING ###
 
+    @_auth
     def datastore_list(self):
         """
         List datastores
         """
         log.debug("Running function")
         endpoint = "/sep/api/v2/datastores"
-        if not self.session_id:
-            self.login()
         url = self._urlexpand(endpoint)
         response = requests.get(url=url, headers=self.headers, verify=self.verify)
         self._process_error(response)
@@ -746,14 +728,13 @@ class Api:
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
+    @_auth
     def datastore_get(self, id):
         """
         Get a datastore
         """
         log.debug("Running function")
         endpoint = "/sep/api/v2/datastores/{}".format(id)
-        if not self.session_id:
-            self.login()
         url = self._urlexpand(endpoint)
         response = requests.get(url=url, headers=self.headers, verify=self.verify)
         self._process_error(response)
@@ -761,6 +742,7 @@ class Api:
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
+    @_auth
     def datastore_find(self, **kwargs):
         """
         Find a datastore
@@ -772,8 +754,6 @@ class Api:
         """
         log.debug("Running function")
         endpoint = "/sep/api/v2/datastores/find"
-        if not self.session_id:
-            self.login()
         url = self._urlexpand(endpoint)
         data = {}
         for param in ["name", "types", "driveGroupNames", "mediaPoolNames"]:
@@ -785,6 +765,7 @@ class Api:
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
+    @_auth
     def datastore_create(self, name, **kwargs):
         """
         Create a datastore
@@ -807,6 +788,7 @@ class Api:
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
+    @_auth
     def datastore_update(self, name, **kwargs):
         """
         Update a datastore
@@ -817,8 +799,6 @@ class Api:
         log.debug("Running function")
         kwargs["name"] = name
         endpoint = "/sep/api/v2/datastores/update"
-        if not self.session_id:
-            self.login()
         url = self._urlexpand(endpoint)
         response = requests.post(url=url, json=kwargs, headers=self.headers, verify=self.verify)
         self._process_error(response)
@@ -826,14 +806,13 @@ class Api:
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
+    @_auth
     def datastore_delete(self, name):
         """
         Delete a datastore
         """
         log.debug("Running function")
         endpoint = "/sep/api/v2/datastores/delete"
-        if not self.session_id:
-            self.login()
         url = self._urlexpand(endpoint)
         # for delete, we need to provide the data as a string and not form / json encoded
         response = requests.post(url=url, data=str(name), headers=self.headers, verify=self.verify)
