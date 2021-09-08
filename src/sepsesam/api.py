@@ -919,9 +919,9 @@ class Api:
         Delete a group
         """
         log.debug("Running function")
-        endpoint = "/sep/api/groups/{}/delete".format(id)
+        endpoint = "/sep/api/groups/remove"
         url = self._urlexpand(endpoint)
-        response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
+        response = requests.post(url=url, auth=(self.username, self.password), verify=self.verify, data=str(id))
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
