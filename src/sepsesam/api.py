@@ -346,6 +346,7 @@ class Api:
         endpoint = "/sep/api/v2/locations"
         url = self._urlexpand(endpoint)
         response = requests.get(url=url, headers=self.headers, verify=self.verify)
+        print(response.text)
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
@@ -954,6 +955,25 @@ class Api:
         url = self._urlexpand(endpoint)
         # for delete, we need to provide the data as a string and not form / json encoded
         response = requests.post(url=url, data=str(id), headers=self.headers, verify=self.verify)
+        self._process_error(response)
+        data = response.json()
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        return data
+
+    ### v2 BACKUP HANDLING ###
+
+    @_auth
+    def backup_start(self, taskName, mediaPoolName, backupLevel="FULL", **kwargs):
+        """
+        Start a backup
+        """
+        log.debug("Running function")
+        endpoint = "/sep/api/v2/backups/start"
+        url = self._urlexpand(endpoint)
+        kwargs["taskName"] = taskName
+        kwargs["mediaPoolName"] = mediaPoolName
+        kwargs["backupLevel"] = backupLevel
+        response = requests.post(url=url, json=[kwargs], headers=self.headers, verify=self.verify)
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
