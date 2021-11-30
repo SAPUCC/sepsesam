@@ -979,6 +979,20 @@ class Api:
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
+    @_auth
+    def backup_get(self, savesetId):
+        """
+        Get a backup 
+        """
+        log.debug("Running function")
+        endpoint = "/sep/api/v2/backups/{}".format(savesetId)
+        url = self._urlexpand(endpoint)
+        response = requests.get(url=url, headers=self.headers, verify=self.verify)
+        self._process_error(response)
+        data = response.json()
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        return data
+
     #################### Version 1 API ####################
 
     ### v1 GROUP HANDLING ###
