@@ -285,7 +285,7 @@ class Api:
         Create a client with the given parameters.
 
         Check the SEP Sesam REST API documentation for applicable parameters:
-        https://wiki.sep.de/wiki/index.php/4_4_3_Beefalo:Using_SEP_sesam_REST_API
+        https://wiki.sep.de/wiki/index.php/File:SEP_sesam-REST-API-V2-Jaglion.pdf
         """
         log.debug("Running function")
         endpoint = "/sep/api/v2/clients/create"
@@ -303,7 +303,7 @@ class Api:
         Update a client with the given parameters. Either "id" or "name" must be given.
 
         Check the SEP Sesam REST API documentation for applicable parameters:
-        https://wiki.sep.de/wiki/index.php/4_4_3_Beefalo:Using_SEP_sesam_REST_API
+        https://wiki.sep.de/wiki/index.php/File:SEP_sesam-REST-API-V2-Jaglion.pdf
         """
         log.debug("Running function")
         if id:
@@ -346,6 +346,7 @@ class Api:
         endpoint = "/sep/api/v2/locations"
         url = self._urlexpand(endpoint)
         response = requests.get(url=url, headers=self.headers, verify=self.verify)
+        print(response.text)
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
@@ -389,7 +390,7 @@ class Api:
         Create a location.
 
         Check the SEP Sesam REST API documentation for applicable parameters:
-        https://wiki.sep.de/wiki/index.php/4_4_3_Beefalo:Using_SEP_sesam_REST_API
+        https://wiki.sep.de/wiki/index.php/File:SEP_sesam-REST-API-V2-Jaglion.pdf
         """
         log.debug("Running function")
         endpoint = "/sep/api/v2/locations/create"
@@ -407,7 +408,7 @@ class Api:
         Update a location. Either id or name must be specified.
 
         Check the SEP Sesam REST API documentation for applicable parameters:
-        https://wiki.sep.de/wiki/index.php/4_4_3_Beefalo:Using_SEP_sesam_REST_API
+        https://wiki.sep.de/wiki/index.php/File:SEP_sesam-REST-API-V2-Jaglion.pdf
         """
         log.debug("Running function")
         if id:
@@ -540,7 +541,7 @@ class Api:
         Update an ACL
 
         Check the SEP Sesam REST API documentation for applicable parameters:
-        https://wiki.sep.de/wiki/index.php/4_4_3_Beefalo:Using_SEP_sesam_REST_API
+        https://wiki.sep.de/wiki/index.php/File:SEP_sesam-REST-API-V2-Jaglion.pdf
         """
         log.debug("Running function")
         kwargs["id"] = id
@@ -685,7 +686,7 @@ class Api:
         Update a credential
 
         Check the SEP Sesam REST API documentation for applicable parameters:
-        https://wiki.sep.de/wiki/index.php/4_4_3_Beefalo:Using_SEP_sesam_REST_API
+        https://wiki.sep.de/wiki/index.php/File:SEP_sesam-REST-API-V2-Jaglion.pdf
         """
         log.debug("Running function")
         kwargs["id"] = id
@@ -771,7 +772,7 @@ class Api:
         Create a datastore
 
         Check the SEP Sesam REST API documentation for applicable parameters:
-        https://wiki.sep.de/wiki/index.php/4_4_3_Beefalo:Using_SEP_sesam_REST_API
+        https://wiki.sep.de/wiki/index.php/File:SEP_sesam-REST-API-V2-Jaglion.pdf
         """
         log.debug("Running function")
         endpoint = "/sep/api/v2/datastores/create"
@@ -794,7 +795,7 @@ class Api:
         Update a datastore
 
         Check the SEP Sesam REST API documentation for applicable parameters:
-        https://wiki.sep.de/wiki/index.php/4_4_3_Beefalo:Using_SEP_sesam_REST_API
+        https://wiki.sep.de/wiki/index.php/File:SEP_sesam-REST-API-V2-Jaglion.pdf
         """
         log.debug("Running function")
         kwargs["name"] = name
@@ -852,6 +853,145 @@ class Api:
         endpoint = "/sep/api/v2/datastores/<name>/mediaPools"
         # POST
         raise RuntimeError('Not implemented')
+
+    ### v2 BACKUP EVENTS HANDLING ###
+
+    @_auth
+    def backup_event_list(self):
+        """
+        List backup events
+        """
+        log.debug("Running function")
+        endpoint = "/sep/api/v2/backupevents"
+        url = self._urlexpand(endpoint)
+        response = requests.get(url=url, headers=self.headers, verify=self.verify)
+        self._process_error(response)
+        data = response.json()
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        return data
+
+    @_auth
+    def backup_event_get(self, id):
+        """
+        Get a backup event
+        """
+        log.debug("Running function")
+        endpoint = "/sep/api/v2/backupevents/{}".format(id)
+        url = self._urlexpand(endpoint)
+        response = requests.get(url=url, headers=self.headers, verify=self.verify)
+        self._process_error(response)
+        data = response.json()
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        return data
+
+    @_auth
+    def backup_event_find(self, **kwargs):
+        """
+        Find a backup event
+
+        Check the SEP Sesam REST API documentation for applicable parameters:
+        https://wiki.sep.de/wiki/index.php/File:SEP_sesam-REST-API-V2-Jaglion.pdf
+        """
+        log.debug("Running function")
+        endpoint = "/sep/api/v2/backupevents/find"
+        url = self._urlexpand(endpoint)
+        response = requests.post(url=url, json=kwargs, headers=self.headers, verify=self.verify)
+        self._process_error(response)
+        data = response.json()
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        return data
+
+    @_auth
+    def backup_event_create(self, object, **kwargs):
+        """
+        Create a backup event
+
+        Check the SEP Sesam REST API documentation for applicable parameters:
+        https://wiki.sep.de/wiki/index.php/File:SEP_sesam-REST-API-V2-Jaglion.pdf
+        """
+        log.debug("Running function")
+        endpoint = "/sep/api/v2/backupevents/create"
+        if len(object) > 128:
+            log.error("Object name has a maximum length of 32")
+            raise Exception("Object name has a maximum length of 32")
+        kwargs["object"] = object
+        if kwargs.get("name", 0) > 255:
+            log.error("Name has a maximum length of 32")
+            raise Exception("Name has a maximum length of 32")           
+        if not self.session_id:
+            self.login()
+        url = self._urlexpand(endpoint)
+        response = requests.post(url=url, json=kwargs, headers=self.headers, verify=self.verify)
+        self._process_error(response)
+        data = response.json()
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        return data
+
+    @_auth
+    def backup_event_update(self, id, **kwargs):
+        """
+        Update a backup event
+
+        Check the SEP Sesam REST API documentation for applicable parameters:
+        https://wiki.sep.de/wiki/index.php/File:SEP_sesam-REST-API-V2-Jaglion.pdf
+        """
+        log.debug("Running function")
+        kwargs["id"] = id
+        endpoint = "/sep/api/v2/backupevents/update"
+        url = self._urlexpand(endpoint)
+        response = requests.post(url=url, json=kwargs, headers=self.headers, verify=self.verify)
+        self._process_error(response)
+        data = response.json()
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        return data
+
+    @_auth
+    def backup_event_delete(self, id):
+        """
+        Delete a backup event
+        """
+        log.debug("Running function")
+        endpoint = "/sep/api/v2/backupevents/delete"
+        url = self._urlexpand(endpoint)
+        # for delete, we need to provide the data as a string and not form / json encoded
+        response = requests.post(url=url, data=str(id), headers=self.headers, verify=self.verify)
+        self._process_error(response)
+        data = response.json()
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        return data
+
+    ### v2 BACKUP HANDLING ###
+
+    @_auth
+    def backup_start(self, taskName, mediaPoolName, backupLevel="FULL", **kwargs):
+        """
+        Start a backup
+        """
+        log.debug("Running function")
+        endpoint = "/sep/api/v2/backups/start"
+        url = self._urlexpand(endpoint)
+        kwargs["taskName"] = taskName
+        kwargs["mediaPoolName"] = mediaPoolName
+        kwargs["backupLevel"] = backupLevel
+        response = requests.post(url=url, json=[kwargs], headers=self.headers, verify=self.verify)
+        self._process_error(response)
+        data = response.json()
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        return data
+
+    @_auth
+    def backup_get(self, savesetId):
+        """
+        Get a backup 
+        """
+        log.debug("Running function")
+        endpoint = "/sep/api/v2/backups/{}".format(savesetId)
+        url = self._urlexpand(endpoint)
+        response = requests.get(url=url, headers=self.headers, verify=self.verify)
+        self._process_error(response)
+        data = response.json()
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        return data
 
     #################### Version 1 API ####################
 
