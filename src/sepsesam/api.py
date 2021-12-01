@@ -1008,13 +1008,13 @@ class Api:
         """
         log.debug("Running function")
         endpoint = "/sep/api/v2/backupevents/create"
+        kwargs["object"] = object
         if len(object) > 128:
             log.error("Object name has a maximum length of 32")
             raise Exception("Object name has a maximum length of 32")
-        kwargs["object"] = object
-        if kwargs.get("name", 0) > 255:
+        if len(kwargs.get("name", "")) > 255:
             log.error("Name has a maximum length of 32")
-            raise Exception("Name has a maximum length of 32")           
+            raise Exception("Name has a maximum length of 32")
         if not self.session_id:
             self.login()
         url = self._urlexpand(endpoint)
@@ -1079,7 +1079,7 @@ class Api:
     @_auth
     def backup_get(self, savesetId):
         """
-        Get a backup 
+        Get a backup
         """
         log.debug("Running function")
         endpoint = "/sep/api/v2/backups/{}".format(savesetId)
