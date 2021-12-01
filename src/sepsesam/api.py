@@ -854,6 +854,103 @@ class Api:
         # POST
         raise RuntimeError('Not implemented')
 
+    ### v2 BACKUP TASKS HANDLING ###
+
+    @_auth
+    def backup_task_list(self):
+        """
+        List backup tasks
+        """
+        log.debug("Running function")
+        endpoint = "/sep/api/v2/backups/findTasks"
+        url = self._urlexpand(endpoint)
+        response = requests.get(url=url, headers=self.headers, verify=self.verify)
+        self._process_error(response)
+        data = response.json()
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        return data
+
+    @_auth
+    def backup_task_get(self, name):
+        """
+        Get a backup task
+        """
+        log.debug("Running function")
+        endpoint = "/sep/api/v2/backups/tasks/{}".format(name)
+        url = self._urlexpand(endpoint)
+        response = requests.get(url=url, headers=self.headers, verify=self.verify)
+        self._process_error(response)
+        data = response.json()
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        return data
+
+    @_auth
+    def backup_task_find(self, **kwargs):
+        """
+        Find a backup task
+
+        Check the SEP Sesam REST API documentation for applicable parameters:
+        https://wiki.sep.de/wiki/index.php/File:SEP_sesam-REST-API-V2-Jaglion.pdf
+        """
+        log.debug("Running function")
+        endpoint = "/sep/api/v2/backups/findTasks"
+        url = self._urlexpand(endpoint)
+        response = requests.post(url=url, json=kwargs, headers=self.headers, verify=self.verify)
+        self._process_error(response)
+        data = response.json()
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        return data
+
+    @_auth
+    def backup_task_create(self, name, **kwargs):
+        """
+        Create a backup task
+
+        Check the SEP Sesam REST API documentation for applicable parameters:
+        https://wiki.sep.de/wiki/index.php/File:SEP_sesam-REST-API-V2-Jaglion.pdf
+        """
+        log.debug("Running function")
+        endpoint = "/sep/api/v2/backups/createTask"
+        kwargs["name"] = name
+        url = self._urlexpand(endpoint)
+        response = requests.post(url=url, json=kwargs, headers=self.headers, verify=self.verify)
+        self._process_error(response)
+        data = response.json()
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        return data
+
+    @_auth
+    def backup_task_update(self, name, **kwargs):
+        """
+        Update a backup task
+
+        Check the SEP Sesam REST API documentation for applicable parameters:
+        https://wiki.sep.de/wiki/index.php/File:SEP_sesam-REST-API-V2-Jaglion.pdf
+        """
+        log.debug("Running function")
+        kwargs["name"] = name
+        endpoint = "/sep/api/v2/backups/updateTask"
+        url = self._urlexpand(endpoint)
+        response = requests.post(url=url, json=kwargs, headers=self.headers, verify=self.verify)
+        self._process_error(response)
+        data = response.json()
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        return data
+
+    @_auth
+    def backup_task_delete(self, name, **kwargs):
+        """
+        Delete a backup task
+        """
+        log.debug("Running function")
+        endpoint = "/sep/api/v2/backups/{}/deleteTask".format(name)
+        url = self._urlexpand(endpoint)
+        response = requests.post(url=url, json=kwargs, headers=self.headers, verify=self.verify)
+        self._process_error(response)
+        data = response.json()
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        return data
+
     ### v2 BACKUP EVENTS HANDLING ###
 
     @_auth
@@ -1376,77 +1473,6 @@ class Api:
         """
         log.debug("Running function")
         endpoint = "/sep/api/schedules/{}/delete".format(name)
-        url = self._urlexpand(endpoint)
-        response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
-        self._process_error(response)
-        data = response.json()
-        log.debug("Got response:\n{}".format(pprint.pformat(data)))
-        return data
-
-    ### v1 TASK HANDLING ###
-
-    def task_list(self):
-        """
-        List all tasks
-        """
-        log.debug("Running function")
-        endpoint = "/sep/api/tasks"
-        url = self._urlexpand(endpoint)
-        response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
-        self._process_error(response)
-        data = response.json()
-        log.debug("Got response:\n{}".format(pprint.pformat(data)))
-        return data
-
-    def task_get(self, name):
-        """
-        Get a task
-        """
-        log.debug("Running function")
-        endpoint = "/sep/api/tasks/{}".format(name)
-        url = self._urlexpand(endpoint)
-        response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
-        self._process_error(response)
-        data = response.json()
-        log.debug("Got response:\n{}".format(pprint.pformat(data)))
-        return data
-
-    def task_find(self, **kwargs):
-        """
-        Find a task. Based on list due to missing support in API v1
-        """
-        return self._filter(self.task_list(), kwargs)
-
-    def task_create(self, name, **kwargs):
-        """
-        Create a task
-        """
-        log.debug("Running function")
-        endpoint = "/sep/api/tasks"
-        url = self._urlexpand(endpoint)
-        kwargs["name"] = name
-        response = requests.post(url=url, auth=(self.username, self.password), json=kwargs, verify=self.verify)
-        self._process_error(response)
-        data = response.json()
-        log.debug("Got response:\n{}".format(pprint.pformat(data)))
-        return data
-
-    def task_update(self, name, **kwargs):
-        """
-        Update a task
-        """
-        log.debug("Running function")
-        data = self.task_get(name=name)
-        kwargs = update(data, kwargs)
-        self.task_delete(name=name)
-        return self.task_create(**kwargs)
-
-    def task_delete(self, name):
-        """
-        Delete a task
-        """
-        log.debug("Running function")
-        endpoint = "/sep/api/tasks/{}/forceRemove".format(name)  # this will NOT take care of references
         url = self._urlexpand(endpoint)
         response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
         self._process_error(response)
