@@ -1090,6 +1090,93 @@ class Api:
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
+    ### v2 MEDIA POOL HANDLING ###
+
+    @_auth
+    def media_pool_list(self):
+        """
+        List all media pools
+        """
+        log.debug("Running function")
+        endpoint = "/sep/api/v2/mediapools"
+        url = self._urlexpand(endpoint)
+        response = requests.get(url=url, headers=self.headers, verify=self.verify)
+        self._process_error(response)
+        data = response.json()
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        return data
+
+    @_auth
+    def media_pool_get(self, name):
+        """
+        Get a media pool
+        """
+        log.debug("Running function")
+        endpoint = "/sep/api/v2/mediapools/{}".format(name)
+        url = self._urlexpand(endpoint)
+        response = requests.get(url=url, headers=self.headers, verify=self.verify)
+        self._process_error(response)
+        data = response.json()
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        return data
+
+    @_auth
+    def media_pool_find(self, **kwargs):
+        """
+        Find a media pool. Based on list due to missing support in API v1
+        """
+        log.debug("Running function")
+        endpoint = "/sep/api/v2/mediapools/find"
+        url = self._urlexpand(endpoint)
+        response = requests.post(url=url, headers=self.headers, json=kwargs, verify=self.verify)
+        self._process_error(response)
+        data = response.json()
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        return data
+
+    @_auth
+    def media_pool_create(self, name, **kwargs):
+        """
+        Create a media pool
+        """
+        log.debug("Running function")
+        endpoint = "/sep/api/v2/mediapools/create"
+        url = self._urlexpand(endpoint)
+        kwargs["name"] = name
+        response = requests.post(url=url, headers=self.headers, json=kwargs, verify=self.verify)
+        self._process_error(response)
+        data = response.json()
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        return data
+
+    @_auth
+    def media_pool_update(self, **kwargs):
+        """
+        Update a media pool
+        """
+        log.debug("Running function")
+        endpoint = "/sep/api/v2/mediapools/update"
+        url = self._urlexpand(endpoint)
+        response = requests.post(url=url, headers=self.headers, json=kwargs, verify=self.verify)
+        self._process_error(response)
+        data = response.json()
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        return data
+
+    @_auth
+    def media_pool_delete(self, name):
+        """
+        Delete a media pool
+        """
+        log.debug("Running function")
+        endpoint = "/sep/api/v2/mediapools/deleteByEntity"
+        url = self._urlexpand(endpoint)
+        response = requests.post(url=url, headers=self.headers, json={"name": name}, verify=self.verify)
+        self._process_error(response)
+        data = response.json()
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        return data
+
     #################### Version 1 API ####################
 
     ### v1 GROUP HANDLING ###
@@ -1617,78 +1704,6 @@ class Api:
         """
         log.debug("Running function")
         endpoint = "/sep/api/commandEvents/{}/delete".format(id)
-        url = self._urlexpand(endpoint)
-        response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
-        self._process_error(response)
-        data = response.json()
-        log.debug("Got response:\n{}".format(pprint.pformat(data)))
-        return data
-
-    ### v1 MEDIA POOL HANDLING ###
-
-    def media_pool_list(self):
-        """
-        List all media pools
-        """
-        log.debug("Running function")
-        endpoint = "/sep/api/mediaPools"
-        url = self._urlexpand(endpoint)
-        response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
-        self._process_error(response)
-        data = response.json()
-        log.debug("Got response:\n{}".format(pprint.pformat(data)))
-        return data
-
-    def media_pool_get(self, id):
-        """
-        Get a media pool
-        """
-        log.debug("Running function")
-        endpoint = "/sep/api/mediaPools/{}".format(id)
-        url = self._urlexpand(endpoint)
-        response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
-        self._process_error(response)
-        data = response.json()
-        log.debug("Got response:\n{}".format(pprint.pformat(data)))
-        return data
-
-    def media_pool_find(self, **kwargs):
-        """
-        Find a media pool. Based on list due to missing support in API v1
-        """
-        return self._filter(self.media_pool_list(), kwargs)
-
-    def media_pool_create(self, id=None, **kwargs):
-        """
-        Create a media pool
-        """
-        log.debug("Running function")
-        endpoint = "/sep/api/mediaPools"
-        url = self._urlexpand(endpoint)
-        if id:
-            kwargs["id"] = id
-        response = requests.post(url=url, auth=(self.username, self.password), json=kwargs, verify=self.verify)
-        self._process_error(response)
-        data = response.json()
-        log.debug("Got response:\n{}".format(pprint.pformat(data)))
-        return data
-
-    def media_pool_update(self, id, **kwargs):
-        """
-        Create/Update a media pool
-        """
-        log.debug("Running function")
-        data = self.media_pool_get(id=id)
-        kwargs = update(data, kwargs)
-        self.media_pool_delete(id=id)
-        return self.media_pool_create(**kwargs)
-
-    def media_pool_delete(self, id):
-        """
-        Delete a media pool
-        """
-        log.debug("Running function")
-        endpoint = "/sep/api/mediaPools/{}/delete".format(id)
         url = self._urlexpand(endpoint)
         response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
         self._process_error(response)
