@@ -1177,6 +1177,97 @@ class Api:
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
+    ### v2 MEDIA HANDLING ###
+
+    @_auth
+    def media_list(self):
+        """
+        List all media 
+        """
+        log.debug("Running function")
+        endpoint = "/sep/api/v2/media"
+        url = self._urlexpand(endpoint)
+        response = requests.get(url=url, headers=self.headers, verify=self.verify)
+        self._process_error(response)
+        data = response.json()
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        return data
+
+    @_auth
+    def media_get(self, name):
+        """
+        Get a media 
+        """
+        log.debug("Running function")
+        endpoint = "/sep/api/v2/media/{}".format(name)
+        url = self._urlexpand(endpoint)
+        response = requests.get(url=url, headers=self.headers, verify=self.verify)
+        self._process_error(response)
+        data = response.json()
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        return data
+
+    @_auth
+    def media_find(self, **kwargs):
+        """
+        Find a media. 
+        
+        Note: It looks like that currently searching by poolName will return all entries
+        """
+        log.debug("Running function")
+        endpoint = "/sep/api/v2/media/find"
+        url = self._urlexpand(endpoint)
+        response = requests.post(url=url, headers=self.headers, json=kwargs, verify=self.verify)
+        self._process_error(response)
+        data = response.json()
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        return data
+
+    @_auth
+    def media_create(self, name, poolName, mediaType, **kwargs):
+        """
+        Create a media pool
+        """
+        log.debug("Running function")
+        endpoint = "/sep/api/v2/media/create"
+        url = self._urlexpand(endpoint)
+        kwargs["name"] = name
+        kwargs["poolName"] = poolName
+        kwargs["mediaType"] = mediaType
+        response = requests.post(url=url, headers=self.headers, json=kwargs, verify=self.verify)
+        self._process_error(response)
+        data = response.json()
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        return data
+
+    @_auth
+    def media_update(self, **kwargs):
+        """
+        Update a media
+        """
+        log.debug("Running function")
+        endpoint = "/sep/api/v2/media/update"
+        url = self._urlexpand(endpoint)
+        response = requests.post(url=url, headers=self.headers, json=kwargs, verify=self.verify)
+        self._process_error(response)
+        data = response.json()
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        return data
+
+    @_auth
+    def media_delete(self, name):
+        """
+        Delete a media
+        """
+        log.debug("Running function")
+        endpoint = "/sep/api/v2/media/delete"
+        url = self._urlexpand(endpoint)
+        response = requests.post(url=url, headers=self.headers, data='["{}"]'.format(name), verify=self.verify)  # TODO: unclear how this works
+        self._process_error(response)
+        data = response.json()
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        return data
+
     #################### Version 1 API ####################
 
     ### v1 GROUP HANDLING ###
