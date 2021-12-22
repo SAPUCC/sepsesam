@@ -147,7 +147,7 @@ class Api:
             return func(*args, **kwargs)
         return _doauth
 
-    def _filter(self, obj_list, kwargs):
+    def _filter(self, obj_list, **kwargs):
         """
         Find an object based on attributes. Based on list due to missing support in API v1
         """
@@ -822,38 +822,6 @@ class Api:
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
-    # TODO: check if this should be implemented
-
-    def datastore_drives_list(self):
-        endpoint = "/sep/api/v2/datastores/<name>/drives"
-        # GET
-        raise RuntimeError('Not implemented')
-
-    def datastore_drives_find(self):
-        endpoint = "/sep/api/v2/datastores/<name>/drives"
-        # POST
-        raise RuntimeError('Not implemented')
-
-    def datastore_drivegroups_list(self):
-        endpoint = "/sep/api/v2/datastores/<name>/driveGroups"
-        # GET
-        raise RuntimeError('Not implemented')
-
-    def datastore_drivegroups_find(self):
-        endpoint = "/sep/api/v2/datastores/<name>/driveGroups"
-        # POST
-        raise RuntimeError('Not implemented')
-
-    def datastore_mediapools_list(self):
-        endpoint = "/sep/api/v2/datastores/<name>/mediaPools"
-        # GET
-        raise RuntimeError('Not implemented')
-
-    def datastore_mediapools_find(self):
-        endpoint = "/sep/api/v2/datastores/<name>/mediaPools"
-        # POST
-        raise RuntimeError('Not implemented')
-
     ### v2 BACKUP TASKS HANDLING ###
 
     @_auth
@@ -1060,17 +1028,14 @@ class Api:
     ### v2 BACKUP HANDLING ###
 
     @_auth
-    def backup_start(self, taskName, mediaPoolName, backupLevel="FULL", **kwargs):
+    def backup_list(self):
         """
-        Start a backup
+        List all backups
         """
         log.debug("Running function")
-        endpoint = "/sep/api/v2/backups/start"
+        endpoint = "/sep/api/v2/backups"
         url = self._urlexpand(endpoint)
-        kwargs["taskName"] = taskName
-        kwargs["mediaPoolName"] = mediaPoolName
-        kwargs["backupLevel"] = backupLevel
-        response = requests.post(url=url, json=[kwargs], headers=self.headers, verify=self.verify)
+        response = requests.get(url=url, headers=self.headers, verify=self.verify)
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
@@ -1085,6 +1050,66 @@ class Api:
         endpoint = "/sep/api/v2/backups/{}".format(savesetId)
         url = self._urlexpand(endpoint)
         response = requests.get(url=url, headers=self.headers, verify=self.verify)
+        self._process_error(response)
+        data = response.json()
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        return data
+    
+    @_auth
+    def backup_find(self, **kwargs):
+        """
+        Find a backup
+        """
+        log.debug("Running function")
+        endpoint = "/sep/api/v2/backups/find"
+        url = self._urlexpand(endpoint)
+        response = requests.post(url=url, headers=self.headers, json=kwargs, verify=self.verify)
+        self._process_error(response)
+        data = response.json()
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        return data
+    
+    @_auth
+    def backup_create(self, name, **kwargs):
+        """
+        Create a backup
+        """
+        log.debug("Running function")
+        endpoint = "/sep/api/v2/backup/create"
+        url = self._urlexpand(endpoint)
+        kwargs["name"] = name
+        response = requests.post(url=url, headers=self.headers, json=kwargs, verify=self.verify)
+        self._process_error(response)
+        data = response.json()
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        return data
+
+    @_auth
+    def backup_update(self, **kwargs):
+        """
+        Update a backup
+        """
+        log.debug("Running function")
+        endpoint = "/sep/api/v2/backup/update"
+        url = self._urlexpand(endpoint)
+        response = requests.post(url=url, headers=self.headers, json=kwargs, verify=self.verify)
+        self._process_error(response)
+        data = response.json()
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        return data
+
+    @_auth
+    def backup_start(self, taskName, mediaPoolName, backupLevel="FULL", **kwargs):
+        """
+        Start a backup
+        """
+        log.debug("Running function")
+        endpoint = "/sep/api/v2/backups/start"
+        url = self._urlexpand(endpoint)
+        kwargs["taskName"] = taskName
+        kwargs["mediaPoolName"] = mediaPoolName
+        kwargs["backupLevel"] = backupLevel
+        response = requests.post(url=url, json=[kwargs], headers=self.headers, verify=self.verify)
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
@@ -1268,6 +1293,23 @@ class Api:
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
+    ### v2 DRIVES HANDLING ###
+
+    @_auth
+    def drive_execute(self, id, action):
+        """
+        Execute an action on a drive
+        """
+        log.debug("Running function")
+        endpoint = "/sep/api/v2/drive/{}/execute".format(name)
+        data = {"action": action}
+        url = self._urlexpand(endpoint)
+        response = requests.post(url=url, headers=self.headers, json=data, verify=self.verify)
+        self._process_error(response)
+        data = response.json()
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        return data
+
     #################### Version 1 API ####################
 
     ### v1 GROUP HANDLING ###
@@ -1302,7 +1344,7 @@ class Api:
         """
         Find a group. Based on list due to missing support in API v1
         """
-        return self._filter(self.group_list(), kwargs)
+        return self._filter(self.group_list(), **kwargs)
 
     def group_create(self, id=None, **kwargs):
         """
@@ -1361,7 +1403,7 @@ class Api:
         """
         Find a role. Based on list due to missing support in API v1
         """
-        return self._filter(self.role_list(), kwargs)
+        return self._filter(self.role_list(), **kwargs)
 
     ### v1 ROLE RELATION HANDLING ###
 
@@ -1395,7 +1437,7 @@ class Api:
         """
         Find a role relation. Based on list due to missing support in API v1
         """
-        return self._filter(self.role_relation_list(), kwargs)
+        return self._filter(self.role_relation_list(), **kwargs)
 
     def role_relation_create(self, group_id, role_id, id=None):
         """
@@ -1471,7 +1513,7 @@ class Api:
         """
         Find an external group. Based on list due to missing support in API v1
         """
-        return self._filter(self.external_group_list(), kwargs)
+        return self._filter(self.external_group_list(), **kwargs)
 
     def external_group_create(self, id=None, **kwargs):
         """
@@ -1541,7 +1583,7 @@ class Api:
         """
         Find an internal <> external group relation. Based on list due to missing support in API v1
         """
-        return self._filter(self.ext_group_relation_list(), kwargs)
+        return self._filter(self.ext_group_relation_list(), **kwargs)
 
     def ext_group_relation_create(self, internal_group_id, external_group_id, id=None):
         """
@@ -1619,7 +1661,7 @@ class Api:
         """
         Find a schedule. Based on list due to missing support in API v1
         """
-        return self._filter(self.schedule_list(), kwargs)
+        return self._filter(self.schedule_list(), **kwargs)
 
     def schedule_create(self, name, **kwargs):
         """
@@ -1690,7 +1732,7 @@ class Api:
         """
         Find a command. Based on list due to missing support in API v1
         """
-        return self._filter(self.command_list(), kwargs)
+        return self._filter(self.command_list(), **kwargs)
 
     def command_create(self, id=None, **kwargs):
         """
@@ -1762,7 +1804,7 @@ class Api:
         """
         Find a command event. Based on list due to missing support in API v1
         """
-        return self._filter(self.command_event_list(), kwargs)
+        return self._filter(self.command_event_list(), **kwargs)
 
     def command_event_create(self, id=None, **kwargs):
         """
@@ -1834,5 +1876,4 @@ class Api:
         """
         Find a drive group. Based on list due to missing support in API v1
         """
-        return self._filter(self.drive_group_list(), kwargs)
-
+        return self._filter(self.drive_group_list(), **kwargs)
