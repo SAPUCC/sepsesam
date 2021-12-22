@@ -1235,9 +1235,7 @@ class Api:
     @_auth
     def media_find(self, **kwargs):
         """
-        Find a media. 
-        
-        Note: It looks like that currently searching by poolName will return all entries
+        Find a media.
         """
         log.debug("Running function")
         endpoint = "/sep/api/v2/media/find"
@@ -1280,14 +1278,14 @@ class Api:
         return data
 
     @_auth
-    def media_delete(self, name):
+    def media_delete(self, name, forceRemoveData=True, initialize=False):
         """
         Delete a media
         """
         log.debug("Running function")
-        endpoint = "/sep/api/v2/media/delete"
+        endpoint = "/sep/api/v2/media/{}/deleteForced".format(name)
         url = self._urlexpand(endpoint)
-        response = requests.post(url=url, headers=self.headers, data='["{}"]'.format(name), verify=self.verify)  # TODO: unclear how this works
+        response = requests.post(url=url, headers=self.headers, json={"forceRemoveData": forceRemoveData, "initialize": initialize}, verify=self.verify)
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
@@ -1877,3 +1875,4 @@ class Api:
         Find a drive group. Based on list due to missing support in API v1
         """
         return self._filter(self.drive_group_list(), **kwargs)
+
