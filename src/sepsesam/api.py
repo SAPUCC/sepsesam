@@ -1075,7 +1075,7 @@ class Api:
         Create a backup
         """
         log.debug("Running function")
-        endpoint = "/sep/api/v2/backup/create"
+        endpoint = "/sep/api/v2/backups/create"
         url = self._urlexpand(endpoint)
         kwargs["name"] = name
         response = requests.post(url=url, headers=self.headers, json=kwargs, verify=self.verify)
@@ -1090,7 +1090,7 @@ class Api:
         Update a backup
         """
         log.debug("Running function")
-        endpoint = "/sep/api/v2/backup/update"
+        endpoint = "/sep/api/v2/backups/update"
         url = self._urlexpand(endpoint)
         response = requests.post(url=url, headers=self.headers, json=kwargs, verify=self.verify)
         self._process_error(response)
