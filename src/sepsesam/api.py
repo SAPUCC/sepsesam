@@ -1301,7 +1301,7 @@ class Api:
         Execute an action on a drive
         """
         log.debug("Running function")
-        endpoint = "/sep/api/v2/drive/{}/execute".format(name)
+        endpoint = "/sep/api/v2/drive/{}/execute".format(id)
         data = {"action": action}
         url = self._urlexpand(endpoint)
         response = requests.post(url=url, headers=self.headers, json=data, verify=self.verify)
