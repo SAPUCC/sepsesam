@@ -12,7 +12,7 @@ jobs:
     - name: Add sesam repository key
       run: curl https://download.sep.de/linux/repositories/debian/key.asc | sudo apt-key add -
     - name: Configure sesam apt sources
-      run: echo 'deb https://download.sep.de/linux/repositories/debian/ buster main' | sudo tee -a /etc/apt/sources.list
+      run: echo 'deb https://download.sep.de/linux/repositories/debian/ bullseye main' | sudo tee -a /etc/apt/sources.list
     - name: Update apt sources
       run: sudo apt-get update -y
     - name: Install sesam server
