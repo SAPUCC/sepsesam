@@ -19,7 +19,7 @@ ERROR_CODES = {
         "error": "CLIENT_ERROR_BAD_REQUEST",
         "message": "Something is not correct in the request sent by the client",
     },
-    401: {"error": "CLIENT_ERROR_UNAUTHORIZED", "messge": "The client is not authenticated to do the request"},
+    401: {"error": "CLIENT_ERROR_UNAUTHORIZED", "message": "The client is not authenticated to do the request"},
     403: {
         "error": "CLIENT_ERROR_FORBIDDEN",
         "message": "The authenticated user does not have the required permissions to do the request",
@@ -44,7 +44,7 @@ log = logging.getLogger("sepsesam")
 
 def update(d, u):
     """
-    Recursivly update a dictionary, taken from
+    Recursively update a dictionary, taken from
     https://stackoverflow.com/questions/3232943/update-value-of-a-nested-dictionary-of-varying-depth
     """
     for k, v in u.items():
@@ -124,7 +124,7 @@ class Api:
                 "url": response.request.url,
             }
         data["status_code"] = response.status_code
-        log.error("An error occured:\n{}".format(pprint.pformat(data)))
+        log.error("An error occurred:\n{}".format(pprint.pformat(data)))
         raise SEPSesamAPIError(**data)
 
     def _urlexpand(self, endpoint):
@@ -1483,7 +1483,7 @@ class Api:
 
     def external_group_list(self):
         """
-        List all external gruops
+        List all external groups
         """
         log.debug("Running function")
         endpoint = "/sep/api/externalGroups"
