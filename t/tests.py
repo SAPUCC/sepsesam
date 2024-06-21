@@ -8,7 +8,7 @@ cred = {
     "password": "sesam",
 }
 
-api = sepsesam.api.Api(**cred)
+api = sepsesam.api.Api(**cred, verify=False)
 
 
 class TestSepSesam(unittest.TestCase):
