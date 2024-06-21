@@ -1,14 +1,21 @@
 name: sepsesam api CI on ubuntu-latest
 
-on: [push, pull_request]
+on: 
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+      - develop
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
     - name: Add sesam repository key
       run: curl https://download.sep.de/linux/repositories/debian/key.asc | sudo apt-key add -
     - name: Configure sesam apt sources
