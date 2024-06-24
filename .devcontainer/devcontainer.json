@@ -1,0 +1,25 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the
+// README at: https://github.com/devcontainers/templates/tree/main/src/ubuntu
+{
+	"name": "Ubuntu",
+    "build": {
+        // Path is relative to the devcontainer.json file.
+        "dockerfile": "../docker/Dockerfile"
+    },
+	"features": {
+		"ghcr.io/devcontainers/features/python:1": {
+			"installTools": true,
+			"version": "latest"
+		}
+	},
+	"postStartCommand": "/start.sh",
+	"customizations": {
+		"vscode": {
+            "settings.extensions.verifySignature": false
+			// "extensions": [
+			// 	"ms-python.python",
+			// 	"ms-python.debugpy"
+			// ]
+		}
+	}
+}
