@@ -1345,7 +1345,7 @@ class Api:
         return self._filter(self.group_list(), **kwargs)
 
 
-    #API V2 (single updated)
+    #API V2 (updated to api/v2)
     def group_create(self, id=None, **kwargs):
         """
         Create a new group
@@ -1510,21 +1510,52 @@ class Api:
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
+
+    #updated to api/v2
     def external_group_find(self, **kwargs):
         """
-        Find an external group. Based on list due to missing support in API v1
-        """
-        return self._filter(self.external_group_list(), **kwargs)
+        Find an externalgroups by properties. Returns a list of external groups.
 
-    def external_group_create(self, id=None, **kwargs):
+        :param id:                  The unique identifier of the groups object. Must not be null. (int)
+        :param externalId:          The external name (i.e. the LDAP name) of the group. required (String)
+        :param enabled:             True, if the external group should be enabled, false otherwise. required (bool)
+        :param relation:            The list of relations to sesam user groups belonging to this external group. (String or int)
+        :param type:                The type of the external group. Valid values are "NONE", "AD" and "LDAP".
+        :param mtime:               The time at which the notification object was modified at last.
+        :param usercomment:         A comment by the user about the external group.
+        
+        """
+        log.debug("Running function")
+        endpoint = "/sep/api/v2/externalgroups/find"
+        url = self._urlexpand(endpoint)
+        for param in [
+            "id",
+            "externalId",
+            "enabled",
+            "relation",
+            "type",
+            "mtime",
+            "usercomment"
+        ]:
+            if param in kwargs:
+                data[param] = kwargs[param]
+        response = requests.post(url=url, json=data, headers=self.headers, verify=self.verify)
+        self._process_error(response)
+        data = response.json()
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        return data
+
+
+    #updated to api/v2
+    def external_group_create(self, id, enabled, **kwargs):
         """
         Create an external group
         """
         log.debug("Running function")
-        endpoint = "/sep/api/externalGroups"
+        endpoint = "/sep/api/v2/externalgroups/create"
         url = self._urlexpand(endpoint)
-        if id:
-            kwargs["id"] = id
+        kwargs["externalId"] = id
+        kwargs["enabled"] = enabled
         response = requests.post(url=url, auth=(self.username, self.password), json=kwargs, verify=self.verify)
         self._process_error(response)
         data = response.json()
@@ -1539,6 +1570,7 @@ class Api:
         self.external_group_delete(id=id)
         return self.external_group_create(id=id, **kwargs)
 
+    #Updated to api/v2
     def external_group_delete(self, id):
         """
         Delete an external group

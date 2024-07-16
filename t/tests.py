@@ -66,14 +66,20 @@ class TestSepSesam(unittest.TestCase):
 
 
     
-    """TO DO"""
-    #Manage external groups
+    """Manage external groups"""
+
+    def test_externalGroups(self):
+        #external_group_create
+        self.assertEqual(api.external_group_create("Unittest_ExternalGroup",True)["externalId"], "Unittest_ExternalGroup")
+
 
         #external_group_find
+        self.assertEqual(api.external_group_find(**{"externalId": "Unittest_ExternalGroup", "id": 1})[0]["externalId"], "Unittest_ExternalGroup")
 
-        #external_group_create
 
         #external_group_delete
+        api.external_group_delete(1)
+        
 
     
     """Manage Groups"""
