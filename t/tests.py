@@ -13,40 +13,57 @@ api = sepsesam.api.Api(**cred, verify=False)
 class TestSepSesam(unittest.TestCase):
     """ sepsesam.api unittests """
 
-    #Backup-task-get
-    def test_backupTaskGet(self):
-        self.assertEqual(api.backup_task_get("SESAM_BACKUP")["name"], "SESAM_BACKUP")
-        self.assertEqual(api.backup_task_get("SESAM_BACKUP")["client"]["id"], 0)
+
+    """Managing Backup Tasks"""
+
+    
 
     #backup_task_create
-    # def test_backupTaskCreate(self):
-    #     api.backup_task_create("UnittestBackup", **{"task.client": "localhost"})
-    #     self.assertEqual(api.backup_task_get("UnittestBackup")["name"], "UnittestBackup")
-    
-    #backup_task_delete
-    # def test_backupTaskDelete(self):
-    #     self.assertEqual()
+    def test_backupTaskCreate(self):
 
-    # Managing Clients
+        #backup_task_create
+        api.backup_task_create("Unittest_BackupTask", **{"client": {"name": "localhost"}, "source": "C:/tmp"})
+       
+
+        #Backup-task-get
+        self.assertEqual(api.backup_task_get("Unittest_BackupTask")["name"], "Unittest_BackupTask")
+        self.assertEqual(api.backup_task_get("Unittest_BackupTask")["client"]["id"], 0)
+        
+
+        #backup_task_delete
+        api.backup_task_delete("Unittest_BackupTask")
+        with self.assertRaises(sepsesam.api.SEPSesamAPIError) as context:
+           
+            api.backup_task_get("Unittest_BackupTask")
+            self.assertEqual(api.backup_task_get("Unittest_BackupTask")["error"], "object.not.found.id")
+        
+         
+
+    """Managing Clients"""
+
+    def test_Clients(self):
+        
+        #client create
+        self.assertEqual(api.client_create("unittest_Client")["id"], 1)
 
 
-    #client_find
-    def test_ClientFind(self):
-        self.assertGreater(len(api.client_find(name="*")), 0)
+        #client_find
+        self.assertGreater(len(api.client_find(name="*")), 1)
+        self.assertEqual(api.client_find(**{"name": "unittest_Client"})[0]["name"], "unittest_Client")
 
-    #client_create
-    def test_ClientCreate(self):
-        self.assertEqual(api.client_create("unittest")["id"], 1)
 
-    #client_update - fügt dem client "usercomment": "test" hinzu
-    def test_ClientUpdate(self):
+        #client update
         self.assertRaises(Exception, api.client_update, None, None)
         self.assertEqual(api.client_update(0, "localhost",**{"usercomment": "test"})["usercomment"], "test")
-        # ToDo
 
-    #client_delete
-    def test_ClientDelete(self):
+
+        #client delete
         self.assertEqual(api.client_delete("1"), 1)
+        self.assertLess(len(api.client_find(name="*")), 2)
+    
+
+
+
 
     
     """TO DO"""
@@ -59,38 +76,42 @@ class TestSepSesam(unittest.TestCase):
         #external_group_delete
 
     
-    #Manage groups
+    """Manage Groups"""
+    
+    def test_GroupCreateAndDelete(self):
 
-    #group_create
-    def test_GroupCreate(self):
+        #group_create
         self.assertEqual(api.group_create(5,**{"name": "UnittestGroup","enabled": True, "rolesList": ['ReadOnly']})["id"],5)
+
 
         #group_delete
         self.assertEqual(api.group_delete(5),5)
                
 
 
-    #Manage locations
+    """Manage locations"""
 
     #location_create and location_delete
-    def test_LocationsCreate(self):
+    def test_LocationsCreateAndDelete(self):
         
         #location create
-        self.assertEqual(api.location_create("UNITTEST")["id"], 1)
-        #location_delete
-        self.assertEqual(api.location_delete(1), 1)
+        self.assertEqual(api.location_create("UNITTEST_LOCATION")["id"], 1)
 
-        """Not working yet"""
-        #Client must not be found, if it has been deleted earlier
-        #self.assertEqual(api.client_get(1)["id"], None)
-        
-        #Exception should be raised, when the id ist not unique (test is not yet working)
-        #self.assertRaises(Exception, api.location_create("UNITTEST2", **{"id": 1}))
 
+        #location_resolve_to_id
+        self.assertEqual(api.location_resolve_to_id("UNITTEST_LOCATION"), 1)
     
-    #location_resolve_to_id
-    def test_LocationResolvetoID(self):
-        self.assertEqual(api.location_resolve_to_id("LOCAL"), 0)
+
+        #id has to be unique    
+        with self.assertRaises(sepsesam.api.SEPSesamAPIError) as context:
+            self.assertEqual(api.location_create("UNITTEST_LOCATION2", **{"id": 1})["error"], "duplicate.entry" )
+
+
+        #location delete
+        api.location_delete(1)
+        self.assertEqual(api.location_get(1),None)
+
+
 
 
 if __name__ == "__main__":
