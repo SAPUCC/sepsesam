@@ -1344,12 +1344,14 @@ class Api:
         """
         return self._filter(self.group_list(), **kwargs)
 
+
+    #API V2 (single updated)
     def group_create(self, id=None, **kwargs):
         """
         Create a new group
         """
         log.debug("Running function")
-        endpoint = "/sep/api/groups"
+        endpoint = "/sep/api/v2/groups/create"
         url = self._urlexpand(endpoint)
         if id:
             kwargs["id"] = id
@@ -1369,12 +1371,13 @@ class Api:
         self.group_delete(id=id)
         return self.group_create(**kwargs)
 
+    # UPDATED: api/v2
     def group_delete(self, id):
         """
         Delete a group
         """
         log.debug("Running function")
-        endpoint = "/sep/api/groups/remove"
+        endpoint = "/sep/api/v2/groups/delete"
         url = self._urlexpand(endpoint)
         response = requests.post(url=url, auth=(self.username, self.password), verify=self.verify, data=str(id))
         self._process_error(response)
