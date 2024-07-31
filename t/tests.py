@@ -12,47 +12,111 @@ api = sepsesam.api.Api(**cred, verify=False)
 
 
 class TestSepSesam(unittest.TestCase):
-    """ sepsesam.api unittests """
+    """sepsesam.api unittests"""
 
-    """ server info """
+    """Managing Backup Tasks"""
 
-    def testGetServerInfo(self):
-        self.assertEqual(api.get_server_info()["restPort"], 11401)
+    # backup_task_create
+    def test_backupTaskCreate(self):
+        # backup_task_create
+        api.backup_task_create(
+            "Unittest_BackupTask",
+            **{"client": api.client_list()[0]['name'], "source": "C:/tmp"},
+        )
 
-    """ clients """
+        # Backup-task-get
+        self.assertEqual(
+            api.backup_task_get("Unittest_BackupTask")["name"], "Unittest_BackupTask"
+        )
+        self.assertEqual(api.backup_task_get("Unittest_BackupTask")["client"]["id"], 0)
 
-    def testClient1List(self):
-        self.assertEqual(api.client_list()[0]["id"], 0)
+        # backup_task_delete
+        api.backup_task_delete("Unittest_BackupTask")
+        with self.assertRaises(sepsesam.api.SEPSesamAPIError):
+            api.backup_task_get("Unittest_BackupTask")
+            self.assertEqual(
+                api.backup_task_get("Unittest_BackupTask")["error"],
+                "object.not.found.id",
+            )
 
-    def testClient2Get(self):
-        self.assertEqual(api.client_get(0)["id"], 0)
+    """Managing Clients"""
 
-    def testClient3Find(self):
-        self.assertGreater(len(api.client_find(name="*")), 0)
+    def test_Clients(self):
+        # client create
+        self.assertEqual(api.client_create("unittest_Client")["id"], 1)
 
-    def testClient4Create(self):
-        self.assertEqual(api.client_create("unittest")["id"], 1)
+        # client_find
+        self.assertGreater(len(api.client_find(name="*")), 1)
+        self.assertEqual(
+            api.client_find(**{"name": "unittest_Client"})[0]["name"], "unittest_Client"
+        )
 
-    def testClient5Update(self):
-        # TODO
-        return
+        # client update
+        self.assertRaises(Exception, api.client_update, None, None)
+        self.assertEqual(
+            api.client_update(1, **{"usercomment": "test"})["usercomment"],
+            "test",
+        )
 
-    def testClient6Delete(self):
+        # client delete
         self.assertEqual(api.client_delete("1"), 1)
+        self.assertLess(len(api.client_find(name="*")), 2)
 
-    """ locations """
+    """Manage external groups"""
 
-    def testLocations1List(self):
-        self.assertEqual(api.location_list()[0]["id"], 0)
+    def test_externalGroups(self):
+        # external_group_create
+        self.assertEqual(
+            api.external_group_create("Unittest_ExternalGroup", True)["externalId"],
+            "Unittest_ExternalGroup",
+        )
 
-    def testLocations2Get(self):
-        self.assertEqual(api.location_get(0)["id"], 0)
+        # external_group_find
+        self.assertEqual(
+            api.external_group_find(
+                **{"externalId": "Unittest_ExternalGroup", "id": 1}
+            )[0]["externalId"],
+            "Unittest_ExternalGroup",
+        )
 
-    def testLocations3Create(self):
-        self.assertEqual(api.location_create("UNITTEST")["id"], 1)
+        # external_group_delete
+        api.external_group_delete(1)
 
-    def testLocations4Delete(self):
-        self.assertEqual(api.location_delete(1), 1)
+    """Manage Groups"""
+
+    def test_GroupCreateAndDelete(self):
+        # group_create
+        self.assertEqual(
+            api.group_create(
+                5,
+                **{"name": "UnittestGroup", "enabled": True, "rolesList": ["ReadOnly"]},
+            )["id"],
+            5,
+        )
+
+        # group_delete
+        self.assertEqual(api.group_delete(5), 5)
+
+    """Manage locations"""
+
+    # location_create and location_delete
+    def test_LocationsCreateAndDelete(self):
+        # location create
+        self.assertEqual(api.location_create("UNITTEST_LOCATION")["id"], 1)
+
+        # location_resolve_to_id
+        self.assertEqual(api.location_resolve_to_id("UNITTEST_LOCATION"), 1)
+
+        # id has to be unique
+        with self.assertRaises(sepsesam.api.SEPSesamAPIError):
+            self.assertEqual(
+                api.location_create("UNITTEST_LOCATION2", **{"id": 1})["error"],
+                "duplicate.entry",
+            )
+
+        # location delete
+        api.location_delete(1)
+        self.assertEqual(api.location_get(1), None)
 
 
 if __name__ == "__main__":
