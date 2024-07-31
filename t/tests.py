@@ -21,7 +21,7 @@ class TestSepSesam(unittest.TestCase):
         # backup_task_create
         api.backup_task_create(
             "Unittest_BackupTask",
-            **{"client": {"name": "localhost"}, "source": "C:/tmp"},
+            **{"client": api.client_list()[0]['name'], "source": "C:/tmp"},
         )
 
         # Backup-task-get
@@ -54,7 +54,7 @@ class TestSepSesam(unittest.TestCase):
         # client update
         self.assertRaises(Exception, api.client_update, None, None)
         self.assertEqual(
-            api.client_update(0, "localhost", **{"usercomment": "test"})["usercomment"],
+            api.client_update(1, **{"usercomment": "test"})["usercomment"],
             "test",
         )
 
