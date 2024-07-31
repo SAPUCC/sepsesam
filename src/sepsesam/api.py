@@ -498,7 +498,7 @@ class Api:
         url = self._urlexpand(endpoint)
         data = {}
         if "queryMode" in kwargs:
-            data = {"queryMode": queryMode}
+            data = {}
         for param in ["object", "origin"]:
             if param in kwargs:
                 data[param] = kwargs[param]
@@ -1528,6 +1528,7 @@ class Api:
         log.debug("Running function")
         endpoint = "/sep/api/v2/externalgroups/find"
         url = self._urlexpand(endpoint)
+        data = {}
         for param in [
             "id",
             "externalId",
