@@ -1667,7 +1667,7 @@ class Api:
         List all schedules
         """
         log.debug("Running function")
-        endpoint = "/sep/api/schedules"
+        endpoint = "/sep/api/v2/schedules"
         url = self._urlexpand(endpoint)
         response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
         self._process_error(response)
@@ -1680,7 +1680,7 @@ class Api:
         Get a schedule
         """
         log.debug("Running function")
-        endpoint = "/sep/api/schedules/{}".format(name)
+        endpoint = "/sep/api/v2/schedules/{}".format(name)
         url = self._urlexpand(endpoint)
         response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
         self._process_error(response)
@@ -1690,16 +1690,22 @@ class Api:
 
     def schedule_find(self, **kwargs):
         """
-        Find a schedule. Based on list due to missing support in API v1
+        Find a schedule
         """
-        return self._filter(self.schedule_list(), **kwargs)
+        endpoint = "/sep/api/v2/schedules/find"
+        url = self._urlexpand(endpoint)
+        response = requests.post(url=url, auth=(self.username, self.password), json=kwargs, verify=self.verify)
+        self._process_error(response)
+        data = response.json()
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        return data
 
     def schedule_create(self, name, **kwargs):
         """
         Create a schedule
         """
         log.debug("Running function")
-        endpoint = "/sep/api/schedules"
+        endpoint = "/sep/api/v2/schedules/create"
         url = self._urlexpand(endpoint)
         kwargs["name"] = name
         response = requests.post(url=url, auth=(self.username, self.password), json=kwargs, verify=self.verify)
@@ -1713,19 +1719,23 @@ class Api:
         Update a schedule
         """
         log.debug("Running function")
-        data = self.schedule_get(name=name)
-        kwargs = update(data, kwargs)
-        self.schedule_delete(name=name)
-        return self.schedule_create(**kwargs)
+        endpoint = "/sep/api/v2/schedules/update"
+        kwargs["name"] = name
+        url = self._urlexpand(endpoint)
+        response = requests.post(url=url, auth=(self.username, self.password), json=kwargs, verify=self.verify)
+        self._process_error(response)
+        data = response.json()
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        return data
 
     def schedule_delete(self, name):
         """
         Delete a schedule
         """
         log.debug("Running function")
-        endpoint = "/sep/api/schedules/{}/delete".format(name)
+        endpoint = "/sep/api/v2/schedules/delete"
         url = self._urlexpand(endpoint)
-        response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
+        response = requests.post(url=url, auth=(self.username, self.password),json=name, verify=self.verify)
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
@@ -1738,7 +1748,7 @@ class Api:
         List all commands
         """
         log.debug("Running function")
-        endpoint = "/sep/api/commands"
+        endpoint = "/sep/api/v2/commands"
         url = self._urlexpand(endpoint)
         response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
         self._process_error(response)
@@ -1746,12 +1756,12 @@ class Api:
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
-    def command_get(self, id):
+    def command_get(self, name):
         """
         Get a command
         """
         log.debug("Running function")
-        endpoint = "/sep/api/commands/{}".format(id)
+        endpoint = "/sep/api/v2/commands/{}".format(name)
         url = self._urlexpand(endpoint)
         response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
         self._process_error(response)
@@ -1761,43 +1771,53 @@ class Api:
 
     def command_find(self, **kwargs):
         """
-        Find a command. Based on list due to missing support in API v1
-        """
-        return self._filter(self.command_list(), **kwargs)
-
-    def command_create(self, id=None, **kwargs):
-        """
-        Update a command
+        Find a command
         """
         log.debug("Running function")
-        endpoint = "/sep/api/commands"
+        endpoint = "/sep/api/v2/commands/find"
         url = self._urlexpand(endpoint)
-        if id:
-            kwargs["id"] = id
         response = requests.post(url=url, auth=(self.username, self.password), json=kwargs, verify=self.verify)
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
-    def command_update(self, **kwargs):
+    def command_create(self, **kwargs):
+        """
+        Create a command
+        """
+        log.debug("Running function")
+        endpoint = "/sep/api/v2/commands/create"
+        url = self._urlexpand(endpoint)
+        response = requests.post(url=url, auth=(self.username, self.password), json=kwargs, verify=self.verify)
+        self._process_error(response)
+        data = response.json()
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        return data
+
+    def command_update(self, name, command, **kwargs):
         """
         Update a command
         """
         log.debug("Running function")
-        data = self.command_get(id=id)
-        kwargs = update(data, kwargs)
-        self.command_delete(id=id)
-        return self.command_create(**kwargs)
+        endpoint = "/sep/api/v2/commands/update"
+        kwargs["name"] = name
+        kwargs["command"] = command
+        url = self._urlexpand(endpoint)
+        response = requests.post(url=url, auth=(self.username, self.password), json=kwargs, verify=self.verify)
+        self._process_error(response)
+        data = response.json()
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        return data
 
-    def command_delete(self, id):
+    def command_delete(self, name):
         """
         Delete a command
         """
         log.debug("Running function")
-        endpoint = "/sep/api/commands/{}/delete".format(id)
+        endpoint = "/sep/api/v2/commands/delete"
         url = self._urlexpand(endpoint)
-        response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
+        response = requests.post(url=url, auth=(self.username, self.password),json=name, verify=self.verify)
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
@@ -1810,7 +1830,7 @@ class Api:
         List all command events
         """
         log.debug("Running function")
-        endpoint = "/sep/api/commandEvents"
+        endpoint = "/sep/api/v2/commandevents"
         url = self._urlexpand(endpoint)
         response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
         self._process_error(response)
@@ -1823,7 +1843,7 @@ class Api:
         Get a command event
         """
         log.debug("Running function")
-        endpoint = "/sep/api/commandEvents/{}".format(id)
+        endpoint = "/sep/api/v2/commandevents/{}".format(id)
         url = self._urlexpand(endpoint)
         response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
         self._process_error(response)
@@ -1833,56 +1853,67 @@ class Api:
 
     def command_event_find(self, **kwargs):
         """
-        Find a command event. Based on list due to missing support in API v1
-        """
-        return self._filter(self.command_event_list(), **kwargs)
-
-    def command_event_create(self, id=None, **kwargs):
-        """
-        Create a command event
+        Find a command event
         """
         log.debug("Running function")
-        endpoint = "/sep/api/commandEvents"
+        endpoint = "/sep/api/v2/commandevents/find"
         url = self._urlexpand(endpoint)
-        if id:
-            kwargs["id"] = id
         response = requests.post(url=url, auth=(self.username, self.password), json=kwargs, verify=self.verify)
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
-    def command_event_update(self, id, **kwargs):
+    def command_event_create(self, **kwargs):
+        """
+        Create a command event
+        """
+        log.debug("Running function")
+        endpoint = "/sep/api/v2/commandevents/create"
+        url = self._urlexpand(endpoint)
+        response = requests.post(url=url, auth=(self.username, self.password), json=kwargs, verify=self.verify)
+        self._process_error(response)
+        data = response.json()
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        return data
+
+    def command_event_update(self, id, name, clientId, **kwargs):
         """
         Update a command event
         """
         log.debug("Running function")
-        data = self.command_event_get(id=id)
-        kwargs = update(data, kwargs)
-        self.command_event_delete(id=id)
-        return self.command_event_create(**kwargs)
+        endpoint = "/sep/api/v2/commandevents/update"
+        kwargs["id"] = id
+        kwargs["name"] = name
+        kwargs["clientId"] = clientId
+        url = self._urlexpand(endpoint)
+        response = requests.post(url=url, auth=(self.username, self.password), json=kwargs, verify=self.verify)
+        self._process_error(response)
+        data = response.json()
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        return data
 
     def command_event_delete(self, id):
         """
         Delete a command event
         """
         log.debug("Running function")
-        endpoint = "/sep/api/commandEvents/{}/delete".format(id)
+        endpoint = "/sep/api/v2/commandevents/delete"
         url = self._urlexpand(endpoint)
-        response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
+        response = requests.post(url=url, auth=(self.username, self.password),json = id, verify=self.verify)
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
-    ### v1 DRIVE GROUPS ###
+    ### v2 DRIVE GROUPS ###
 
     def drive_group_list(self):
         """
         List all drive groups
         """
         log.debug("Running function")
-        endpoint = "/sep/api/driveGroups"
+        endpoint = "/sep/api/v2/drivegroups"
         url = self._urlexpand(endpoint)
         response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
         self._process_error(response)
@@ -1890,22 +1921,37 @@ class Api:
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
-    def drive_group_get(self, id):
+    def drive_group_get(self, id = None, name = None):
         """
         Get a drive group
         """
+        if name:
+            id = self.drive_group_resolveDriveGroupToId(name)
+
         log.debug("Running function")
-        endpoint = "/sep/api/driveGroups/{}".format(id)
+        endpoint = "/sep/api/v2/drivegroups/{}".format(id)
         url = self._urlexpand(endpoint)
         response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
+        
+            
 
     def drive_group_find(self, **kwargs):
         """
         Find a drive group. Based on list due to missing support in API v1
+        It is possible to find a drive group by name and id with drive_group_get()
         """
         return self._filter(self.drive_group_list(), **kwargs)
 
+    def drive_group_resolveDriveGroupToId(self, name):
+        log.debug("Running function")
+        endpoint = "/sep/api/v2/drivegroups/resolveDriveGroupToId/"
+        url = self._urlexpand(endpoint)
+        response = requests.post(url=url, auth=(self.username, self.password), json = name, verify=self.verify)
+        self._process_error(response)
+        data = response.json()
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        return data
