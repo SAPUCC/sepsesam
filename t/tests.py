@@ -118,6 +118,121 @@ class TestSepSesam(unittest.TestCase):
         api.location_delete(1)
         self.assertEqual(api.location_get(1), None)
 
+    """Manage commands"""
+
+    def test_command_handling(self):
+        #no commands should exist
+        self.assertEqual(api.command_list(), [])
+
+        api.command_create(
+            **{
+                "name": "newerCommand",
+                "owner": "Marcus",
+                "type": "EXECUTE",
+                "command": "echo 'command'"
+            }
+        )
+
+        self.assertEqual(api.command_get("newerCommand")["owner"],"Marcus")
+        
+        #create second command for testing the command_find method
+        api.command_create(
+            **{
+                "name": "newererCommand",
+                "owner": "Marcus",
+                "type": "EXECUTE",
+                "command": "echo 'command'"
+            }
+        )
+
+        #finds more than one command matching "owner":"Marcus"
+        self.assertTrue(len(api.command_find(**{"owner":"Marcus"}))>1)
+
+        #only one command with the owner Marcus should be left after command_update
+        self.assertEqual(api.command_update("newererCommand", "echo 'command'",**{"owner":"Mike"})["owner"],"Mike")
+        self.assertEqual(api.command_find(**{"owner":"Marcus"}),[api.command_get("newerCommand")])
+        
+        #cleaning up
+        self.assertEqual(api.command_delete("newererCommand"),"newererCommand")
+        self.assertEqual(api.command_delete("newerCommand"),"newerCommand")
+        self.assertEqual(api.command_list(),[])
+        
+
+        """Manage command events"""
+        """ Same test as commands due to dependency of command events """
+
+        #no command events should exist at the beginning
+        print(api.command_event_list())
+
+        #create command as prerequisite
+        api.command_create(**{"name": "eventCommand1","owner": "Marcus","type": "EXECUTE","command": "echo 'command'"})
+        api.command_create(**{"name": "eventCommand2","owner": "Marcus","type": "EXECUTE","command": "echo 'command'"})
+
+        api.command_event_create(**{ "id": 0, "name": "testEvent1", "commandName":"eventCommand1", "clientId": 0})
+        
+        #testing event_get()
+        self.assertEqual(api.command_event_get(0)["name"], "testEvent1")
+
+        #creating second event for find() testing
+        api.command_event_create(**{ "id": 1, "name": "testEvent2", "commandName":"eventCommand1", "clientId": 0})
+        #command_event_find not working yet
+        #self.assertTrue(len(api.command_event_find(**{"commandName": "eventCommand1"}))>1)
+
+        #there should only be found one command event after the update
+        api.command_event_update(1, "testEvent2", 0, **{"object":"eventCommand2"})
+        self.assertEqual(api.command_event_get(1)["object"], "eventCommand2")
+
+        #command_event_find not working yet
+        #len(api.command_event_find(**{"commandName": "eventCommand1"}))==1
+
+        #cleaning up
+        api.command_event_delete(0)
+        api.command_event_delete(1)
+        api.command_delete("eventCommand1")
+        api.command_delete("eventCommand2")
+
+        self.assertEqual(api.command_event_list(), [])
+     
+
+    """ Manage backup schedule """
+    def test_schedule(self):
+        #list should be empty at the beginning
+        self.assertEqual(api.schedule_list(),[])
+
+        #create Backup schedule
+        api.schedule_create("APISchedule1",**{"mo":"false"})
+        api.schedule_create("APISchedule2",**{"mo":"false"})
+
+        #find and list
+        self.assertTrue(len(api.schedule_find(**{"mo":"false"}))>1)
+        self.assertTrue(api.schedule_list() != [])
+
+        #get and update backup schedules
+        self.assertEqual(api.schedule_get("APISchedule1")["mo"],api.schedule_get("APISchedule2")["mo"])
+        api.schedule_update("APISchedule2", **{"mo":"true"})
+        self.assertNotEqual(api.schedule_get("APISchedule1")["mo"],api.schedule_get("APISchedule2")["mo"])
+        
+        #clean up
+        api.schedule_delete("APISchedule1")
+        api.schedule_delete("APISchedule2")
+
+        self.assertEqual(api.schedule_list(),[])
+
+    """Drive group handling"""
+
+    def test_drive_group(self):
+        
+        #test if there are already drive_groups
+        if api.drive_group_list() != []:
+            
+            #check if get and list produce the same result
+            self.assertEqual(api.drive_group_list()[0]["name"], api.drive_group_get(1)["name"])
+            
+            #check if drive_group_get() is able to access drive groups by name and id
+            self.assertEqual(api.drive_group_get(1), api.drive_group_get(None, "Test-Drives"))
+
+
+
 
 if __name__ == "__main__":
     unittest.main()
