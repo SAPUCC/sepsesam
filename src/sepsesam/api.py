@@ -1525,7 +1525,6 @@ class Api:
         :param usercomment:         A comment by the user about the external group.
         
         """
-        log.debug("Running function")
         endpoint = "/sep/api/v2/externalgroups/find"
         url = self._urlexpand(endpoint)
         data = {}
