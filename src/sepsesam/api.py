@@ -497,8 +497,6 @@ class Api:
         endpoint = "/sep/api/v2/acls/find"
         url = self._urlexpand(endpoint)
         data = {}
-        if "queryMode" in kwargs:
-            data = {}
         for param in ["object", "origin"]:
             if param in kwargs:
                 data[param] = kwargs[param]
