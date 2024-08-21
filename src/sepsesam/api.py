@@ -497,8 +497,6 @@ class Api:
         endpoint = "/sep/api/v2/acls/find"
         url = self._urlexpand(endpoint)
         data = {}
-        if "queryMode" in kwargs:
-            data = {"queryMode": queryMode}
         for param in ["object", "origin"]:
             if param in kwargs:
                 data[param] = kwargs[param]
@@ -1344,12 +1342,14 @@ class Api:
         """
         return self._filter(self.group_list(), **kwargs)
 
+
+    #API V2 (updated to api/v2)
     def group_create(self, id=None, **kwargs):
         """
         Create a new group
         """
         log.debug("Running function")
-        endpoint = "/sep/api/groups"
+        endpoint = "/sep/api/v2/groups/create"
         url = self._urlexpand(endpoint)
         if id:
             kwargs["id"] = id
@@ -1369,12 +1369,13 @@ class Api:
         self.group_delete(id=id)
         return self.group_create(**kwargs)
 
+    # UPDATED: api/v2
     def group_delete(self, id):
         """
         Delete a group
         """
         log.debug("Running function")
-        endpoint = "/sep/api/groups/remove"
+        endpoint = "/sep/api/v2/groups/delete"
         url = self._urlexpand(endpoint)
         response = requests.post(url=url, auth=(self.username, self.password), verify=self.verify, data=str(id))
         self._process_error(response)
@@ -1507,21 +1508,52 @@ class Api:
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
+
+    #updated to api/v2
     def external_group_find(self, **kwargs):
         """
-        Find an external group. Based on list due to missing support in API v1
-        """
-        return self._filter(self.external_group_list(), **kwargs)
+        Find an externalgroups by properties. Returns a list of external groups.
 
-    def external_group_create(self, id=None, **kwargs):
+        :param id:                  The unique identifier of the groups object. Must not be null. (int)
+        :param externalId:          The external name (i.e. the LDAP name) of the group. required (String)
+        :param enabled:             True, if the external group should be enabled, false otherwise. required (bool)
+        :param relation:            The list of relations to sesam user groups belonging to this external group. (String or int)
+        :param type:                The type of the external group. Valid values are "NONE", "AD" and "LDAP".
+        :param mtime:               The time at which the notification object was modified at last.
+        :param usercomment:         A comment by the user about the external group.
+        
+        """
+        endpoint = "/sep/api/v2/externalgroups/find"
+        url = self._urlexpand(endpoint)
+        data = {}
+        for param in [
+            "id",
+            "externalId",
+            "enabled",
+            "relation",
+            "type",
+            "mtime",
+            "usercomment"
+        ]:
+            if param in kwargs:
+                data[param] = kwargs[param]
+        response = requests.post(url=url, json=data, headers=self.headers, verify=self.verify)
+        self._process_error(response)
+        data = response.json()
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        return data
+
+
+    #updated to api/v2
+    def external_group_create(self, id, enabled, **kwargs):
         """
         Create an external group
         """
         log.debug("Running function")
-        endpoint = "/sep/api/externalGroups"
+        endpoint = "/sep/api/v2/externalgroups/create"
         url = self._urlexpand(endpoint)
-        if id:
-            kwargs["id"] = id
+        kwargs["externalId"] = id
+        kwargs["enabled"] = enabled
         response = requests.post(url=url, auth=(self.username, self.password), json=kwargs, verify=self.verify)
         self._process_error(response)
         data = response.json()
@@ -1536,6 +1568,7 @@ class Api:
         self.external_group_delete(id=id)
         return self.external_group_create(id=id, **kwargs)
 
+    #Updated to api/v2
     def external_group_delete(self, id):
         """
         Delete an external group
@@ -1627,14 +1660,14 @@ class Api:
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
-    ### v1 SCHEDULE HANDLING ###
+    ### SCHEDULE HANDLING (updated to v2) ###
 
     def schedule_list(self):
         """
         List all schedules
         """
         log.debug("Running function")
-        endpoint = "/sep/api/schedules"
+        endpoint = "/sep/api/v2/schedules"
         url = self._urlexpand(endpoint)
         response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
         self._process_error(response)
@@ -1647,7 +1680,7 @@ class Api:
         Get a schedule
         """
         log.debug("Running function")
-        endpoint = "/sep/api/schedules/{}".format(name)
+        endpoint = "/sep/api/v2/schedules/{}".format(name)
         url = self._urlexpand(endpoint)
         response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
         self._process_error(response)
@@ -1657,16 +1690,22 @@ class Api:
 
     def schedule_find(self, **kwargs):
         """
-        Find a schedule. Based on list due to missing support in API v1
+        Find a schedule
         """
-        return self._filter(self.schedule_list(), **kwargs)
+        endpoint = "/sep/api/v2/schedules/find"
+        url = self._urlexpand(endpoint)
+        response = requests.post(url=url, auth=(self.username, self.password), json=kwargs, verify=self.verify)
+        self._process_error(response)
+        data = response.json()
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        return data
 
     def schedule_create(self, name, **kwargs):
         """
         Create a schedule
         """
         log.debug("Running function")
-        endpoint = "/sep/api/schedules"
+        endpoint = "/sep/api/v2/schedules/create"
         url = self._urlexpand(endpoint)
         kwargs["name"] = name
         response = requests.post(url=url, auth=(self.username, self.password), json=kwargs, verify=self.verify)
@@ -1680,32 +1719,36 @@ class Api:
         Update a schedule
         """
         log.debug("Running function")
-        data = self.schedule_get(name=name)
-        kwargs = update(data, kwargs)
-        self.schedule_delete(name=name)
-        return self.schedule_create(**kwargs)
+        endpoint = "/sep/api/v2/schedules/update"
+        kwargs["name"] = name
+        url = self._urlexpand(endpoint)
+        response = requests.post(url=url, auth=(self.username, self.password), json=kwargs, verify=self.verify)
+        self._process_error(response)
+        data = response.json()
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        return data
 
     def schedule_delete(self, name):
         """
         Delete a schedule
         """
         log.debug("Running function")
-        endpoint = "/sep/api/schedules/{}/delete".format(name)
+        endpoint = "/sep/api/v2/schedules/delete"
         url = self._urlexpand(endpoint)
-        response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
+        response = requests.post(url=url, auth=(self.username, self.password),json=name, verify=self.verify)
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
-    ### v1 COMMAND HANDLING ###
+    ### COMMAND HANDLING (updated to v2) ###
 
     def command_list(self):
         """
         List all commands
         """
         log.debug("Running function")
-        endpoint = "/sep/api/commands"
+        endpoint = "/sep/api/v2/commands"
         url = self._urlexpand(endpoint)
         response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
         self._process_error(response)
@@ -1713,12 +1756,12 @@ class Api:
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
-    def command_get(self, id):
+    def command_get(self, name):
         """
         Get a command
         """
         log.debug("Running function")
-        endpoint = "/sep/api/commands/{}".format(id)
+        endpoint = "/sep/api/v2/commands/{}".format(name)
         url = self._urlexpand(endpoint)
         response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
         self._process_error(response)
@@ -1728,56 +1771,66 @@ class Api:
 
     def command_find(self, **kwargs):
         """
-        Find a command. Based on list due to missing support in API v1
-        """
-        return self._filter(self.command_list(), **kwargs)
-
-    def command_create(self, id=None, **kwargs):
-        """
-        Update a command
+        Find a command
         """
         log.debug("Running function")
-        endpoint = "/sep/api/commands"
+        endpoint = "/sep/api/v2/commands/find"
         url = self._urlexpand(endpoint)
-        if id:
-            kwargs["id"] = id
         response = requests.post(url=url, auth=(self.username, self.password), json=kwargs, verify=self.verify)
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
-    def command_update(self, **kwargs):
+    def command_create(self, **kwargs):
         """
-        Update a command
-        """
-        log.debug("Running function")
-        data = self.command_get(id=id)
-        kwargs = update(data, kwargs)
-        self.command_delete(id=id)
-        return self.command_create(**kwargs)
-
-    def command_delete(self, id):
-        """
-        Delete a command
+        Create a command
         """
         log.debug("Running function")
-        endpoint = "/sep/api/commands/{}/delete".format(id)
+        endpoint = "/sep/api/v2/commands/create"
         url = self._urlexpand(endpoint)
-        response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
+        response = requests.post(url=url, auth=(self.username, self.password), json=kwargs, verify=self.verify)
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
-    ### v1 COMMAND EVENT HANDLING ###
+    def command_update(self, name, command, **kwargs):
+        """
+        Update a command
+        """
+        log.debug("Running function")
+        endpoint = "/sep/api/v2/commands/update"
+        kwargs["name"] = name
+        kwargs["command"] = command
+        url = self._urlexpand(endpoint)
+        response = requests.post(url=url, auth=(self.username, self.password), json=kwargs, verify=self.verify)
+        self._process_error(response)
+        data = response.json()
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        return data
+
+    def command_delete(self, name):
+        """
+        Delete a command
+        """
+        log.debug("Running function")
+        endpoint = "/sep/api/v2/commands/delete"
+        url = self._urlexpand(endpoint)
+        response = requests.post(url=url, auth=(self.username, self.password),json=name, verify=self.verify)
+        self._process_error(response)
+        data = response.json()
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        return data
+
+    ### COMMAND EVENT HANDLING (updated to v2) ###
 
     def command_event_list(self):
         """
         List all command events
         """
         log.debug("Running function")
-        endpoint = "/sep/api/commandEvents"
+        endpoint = "/sep/api/v2/commandevents"
         url = self._urlexpand(endpoint)
         response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
         self._process_error(response)
@@ -1790,7 +1843,7 @@ class Api:
         Get a command event
         """
         log.debug("Running function")
-        endpoint = "/sep/api/commandEvents/{}".format(id)
+        endpoint = "/sep/api/v2/commandevents/{}".format(id)
         url = self._urlexpand(endpoint)
         response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
         self._process_error(response)
@@ -1800,56 +1853,67 @@ class Api:
 
     def command_event_find(self, **kwargs):
         """
-        Find a command event. Based on list due to missing support in API v1
-        """
-        return self._filter(self.command_event_list(), **kwargs)
-
-    def command_event_create(self, id=None, **kwargs):
-        """
-        Create a command event
+        Find a command event
         """
         log.debug("Running function")
-        endpoint = "/sep/api/commandEvents"
+        endpoint = "/sep/api/v2/commandevents/find"
         url = self._urlexpand(endpoint)
-        if id:
-            kwargs["id"] = id
         response = requests.post(url=url, auth=(self.username, self.password), json=kwargs, verify=self.verify)
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
-    def command_event_update(self, id, **kwargs):
+    def command_event_create(self, **kwargs):
+        """
+        Create a command event
+        """
+        log.debug("Running function")
+        endpoint = "/sep/api/v2/commandevents/create"
+        url = self._urlexpand(endpoint)
+        response = requests.post(url=url, auth=(self.username, self.password), json=kwargs, verify=self.verify)
+        self._process_error(response)
+        data = response.json()
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        return data
+
+    def command_event_update(self, id, name, clientId, **kwargs):
         """
         Update a command event
         """
         log.debug("Running function")
-        data = self.command_event_get(id=id)
-        kwargs = update(data, kwargs)
-        self.command_event_delete(id=id)
-        return self.command_event_create(**kwargs)
+        endpoint = "/sep/api/v2/commandevents/update"
+        kwargs["id"] = id
+        kwargs["name"] = name
+        kwargs["clientId"] = clientId
+        url = self._urlexpand(endpoint)
+        response = requests.post(url=url, auth=(self.username, self.password), json=kwargs, verify=self.verify)
+        self._process_error(response)
+        data = response.json()
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        return data
 
     def command_event_delete(self, id):
         """
         Delete a command event
         """
         log.debug("Running function")
-        endpoint = "/sep/api/commandEvents/{}/delete".format(id)
+        endpoint = "/sep/api/v2/commandevents/delete"
         url = self._urlexpand(endpoint)
-        response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
+        response = requests.post(url=url, auth=(self.username, self.password),json = id, verify=self.verify)
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
-    ### v1 DRIVE GROUPS ###
+    ### DRIVE GROUPS (updated to v2) ###
 
     def drive_group_list(self):
         """
         List all drive groups
         """
         log.debug("Running function")
-        endpoint = "/sep/api/driveGroups"
+        endpoint = "/sep/api/v2/drivegroups"
         url = self._urlexpand(endpoint)
         response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
         self._process_error(response)
@@ -1857,22 +1921,37 @@ class Api:
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
-    def drive_group_get(self, id):
+    def drive_group_get(self, id = None, name = None):
         """
         Get a drive group
         """
+        if name:
+            id = self.drive_group_resolveDriveGroupToId(name)
+
         log.debug("Running function")
-        endpoint = "/sep/api/driveGroups/{}".format(id)
+        endpoint = "/sep/api/v2/drivegroups/{}".format(id)
         url = self._urlexpand(endpoint)
         response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
+        
+            
 
     def drive_group_find(self, **kwargs):
         """
         Find a drive group. Based on list due to missing support in API v1
+        It is possible to find a drive group by name and id with drive_group_get()
         """
         return self._filter(self.drive_group_list(), **kwargs)
 
+    def drive_group_resolveDriveGroupToId(self, name):
+        log.debug("Running function")
+        endpoint = "/sep/api/v2/drivegroups/resolveDriveGroupToId/"
+        url = self._urlexpand(endpoint)
+        response = requests.post(url=url, auth=(self.username, self.password), json = name, verify=self.verify)
+        self._process_error(response)
+        data = response.json()
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        return data
