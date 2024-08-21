@@ -1660,7 +1660,7 @@ class Api:
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
-    ### v1 SCHEDULE HANDLING ###
+    ### SCHEDULE HANDLING (updated to v2) ###
 
     def schedule_list(self):
         """
@@ -1741,7 +1741,7 @@ class Api:
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
-    ### v1 COMMAND HANDLING ###
+    ### COMMAND HANDLING (updated to v2) ###
 
     def command_list(self):
         """
@@ -1823,7 +1823,7 @@ class Api:
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
-    ### v1 COMMAND EVENT HANDLING ###
+    ### COMMAND EVENT HANDLING (updated to v2) ###
 
     def command_event_list(self):
         """
@@ -1906,7 +1906,7 @@ class Api:
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
-    ### v2 DRIVE GROUPS ###
+    ### DRIVE GROUPS (updated to v2) ###
 
     def drive_group_list(self):
         """
