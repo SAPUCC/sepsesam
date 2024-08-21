@@ -162,7 +162,7 @@ class TestSepSesam(unittest.TestCase):
         """ Same test as commands due to dependency of command events """
 
         #no command events should exist at the beginning
-        print(api.command_event_list())
+        self.assertEqual(api.command_event_list(), [])
 
         #create command as prerequisite
         api.command_create(**{"name": "eventCommand1","owner": "Marcus","type": "EXECUTE","command": "echo 'command'"})
@@ -196,9 +196,7 @@ class TestSepSesam(unittest.TestCase):
 
     """ Manage backup schedule """
     def test_schedule(self):
-        #list should be empty at the beginning
-        self.assertEqual(api.schedule_list(),[])
-
+        
         #create Backup schedule
         api.schedule_create("APISchedule1",**{"mo":"false"})
         api.schedule_create("APISchedule2",**{"mo":"false"})
@@ -212,11 +210,17 @@ class TestSepSesam(unittest.TestCase):
         api.schedule_update("APISchedule2", **{"mo":"true"})
         self.assertNotEqual(api.schedule_get("APISchedule1")["mo"],api.schedule_get("APISchedule2")["mo"])
         
+        #APISchedule1 is found in list()
+        names = [schedule['name'] for schedule in api.schedule_list()]
+        self.assertIn("APISchedule1", names)
+
         #clean up
         api.schedule_delete("APISchedule1")
         api.schedule_delete("APISchedule2")
 
-        self.assertEqual(api.schedule_list(),[])
+        #APISchedule1 should not be found anymore
+        names = [schedule['name'] for schedule in api.schedule_list()]
+        self.assertNotIn("APISchedule1", names)
 
     """Drive group handling"""
 
