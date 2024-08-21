@@ -164,32 +164,34 @@ class TestSepSesam(unittest.TestCase):
         #no command events should exist at the beginning
         self.assertEqual(api.command_event_list(), [])
 
-        #create command as prerequisite
+        #create commands and schedule as prerequisite
         api.command_create(**{"name": "eventCommand1","owner": "Marcus","type": "EXECUTE","command": "echo 'command'"})
         api.command_create(**{"name": "eventCommand2","owner": "Marcus","type": "EXECUTE","command": "echo 'command'"})
+        api.schedule_create(**{"name": "mySchedule","absFlag": True, "tu": True, "pBase": "DAILY"})
 
-        api.command_event_create(**{ "id": 0, "name": "testEvent1", "commandName":"eventCommand1", "clientId": 0})
+        api.command_event_create(**{ "id": 0, "name": "testEvent1",  "scheduleName" : "mySchedule", "commandName":"eventCommand1", "clientId": 0})
         
         #testing event_get()
         self.assertEqual(api.command_event_get(0)["name"], "testEvent1")
 
         #creating second event for find() testing
-        api.command_event_create(**{ "id": 1, "name": "testEvent2", "commandName":"eventCommand1", "clientId": 0})
-        #command_event_find not working yet
-        #self.assertTrue(len(api.command_event_find(**{"commandName": "eventCommand1"}))>1)
+        #command_event_find is only working if the command_event has a assigned schedule
+        api.command_event_create(**{ "id": 1, "name": "testEvent2",  "scheduleName" : "mySchedule", "commandName":"eventCommand1", "clientId": 0})
+        self.assertTrue(len(api.command_event_find(**{"commandName": "eventCommand1"}))>1)
 
         #there should only be found one command event after the update
         api.command_event_update(1, "testEvent2", 0, **{"object":"eventCommand2"})
         self.assertEqual(api.command_event_get(1)["object"], "eventCommand2")
 
         #command_event_find not working yet
-        #len(api.command_event_find(**{"commandName": "eventCommand1"}))==1
+        self.assertTrue(len(api.command_event_find(**{"commandName": "eventCommand1"}))==1)
 
         #cleaning up
         api.command_event_delete(0)
         api.command_event_delete(1)
         api.command_delete("eventCommand1")
         api.command_delete("eventCommand2")
+        api.schedule_delete("mySchedule")
 
         self.assertEqual(api.command_event_list(), [])
      
