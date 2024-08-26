@@ -67,7 +67,7 @@ class TestSepSesam(unittest.TestCase):
     def test_externalGroups(self):
         # # external_group_create
         self.assertEqual(
-            api.external_group_create(id="Unittest_ExternalGroup", enabled=True)[
+            api.external_group_create(externalId="Unittest_ExternalGroup", enabled=True)[
                 "externalId"
             ],
             "Unittest_ExternalGroup",

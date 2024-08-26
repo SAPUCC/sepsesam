@@ -1593,14 +1593,12 @@ class Api:
         return data
 
     # Updated to api/v2
-    def external_group_create(self, id, enabled=True, **kwargs):
+    def external_group_create(self, **kwargs):
         """
         Create an external group
         """
         endpoint = "/sep/api/v2/externalgroups/create"
         url = self._urlexpand(endpoint)
-        kwargs["externalId"] = id
-        kwargs["enabled"] = enabled
         response = requests.post(
             url=url,
             auth=(self.username, self.password),
