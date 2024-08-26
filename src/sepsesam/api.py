@@ -1546,7 +1546,7 @@ class Api:
         """
         Get an external group
         """
-        endpoint = "/sep/api/v2/externalgroups/{}".format(id)
+        endpoint = f"/sep/api/v2/externalgroups/{id}"
         url = self._urlexpand(endpoint)
         response = requests.get(
             url=url, auth=(self.username, self.password), verify=self.verify
@@ -1625,7 +1625,7 @@ class Api:
                 kwargs["id"] = external_groups[0]["id"]
             else:
                 raise Exception(
-                    f"Found {len(external_groups)} external groups with externalId={kwargs["externalId"]}. Please provide a unique id instead."
+                    f"Found {len(external_groups)} external groups with externalId={kwargs['externalId']}. Please provide a unique id instead."
                 )
         response = requests.post(
             url=url,
@@ -1671,9 +1671,9 @@ class Api:
                 kwargs["id"] = external_groups[0]["id"]
             else:
                 raise Exception(
-                    f"Found {len(external_groups)} external groups with externalId={kwargs["externalId"]}. Please provide a unique id instead."
+                    f"Found {len(external_groups)} external groups with externalId={kwargs['externalId']}. Please provide a unique id instead."
                 )
-        endpoint = f"/sep/api/v2/externalgroups/{kwargs["id"]}/groups"
+        endpoint = f"/sep/api/v2/externalgroups/{kwargs['id']}/groups"
         url = self._urlexpand(endpoint)
         response = requests.post(
             url=url,
@@ -1697,9 +1697,9 @@ class Api:
                 kwargs["id"] = external_groups[0]["id"]
             else:
                 raise Exception(
-                    f"Found {len(external_groups)} external groups with externalId={kwargs["externalId"]}. Please provide a unique id instead."
+                    f"Found {len(external_groups)} external groups with externalId={kwargs['externalId']}. Please provide a unique id instead."
                 )
-        endpoint = f"/sep/api/v2/externalgroups/{kwargs["id"]}/groups"
+        endpoint = f"/sep/api/v2/externalgroups/{kwargs['id']}/groups"
         url = self._urlexpand(endpoint)
         response = requests.get(
             url=url, auth=(self.username, self.password), verify=self.verify
