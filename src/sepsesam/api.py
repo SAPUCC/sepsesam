@@ -1494,7 +1494,7 @@ class Api:
             if len(external_groups) == 1:
                 kwargs["id"] = external_groups[0]["id"]
             else:
-                raise Exception(f"Found {len(external_group)} external groups with externalId={kwargs["externalId"]}. Please provide a unique id instead.")
+                raise Exception(f"Found {len(external_groups)} external groups with externalId={kwargs["externalId"]}. Please provide a unique id instead.")
         response = requests.post(url=url, auth=(self.username, self.password), json=kwargs, verify=self.verify)
         self._process_error(response)
         data = response.json()
@@ -1530,7 +1530,7 @@ class Api:
             if len(external_groups) == 1:
                 kwargs["id"] = external_groups[0]["id"]
             else:
-                raise Exception(f"Found {len(external_group)} external groups with externalId={kwargs["externalId"]}. Please provide a unique id instead.")
+                raise Exception(f"Found {len(external_groups)} external groups with externalId={kwargs["externalId"]}. Please provide a unique id instead.")
         endpoint = f"/sep/api/v2/externalgroups/{kwargs["id"]}/groups"
         url = self._urlexpand(endpoint)
         response = requests.post(url=url, auth=(self.username, self.password), json=[groups], verify=self.verify)
@@ -1548,7 +1548,7 @@ class Api:
             if len(external_groups) == 1:
                 kwargs["id"] = external_groups[0]["id"]
             else:
-                raise Exception(f"Found {len(external_group)} external groups with externalId={kwargs["externalId"]}. Please provide a unique id instead.")
+                raise Exception(f"Found {len(external_groups)} external groups with externalId={kwargs["externalId"]}. Please provide a unique id instead.")
         endpoint = f"/sep/api/v2/externalgroups/{kwargs["id"]}/groups"
         url = self._urlexpand(endpoint)
         response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
