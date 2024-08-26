@@ -65,10 +65,23 @@ class TestSepSesam(unittest.TestCase):
     """Manage external groups"""
 
     def test_externalGroups(self):
-        # external_group_create
+        # # external_group_create
         self.assertEqual(
-            api.external_group_create("Unittest_ExternalGroup", True)["externalId"],
+            api.external_group_create(
+                id="Unittest_ExternalGroup", enabled=True)["externalId"],
             "Unittest_ExternalGroup",
+        )
+
+        # external_group_list
+        self.assertEqual(
+            api.external_group_list()[0]["externalId"],
+            "Unittest_ExternalGroup"
+        )
+
+        # external_group_get
+        self.assertEqual(
+            api.external_group_get(id="1")["externalId"],
+            "Unittest_ExternalGroup"
         )
 
         # external_group_find
@@ -77,6 +90,29 @@ class TestSepSesam(unittest.TestCase):
                 **{"externalId": "Unittest_ExternalGroup", "id": 1}
             )[0]["externalId"],
             "Unittest_ExternalGroup",
+        )
+
+        # external_group_update
+        self.assertEqual(
+            api.external_group_update(externalId="Unittest_ExternalGroup", enabled=False)["enabled"],
+            False
+        )
+        self.assertEqual(
+            api.external_group_update(externalId="Unittest_ExternalGroup_renamed", id="1")["externalId"],
+            "Unittest_ExternalGroup_renamed"
+        )
+
+        # external_group_update_relations and external_group_get_relations
+        groups = ["OPERATOR", "BACKUP"]
+        relating_groups = api.external_group_update_relations(externalId="Unittest_ExternalGroup_renamed", groups=groups)
+        self.assertEqual(
+            [group["name"] for group in relating_groups],
+            ["OPERATOR", "BACKUP"]
+        )
+        relating_groups = api.external_group_get_relations(externalId="Unittest_ExternalGroup_renamed")
+        self.assertEqual(
+            [group["name"] for group in relating_groups],
+            ["OPERATOR", "BACKUP"]
         )
 
         # external_group_delete

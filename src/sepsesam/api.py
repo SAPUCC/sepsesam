@@ -151,7 +151,6 @@ class Api:
         """
         Find an object based on attributes. Based on list due to missing support in API v1
         """
-        log.debug("Running function")
         data = []
         for obj in obj_list:
             valid_entry = True
@@ -172,7 +171,6 @@ class Api:
         """
         Logon to the SEP sesam v2 API
         """
-        log.debug("Running function")
         endpoint = "sep/api/v2/auth/login"
         data = {"username": self.username, "secret": self.password, "type": "CLASSIC"}
         url = self._urlexpand(endpoint)
@@ -188,7 +186,6 @@ class Api:
         """
         Logout and cleanup session
         """
-        log.debug("Running function")
         endpoint = "sep/api/v2/auth/logout"
         if self.session_id:
             url = self._urlexpand(endpoint)
@@ -199,7 +196,6 @@ class Api:
         """
         Retrieve server information
         """
-        log.debug("Running function")
         endpoint = "sep/api/v2/server/info"
         url = self._urlexpand(endpoint)
         response = requests.get(url=url, headers=self.headers, verify=self.verify)
@@ -215,7 +211,6 @@ class Api:
         """
         Return a list of clients
         """
-        log.debug("Running function")
         endpoint = "/sep/api/v2/clients"
         url = self._urlexpand(endpoint)
         response = requests.get(url=url, headers=self.headers, verify=self.verify)
@@ -229,7 +224,6 @@ class Api:
         """
         Return a client for a given ID
         """
-        log.debug("Running function")
         endpoint = "/sep/api/v2/clients/{}".format(id)
         url = self._urlexpand(endpoint)
         response = requests.get(url=url, headers=self.headers, verify=self.verify)
@@ -254,7 +248,6 @@ class Api:
         :param matchWithSavesetID: A save set ID. When specified, the filter returns a list of clients compatible with the backup’s type. (string)
         :param queryMode:          The query mode. Valid values are DEFAULT or RESTORE. When omitted, the query mode defaults to DEFAULT. (string)
         """
-        log.debug("Running function")
         endpoint = "/sep/api/v2/clients/find"
         url = self._urlexpand(endpoint)
         data = {"queryMode": queryMode}
@@ -287,7 +280,6 @@ class Api:
         Check the SEP Sesam REST API documentation for applicable parameters:
         https://wiki.sep.de/wiki/index.php/File:SEP_sesam-REST-API-V2-Jaglion.pdf
         """
-        log.debug("Running function")
         endpoint = "/sep/api/v2/clients/create"
         url = self._urlexpand(endpoint)
         kwargs["name"] = name
@@ -305,7 +297,6 @@ class Api:
         Check the SEP Sesam REST API documentation for applicable parameters:
         https://wiki.sep.de/wiki/index.php/File:SEP_sesam-REST-API-V2-Jaglion.pdf
         """
-        log.debug("Running function")
         if id:
             kwargs["id"] = id
         elif name:
@@ -325,7 +316,6 @@ class Api:
         """
         Delete a client
         """
-        log.debug("Running function")
         endpoint = "/sep/api/v2/clients/delete"
         url = self._urlexpand(endpoint)
         # for delete, we need to provide the data as a string and not form / json encoded
@@ -342,7 +332,6 @@ class Api:
         """
         List all locations
         """
-        log.debug("Running function")
         endpoint = "/sep/api/v2/locations"
         url = self._urlexpand(endpoint)
         response = requests.get(url=url, headers=self.headers, verify=self.verify)
@@ -357,7 +346,6 @@ class Api:
         """
         Retrieve a location
         """
-        log.debug("Running function")
         endpoint = "/sep/api/v2/locations/{}".format(id)
         url = self._urlexpand(endpoint)
         data = {"id": id}
@@ -374,7 +362,6 @@ class Api:
 
         :param parent: The ID of the parent location. (int)
         """
-        log.debug("Running function")
         endpoint = "/sep/api/v2/locations/find/"
         url = self._urlexpand(endpoint)
         data = {"parent": parent}
@@ -392,7 +379,6 @@ class Api:
         Check the SEP Sesam REST API documentation for applicable parameters:
         https://wiki.sep.de/wiki/index.php/File:SEP_sesam-REST-API-V2-Jaglion.pdf
         """
-        log.debug("Running function")
         endpoint = "/sep/api/v2/locations/create"
         url = self._urlexpand(endpoint)
         kwargs["name"] = name
@@ -410,7 +396,6 @@ class Api:
         Check the SEP Sesam REST API documentation for applicable parameters:
         https://wiki.sep.de/wiki/index.php/File:SEP_sesam-REST-API-V2-Jaglion.pdf
         """
-        log.debug("Running function")
         if id:
             kwargs["id"] = id
         elif name:
@@ -430,7 +415,6 @@ class Api:
         """
         Deletes a location
         """
-        log.debug("Running function")
         endpoint = "/sep/api/v2/locations/delete"
         url = self._urlexpand(endpoint)
         # for delete, we need to provide the data as a string and not form / json encoded
@@ -445,7 +429,6 @@ class Api:
         """
         Resolve a given name or path to an id
         """
-        log.debug("Running function")
         endpoint = "/sep/api/v2/locations/resolveLocationToId"
         url = self._urlexpand(endpoint)
         # data is provided as is, but with a strange formatting
@@ -462,7 +445,6 @@ class Api:
         """
         List ACLs
         """
-        log.debug("Running function")
         endpoint = "/sep/api/v2/acls"
         url = self._urlexpand(endpoint)
         response = requests.get(url=url, headers=self.headers, verify=self.verify)
@@ -476,7 +458,6 @@ class Api:
         """
         Get an ACL
         """
-        log.debug("Running function")
         endpoint = "/sep/api/v2/acls/{}".format(id)
         url = self._urlexpand(endpoint)
         response = requests.get(url=url, headers=self.headers, verify=self.verify)
@@ -493,7 +474,6 @@ class Api:
         :param object: The object ID. (string)
         :param origin: The object origin (string)
         """
-        log.debug("Running function")
         endpoint = "/sep/api/v2/acls/find"
         url = self._urlexpand(endpoint)
         data = {}
@@ -521,7 +501,6 @@ class Api:
                        group. (string)
         :param id:     The unique ID of the ACL. If none is given, one will be created.
         """
-        log.debug("Running function")
         endpoint = "/sep/api/v2/acls/create"
         data = {"object": object, "origin": origin, "value": value}
         if id:
@@ -541,7 +520,6 @@ class Api:
         Check the SEP Sesam REST API documentation for applicable parameters:
         https://wiki.sep.de/wiki/index.php/File:SEP_sesam-REST-API-V2-Jaglion.pdf
         """
-        log.debug("Running function")
         kwargs["id"] = id
         endpoint = "/sep/api/v2/acls/update"
         url = self._urlexpand(endpoint)
@@ -556,7 +534,6 @@ class Api:
         """
         Delete an ACL
         """
-        log.debug("Running function")
         endpoint = "/sep/api/v2/acls/delete"
         url = self._urlexpand(endpoint)
         # for delete, we need to provide the data as a string and not form / json encoded
@@ -573,7 +550,6 @@ class Api:
         """
         List credentials
         """
-        log.debug("Running function")
         endpoint = "/sep/api/v2/credentials"
         url = self._urlexpand(endpoint)
         response = requests.get(url=url, headers=self.headers, verify=self.verify)
@@ -587,7 +563,6 @@ class Api:
         """
         Get a credential
         """
-        log.debug("Running function")
         endpoint = "/sep/api/v2/credentials/{}".format(id)
         url = self._urlexpand(endpoint)
         response = requests.get(url=url, headers=self.headers, verify=self.verify)
@@ -603,7 +578,6 @@ class Api:
 
         :param type: The credential type. (string)
         """
-        log.debug("Running function")
         endpoint = "/sep/api/v2/credentials/find"
         url = self._urlexpand(endpoint)
         data = {"type": type}
@@ -648,7 +622,6 @@ class Api:
         :param userComment:  The description or users comment. (string)
         :param id:           The unique ID of the credential. If none is given, one will be created.
         """
-        log.debug("Running function")
         endpoint = "/sep/api/v2/credentials/create"
         data = {"type": type}
         for param in [
@@ -686,7 +659,6 @@ class Api:
         Check the SEP Sesam REST API documentation for applicable parameters:
         https://wiki.sep.de/wiki/index.php/File:SEP_sesam-REST-API-V2-Jaglion.pdf
         """
-        log.debug("Running function")
         kwargs["id"] = id
         endpoint = "/sep/api/v2/credentials/update"
         url = self._urlexpand(endpoint)
@@ -701,7 +673,6 @@ class Api:
         """
         Delete a credential
         """
-        log.debug("Running function")
         endpoint = "/sep/api/v2/credentials/delete"
         url = self._urlexpand(endpoint)
         # for delete, we need to provide the data as a string and not form / json encoded
@@ -718,7 +689,6 @@ class Api:
         """
         List datastores
         """
-        log.debug("Running function")
         endpoint = "/sep/api/v2/datastores"
         url = self._urlexpand(endpoint)
         response = requests.get(url=url, headers=self.headers, verify=self.verify)
@@ -732,7 +702,6 @@ class Api:
         """
         Get a datastore
         """
-        log.debug("Running function")
         endpoint = "/sep/api/v2/datastores/{}".format(id)
         url = self._urlexpand(endpoint)
         response = requests.get(url=url, headers=self.headers, verify=self.verify)
@@ -751,7 +720,6 @@ class Api:
         :param driveGroupNames: The list of drive group names to match. ([string])
         :param mediaPoolNames:  The list of media pool names to match. ([string])
         """
-        log.debug("Running function")
         endpoint = "/sep/api/v2/datastores/find"
         url = self._urlexpand(endpoint)
         data = {}
@@ -772,7 +740,6 @@ class Api:
         Check the SEP Sesam REST API documentation for applicable parameters:
         https://wiki.sep.de/wiki/index.php/File:SEP_sesam-REST-API-V2-Jaglion.pdf
         """
-        log.debug("Running function")
         endpoint = "/sep/api/v2/datastores/create"
         if len(name) > 32:
             log.error("Datastore name has a maximum length of 32")
@@ -795,7 +762,6 @@ class Api:
         Check the SEP Sesam REST API documentation for applicable parameters:
         https://wiki.sep.de/wiki/index.php/File:SEP_sesam-REST-API-V2-Jaglion.pdf
         """
-        log.debug("Running function")
         kwargs["name"] = name
         endpoint = "/sep/api/v2/datastores/update"
         url = self._urlexpand(endpoint)
@@ -810,7 +776,6 @@ class Api:
         """
         Delete a datastore
         """
-        log.debug("Running function")
         endpoint = "/sep/api/v2/datastores/delete"
         url = self._urlexpand(endpoint)
         # for delete, we need to provide the data as a string and not form / json encoded
@@ -827,7 +792,6 @@ class Api:
         """
         List backup tasks
         """
-        log.debug("Running function")
         endpoint = "/sep/api/v2/backups/findTasks"
         url = self._urlexpand(endpoint)
         response = requests.get(url=url, headers=self.headers, verify=self.verify)
@@ -841,7 +805,6 @@ class Api:
         """
         Get a backup task
         """
-        log.debug("Running function")
         endpoint = "/sep/api/v2/backups/tasks/{}".format(name)
         url = self._urlexpand(endpoint)
         response = requests.get(url=url, headers=self.headers, verify=self.verify)
@@ -858,7 +821,6 @@ class Api:
         Check the SEP Sesam REST API documentation for applicable parameters:
         https://wiki.sep.de/wiki/index.php/File:SEP_sesam-REST-API-V2-Jaglion.pdf
         """
-        log.debug("Running function")
         endpoint = "/sep/api/v2/backups/findTasks"
         url = self._urlexpand(endpoint)
         response = requests.post(url=url, json=kwargs, headers=self.headers, verify=self.verify)
@@ -875,7 +837,6 @@ class Api:
         Check the SEP Sesam REST API documentation for applicable parameters:
         https://wiki.sep.de/wiki/index.php/File:SEP_sesam-REST-API-V2-Jaglion.pdf
         """
-        log.debug("Running function")
         endpoint = "/sep/api/v2/backups/createTask"
         kwargs["name"] = name
         url = self._urlexpand(endpoint)
@@ -893,7 +854,6 @@ class Api:
         Check the SEP Sesam REST API documentation for applicable parameters:
         https://wiki.sep.de/wiki/index.php/File:SEP_sesam-REST-API-V2-Jaglion.pdf
         """
-        log.debug("Running function")
         kwargs["name"] = name
         endpoint = "/sep/api/v2/backups/updateTask"
         url = self._urlexpand(endpoint)
@@ -908,7 +868,6 @@ class Api:
         """
         Delete a backup task
         """
-        log.debug("Running function")
         endpoint = "/sep/api/v2/backups/{}/deleteTask".format(name)
         url = self._urlexpand(endpoint)
         response = requests.post(url=url, json=kwargs, headers=self.headers, verify=self.verify)
@@ -924,7 +883,6 @@ class Api:
         """
         List backup events
         """
-        log.debug("Running function")
         endpoint = "/sep/api/v2/backupevents"
         url = self._urlexpand(endpoint)
         response = requests.get(url=url, headers=self.headers, verify=self.verify)
@@ -938,7 +896,6 @@ class Api:
         """
         Get a backup event
         """
-        log.debug("Running function")
         endpoint = "/sep/api/v2/backupevents/{}".format(id)
         url = self._urlexpand(endpoint)
         response = requests.get(url=url, headers=self.headers, verify=self.verify)
@@ -955,7 +912,6 @@ class Api:
         Check the SEP Sesam REST API documentation for applicable parameters:
         https://wiki.sep.de/wiki/index.php/File:SEP_sesam-REST-API-V2-Jaglion.pdf
         """
-        log.debug("Running function")
         endpoint = "/sep/api/v2/backupevents/find"
         url = self._urlexpand(endpoint)
         response = requests.post(url=url, json=kwargs, headers=self.headers, verify=self.verify)
@@ -972,7 +928,6 @@ class Api:
         Check the SEP Sesam REST API documentation for applicable parameters:
         https://wiki.sep.de/wiki/index.php/File:SEP_sesam-REST-API-V2-Jaglion.pdf
         """
-        log.debug("Running function")
         endpoint = "/sep/api/v2/backupevents/create"
         kwargs["object"] = object
         if len(object) > 128:
@@ -998,7 +953,6 @@ class Api:
         Check the SEP Sesam REST API documentation for applicable parameters:
         https://wiki.sep.de/wiki/index.php/File:SEP_sesam-REST-API-V2-Jaglion.pdf
         """
-        log.debug("Running function")
         kwargs["id"] = id
         endpoint = "/sep/api/v2/backupevents/update"
         url = self._urlexpand(endpoint)
@@ -1013,7 +967,6 @@ class Api:
         """
         Delete a backup event
         """
-        log.debug("Running function")
         endpoint = "/sep/api/v2/backupevents/delete"
         url = self._urlexpand(endpoint)
         # for delete, we need to provide the data as a string and not form / json encoded
@@ -1030,7 +983,6 @@ class Api:
         """
         List all backups
         """
-        log.debug("Running function")
         endpoint = "/sep/api/v2/backups"
         url = self._urlexpand(endpoint)
         response = requests.get(url=url, headers=self.headers, verify=self.verify)
@@ -1044,7 +996,6 @@ class Api:
         """
         Get a backup
         """
-        log.debug("Running function")
         endpoint = "/sep/api/v2/backups/{}".format(savesetId)
         url = self._urlexpand(endpoint)
         response = requests.get(url=url, headers=self.headers, verify=self.verify)
@@ -1058,7 +1009,6 @@ class Api:
         """
         Find a backup
         """
-        log.debug("Running function")
         endpoint = "/sep/api/v2/backups/find"
         url = self._urlexpand(endpoint)
         response = requests.post(url=url, headers=self.headers, json=kwargs, verify=self.verify)
@@ -1072,7 +1022,6 @@ class Api:
         """
         Create a backup
         """
-        log.debug("Running function")
         endpoint = "/sep/api/v2/backups/create"
         url = self._urlexpand(endpoint)
         kwargs["name"] = name
@@ -1087,7 +1036,6 @@ class Api:
         """
         Update a backup
         """
-        log.debug("Running function")
         endpoint = "/sep/api/v2/backups/update"
         url = self._urlexpand(endpoint)
         response = requests.post(url=url, headers=self.headers, json=kwargs, verify=self.verify)
@@ -1101,7 +1049,6 @@ class Api:
         """
         Start a backup
         """
-        log.debug("Running function")
         endpoint = "/sep/api/v2/backups/start"
         url = self._urlexpand(endpoint)
         kwargs["taskName"] = taskName
@@ -1120,7 +1067,6 @@ class Api:
         """
         List all media pools
         """
-        log.debug("Running function")
         endpoint = "/sep/api/v2/mediapools"
         url = self._urlexpand(endpoint)
         response = requests.get(url=url, headers=self.headers, verify=self.verify)
@@ -1134,7 +1080,6 @@ class Api:
         """
         Get a media pool
         """
-        log.debug("Running function")
         endpoint = "/sep/api/v2/mediapools/{}".format(name)
         url = self._urlexpand(endpoint)
         response = requests.get(url=url, headers=self.headers, verify=self.verify)
@@ -1148,7 +1093,6 @@ class Api:
         """
         Find a media pool. Based on list due to missing support in API v1
         """
-        log.debug("Running function")
         endpoint = "/sep/api/v2/mediapools/find"
         url = self._urlexpand(endpoint)
         response = requests.post(url=url, headers=self.headers, json=kwargs, verify=self.verify)
@@ -1162,7 +1106,6 @@ class Api:
         """
         Create a media pool
         """
-        log.debug("Running function")
         endpoint = "/sep/api/v2/mediapools/create"
         url = self._urlexpand(endpoint)
         kwargs["name"] = name
@@ -1177,7 +1120,6 @@ class Api:
         """
         Update a media pool
         """
-        log.debug("Running function")
         endpoint = "/sep/api/v2/mediapools/update"
         url = self._urlexpand(endpoint)
         response = requests.post(url=url, headers=self.headers, json=kwargs, verify=self.verify)
@@ -1191,7 +1133,6 @@ class Api:
         """
         Delete a media pool
         """
-        log.debug("Running function")
         endpoint = "/sep/api/v2/mediapools/deleteByEntity"
         url = self._urlexpand(endpoint)
         response = requests.post(url=url, headers=self.headers, json={"name": name}, verify=self.verify)
@@ -1207,7 +1148,6 @@ class Api:
         """
         List all media 
         """
-        log.debug("Running function")
         endpoint = "/sep/api/v2/media"
         url = self._urlexpand(endpoint)
         response = requests.get(url=url, headers=self.headers, verify=self.verify)
@@ -1221,7 +1161,6 @@ class Api:
         """
         Get a media 
         """
-        log.debug("Running function")
         endpoint = "/sep/api/v2/media/{}".format(name)
         url = self._urlexpand(endpoint)
         response = requests.get(url=url, headers=self.headers, verify=self.verify)
@@ -1235,7 +1174,6 @@ class Api:
         """
         Find a media.
         """
-        log.debug("Running function")
         endpoint = "/sep/api/v2/media/find"
         url = self._urlexpand(endpoint)
         response = requests.post(url=url, headers=self.headers, json=kwargs, verify=self.verify)
@@ -1249,7 +1187,6 @@ class Api:
         """
         Create a media pool
         """
-        log.debug("Running function")
         endpoint = "/sep/api/v2/media/create"
         url = self._urlexpand(endpoint)
         kwargs["name"] = name
@@ -1266,7 +1203,6 @@ class Api:
         """
         Update a media
         """
-        log.debug("Running function")
         endpoint = "/sep/api/v2/media/update"
         url = self._urlexpand(endpoint)
         response = requests.post(url=url, headers=self.headers, json=kwargs, verify=self.verify)
@@ -1280,7 +1216,6 @@ class Api:
         """
         Delete a media
         """
-        log.debug("Running function")
         endpoint = "/sep/api/v2/media/{}/deleteForced".format(name)
         url = self._urlexpand(endpoint)
         response = requests.post(url=url, headers=self.headers, json={"forceRemoveData": forceRemoveData, "initialize": initialize}, verify=self.verify)
@@ -1296,7 +1231,6 @@ class Api:
         """
         Execute an action on a drive
         """
-        log.debug("Running function")
         endpoint = "/sep/api/v2/drives/{}/execute".format(id)
         data = {"action": action}
         url = self._urlexpand(endpoint)
@@ -1314,7 +1248,6 @@ class Api:
         """
         List all groups
         """
-        log.debug("Running function")
         endpoint = "/sep/api/groups"
         url = self._urlexpand(endpoint)
         response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
@@ -1327,7 +1260,6 @@ class Api:
         """
         Get a group
         """
-        log.debug("Running function")
         endpoint = "/sep/api/groups/{}".format(id)
         url = self._urlexpand(endpoint)
         response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
@@ -1348,7 +1280,6 @@ class Api:
         """
         Create a new group
         """
-        log.debug("Running function")
         endpoint = "/sep/api/v2/groups/create"
         url = self._urlexpand(endpoint)
         if id:
@@ -1363,7 +1294,6 @@ class Api:
         """
         Update group
         """
-        log.debug("Running function")
         data = self.group_get(id=id)
         kwargs = update(data, kwargs)
         self.group_delete(id=id)
@@ -1374,7 +1304,6 @@ class Api:
         """
         Delete a group
         """
-        log.debug("Running function")
         endpoint = "/sep/api/v2/groups/delete"
         url = self._urlexpand(endpoint)
         response = requests.post(url=url, auth=(self.username, self.password), verify=self.verify, data=str(id))
@@ -1389,7 +1318,6 @@ class Api:
         """
         List all roles
         """
-        log.debug("Running function")
         endpoint = "/sep/api/roles"
         url = self._urlexpand(endpoint)
         response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
@@ -1410,7 +1338,6 @@ class Api:
         """
         List all roleRelations
         """
-        log.debug("Running function")
         endpoint = "/sep/api/roleRelations"
         url = self._urlexpand(endpoint)
         response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
@@ -1423,7 +1350,6 @@ class Api:
         """
         Get a role relation
         """
-        log.debug("Running function")
         endpoint = "/sep/api/roleRelations/{}".format(id)
         url = self._urlexpand(endpoint)
         response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
@@ -1442,7 +1368,6 @@ class Api:
         """
         Create a new role <> group relation
         """
-        log.debug("Running function")
         endpoint = "/sep/api/roleRelations"
         url = self._urlexpand(endpoint)
         data = {
@@ -1461,7 +1386,6 @@ class Api:
         """
         Update a role <> group relation.
         """
-        log.debug("Running function")
         self.role_relation_delete(id=id)
         # it looks like the delete command is async
         # since we do not reference the role relation id somewhere else, we just do not care
@@ -1471,7 +1395,6 @@ class Api:
         """
         Delete a role relation
         """
-        log.debug("Running function")
         endpoint = "/sep/api/roleRelations/{}/delete".format(id)
         url = self._urlexpand(endpoint)
         response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
@@ -1480,14 +1403,14 @@ class Api:
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
-    ### v1 EXTERNAL GROUP HANDLING ###
+    ### EXTERNAL GROUP HANDLING (updated to v2)
 
+    # Updated to api/v2
     def external_group_list(self):
         """
         List all external groups
         """
-        log.debug("Running function")
-        endpoint = "/sep/api/externalGroups"
+        endpoint = "/sep/api/v2/externalgroups"
         url = self._urlexpand(endpoint)
         response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
         self._process_error(response)
@@ -1495,12 +1418,12 @@ class Api:
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
+    # Updated to api/v2
     def external_group_get(self, id):
         """
         Get an external group
         """
-        log.debug("Running function")
-        endpoint = "/sep/api/externalGroups/{}".format(id)
+        endpoint = "/sep/api/v2/externalgroups/{}".format(id)
         url = self._urlexpand(endpoint)
         response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
         self._process_error(response)
@@ -1509,7 +1432,7 @@ class Api:
         return data
 
 
-    #updated to api/v2
+    # Updated to api/v2
     def external_group_find(self, **kwargs):
         """
         Find an externalgroups by properties. Returns a list of external groups.
@@ -1544,12 +1467,11 @@ class Api:
         return data
 
 
-    #updated to api/v2
-    def external_group_create(self, id, enabled, **kwargs):
+    # Updated to api/v2
+    def external_group_create(self, id, enabled=True, **kwargs):
         """
         Create an external group
         """
-        log.debug("Running function")
         endpoint = "/sep/api/v2/externalgroups/create"
         url = self._urlexpand(endpoint)
         kwargs["externalId"] = id
@@ -1560,99 +1482,74 @@ class Api:
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
+    # Updated to api/v2
+    def external_group_update(self, **kwargs):
+        """
+        Update an external group
+        """
+        endpoint = "/sep/api/v2/externalgroups/update"
+        url = self._urlexpand(endpoint)
+        if "externalId" in kwargs and "id" not in kwargs:
+            external_groups = self.external_group_find(externalId=kwargs["externalId"])
+            if len(external_groups) == 1:
+                kwargs["id"] = external_groups[0]["id"]
+            else:
+                raise Exception(f"Found {len(external_group)} external groups with externalId={kwargs["externalId"]}. Please provide a unique id instead.")
+        response = requests.post(url=url, auth=(self.username, self.password), json=kwargs, verify=self.verify)
+        self._process_error(response)
+        data = response.json()
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        return data
+
     def external_group_upsert(self, id, **kwargs):
         """
         Create/Update an external group
         """
-        log.debug("Running function")
         self.external_group_delete(id=id)
         return self.external_group_create(id=id, **kwargs)
 
-    #Updated to api/v2
+    # Updated to api/v2
     def external_group_delete(self, id):
         """
         Delete an external group
         """
-        log.debug("Running function")
-        endpoint = "/sep/api/externalGroups/{}/delete".format(id)
+        endpoint = "/sep/api/v2/externalgroups/delete"
         url = self._urlexpand(endpoint)
-        response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
+        response = requests.post(url=url, auth=(self.username, self.password), json=id, verify=self.verify)
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
-    ### v1 EXTERNAL GROUP RELATION HANDLING
-
-    def ext_group_relation_list(self):
+    def external_group_update_relations(self, groups: list, **kwargs):
         """
-        List all internal <> external group relations
+        Sets the sesam user groups associated to the given external group.
         """
-        log.debug("Running function")
-        endpoint = "/sep/api/externalGroupRelations"
+        if "externalId" in kwargs and "id" not in kwargs:
+            external_groups = self.external_group_find(externalId=kwargs["externalId"])
+            if len(external_groups) == 1:
+                kwargs["id"] = external_groups[0]["id"]
+            else:
+                raise Exception(f"Found {len(external_group)} external groups with externalId={kwargs["externalId"]}. Please provide a unique id instead.")
+        endpoint = f"/sep/api/v2/externalgroups/{kwargs["id"]}/groups"
         url = self._urlexpand(endpoint)
-        response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
+        response = requests.post(url=url, auth=(self.username, self.password), json=[groups], verify=self.verify)
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
-    def ext_group_relation_get(self, id):
+    def external_group_get_relations(self, **kwargs):
         """
-        Get an internal <> external group relation
+        Returns the sesam user groups associated to the given external group.
         """
-        log.debug("Running function")
-        endpoint = "/sep/api/externalGroupRelations/{}".format(id)
-        url = self._urlexpand(endpoint)
-        response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
-        self._process_error(response)
-        data = response.json()
-        log.debug("Got response:\n{}".format(pprint.pformat(data)))
-        return data
-
-    def ext_group_relation_find(self, **kwargs):
-        """
-        Find an internal <> external group relation. Based on list due to missing support in API v1
-        """
-        return self._filter(self.ext_group_relation_list(), **kwargs)
-
-    def ext_group_relation_create(self, internal_group_id, external_group_id, id=None):
-        """
-        Create a new internal <> external group relation
-        """
-        log.debug("Running function")
-        endpoint = "/sep/api/externalGroupRelations"
-        url = self._urlexpand(endpoint)
-        data = {
-            "groupId": internal_group_id,
-            "externalGroupId": external_group_id,
-        }
-        if id:
-            data["id"] = id
-        response = requests.post(url=url, auth=(self.username, self.password), json=data, verify=self.verify)
-        self._process_error(response)
-        data = response.json()
-        log.debug("Got response:\n{}".format(pprint.pformat(data)))
-        return data
-
-    def ext_group_relation_update(self, id, internal_group_id, external_group_id):
-        """
-        Update a internal <> external group relation
-        """
-        log.debug("Running function")
-        self.ext_group_relation_delete(id=id)
-        return self.ext_group_relation_create(
-            id=id,
-            internal_group_id=internal_group_id,
-            external_group_id=external_group_id
-        )
-
-    def ext_group_relation_delete(self, id):
-        """
-        Delete an internal <> external group relation
-        """
-        log.debug("Running function")
-        endpoint = "/sep/api/externalGroupRelations/{}/delete".format(id)
+        if "externalId" in kwargs and "id" not in kwargs:
+            external_groups = self.external_group_find(externalId=kwargs["externalId"])
+            if len(external_groups) == 1:
+                kwargs["id"] = external_groups[0]["id"]
+            else:
+                raise Exception(f"Found {len(external_group)} external groups with externalId={kwargs["externalId"]}. Please provide a unique id instead.")
+        endpoint = f"/sep/api/v2/externalgroups/{kwargs["id"]}/groups"
         url = self._urlexpand(endpoint)
         response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
         self._process_error(response)
@@ -1666,7 +1563,6 @@ class Api:
         """
         List all schedules
         """
-        log.debug("Running function")
         endpoint = "/sep/api/v2/schedules"
         url = self._urlexpand(endpoint)
         response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
@@ -1679,7 +1575,6 @@ class Api:
         """
         Get a schedule
         """
-        log.debug("Running function")
         endpoint = "/sep/api/v2/schedules/{}".format(name)
         url = self._urlexpand(endpoint)
         response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
@@ -1704,7 +1599,6 @@ class Api:
         """
         Create a schedule
         """
-        log.debug("Running function")
         endpoint = "/sep/api/v2/schedules/create"
         url = self._urlexpand(endpoint)
         kwargs["name"] = name
@@ -1718,7 +1612,6 @@ class Api:
         """
         Update a schedule
         """
-        log.debug("Running function")
         endpoint = "/sep/api/v2/schedules/update"
         kwargs["name"] = name
         url = self._urlexpand(endpoint)
@@ -1732,7 +1625,6 @@ class Api:
         """
         Delete a schedule
         """
-        log.debug("Running function")
         endpoint = "/sep/api/v2/schedules/delete"
         url = self._urlexpand(endpoint)
         response = requests.post(url=url, auth=(self.username, self.password),json=name, verify=self.verify)
@@ -1747,7 +1639,6 @@ class Api:
         """
         List all commands
         """
-        log.debug("Running function")
         endpoint = "/sep/api/v2/commands"
         url = self._urlexpand(endpoint)
         response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
@@ -1760,7 +1651,6 @@ class Api:
         """
         Get a command
         """
-        log.debug("Running function")
         endpoint = "/sep/api/v2/commands/{}".format(name)
         url = self._urlexpand(endpoint)
         response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
@@ -1773,7 +1663,6 @@ class Api:
         """
         Find a command
         """
-        log.debug("Running function")
         endpoint = "/sep/api/v2/commands/find"
         url = self._urlexpand(endpoint)
         response = requests.post(url=url, auth=(self.username, self.password), json=kwargs, verify=self.verify)
@@ -1786,7 +1675,6 @@ class Api:
         """
         Create a command
         """
-        log.debug("Running function")
         endpoint = "/sep/api/v2/commands/create"
         url = self._urlexpand(endpoint)
         response = requests.post(url=url, auth=(self.username, self.password), json=kwargs, verify=self.verify)
@@ -1799,7 +1687,6 @@ class Api:
         """
         Update a command
         """
-        log.debug("Running function")
         endpoint = "/sep/api/v2/commands/update"
         kwargs["name"] = name
         kwargs["command"] = command
@@ -1814,7 +1701,6 @@ class Api:
         """
         Delete a command
         """
-        log.debug("Running function")
         endpoint = "/sep/api/v2/commands/delete"
         url = self._urlexpand(endpoint)
         response = requests.post(url=url, auth=(self.username, self.password),json=name, verify=self.verify)
@@ -1829,7 +1715,6 @@ class Api:
         """
         List all command events
         """
-        log.debug("Running function")
         endpoint = "/sep/api/v2/commandevents"
         url = self._urlexpand(endpoint)
         response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
@@ -1842,7 +1727,6 @@ class Api:
         """
         Get a command event
         """
-        log.debug("Running function")
         endpoint = "/sep/api/v2/commandevents/{}".format(id)
         url = self._urlexpand(endpoint)
         response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
@@ -1855,7 +1739,6 @@ class Api:
         """
         Find a command event
         """
-        log.debug("Running function")
         endpoint = "/sep/api/v2/commandevents/find"
         url = self._urlexpand(endpoint)
         response = requests.post(url=url, auth=(self.username, self.password), json=kwargs, verify=self.verify)
@@ -1868,7 +1751,6 @@ class Api:
         """
         Create a command event
         """
-        log.debug("Running function")
         endpoint = "/sep/api/v2/commandevents/create"
         url = self._urlexpand(endpoint)
         response = requests.post(url=url, auth=(self.username, self.password), json=kwargs, verify=self.verify)
@@ -1881,7 +1763,6 @@ class Api:
         """
         Update a command event
         """
-        log.debug("Running function")
         endpoint = "/sep/api/v2/commandevents/update"
         kwargs["id"] = id
         kwargs["name"] = name
@@ -1897,7 +1778,6 @@ class Api:
         """
         Delete a command event
         """
-        log.debug("Running function")
         endpoint = "/sep/api/v2/commandevents/delete"
         url = self._urlexpand(endpoint)
         response = requests.post(url=url, auth=(self.username, self.password),json = id, verify=self.verify)
@@ -1912,7 +1792,6 @@ class Api:
         """
         List all drive groups
         """
-        log.debug("Running function")
         endpoint = "/sep/api/v2/drivegroups"
         url = self._urlexpand(endpoint)
         response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
@@ -1928,7 +1807,6 @@ class Api:
         if name:
             id = self.drive_group_resolveDriveGroupToId(name)
 
-        log.debug("Running function")
         endpoint = "/sep/api/v2/drivegroups/{}".format(id)
         url = self._urlexpand(endpoint)
         response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
@@ -1947,7 +1825,6 @@ class Api:
         return self._filter(self.drive_group_list(), **kwargs)
 
     def drive_group_resolveDriveGroupToId(self, name):
-        log.debug("Running function")
         endpoint = "/sep/api/v2/drivegroups/resolveDriveGroupToId/"
         url = self._urlexpand(endpoint)
         response = requests.post(url=url, auth=(self.username, self.password), json = name, verify=self.verify)
