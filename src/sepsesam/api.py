@@ -1521,6 +1521,7 @@ class Api:
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
+    # Updated to api/v2
     def external_group_update_relations(self, groups: list, **kwargs):
         """
         Sets the sesam user groups associated to the given external group.
@@ -1539,6 +1540,7 @@ class Api:
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
+    # Updated to api/v2
     def external_group_get_relations(self, **kwargs):
         """
         Returns the sesam user groups associated to the given external group.
