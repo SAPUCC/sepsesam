@@ -19,12 +19,18 @@ ERROR_CODES = {
         "error": "CLIENT_ERROR_BAD_REQUEST",
         "message": "Something is not correct in the request sent by the client",
     },
-    401: {"error": "CLIENT_ERROR_UNAUTHORIZED", "message": "The client is not authenticated to do the request"},
+    401: {
+        "error": "CLIENT_ERROR_UNAUTHORIZED",
+        "message": "The client is not authenticated to do the request",
+    },
     403: {
         "error": "CLIENT_ERROR_FORBIDDEN",
         "message": "The authenticated user does not have the required permissions to do the request",
     },
-    404: {"error": "CLIENT_ERROR_NOT_FOUND", "message": "The requested endpoint does not exist"},
+    404: {
+        "error": "CLIENT_ERROR_NOT_FOUND",
+        "message": "The requested endpoint does not exist",
+    },
     405: {
         "error": "CLIENT_ERROR_METHOD_NOT_ALLOWED",
         "message": "The target object is not editable (error type = ‘NOT_EDITABLE’)",
@@ -41,6 +47,7 @@ ERROR_CODES = {
 
 # set logger
 log = logging.getLogger("sepsesam")
+
 
 def update(d, u):
     """
@@ -137,14 +144,16 @@ class Api:
         )
 
     def _auth(func):
-        """ Check if session is set, and if not, authenticate before
-            executing function
+        """Check if session is set, and if not, authenticate before
+        executing function
         """
+
         def _doauth(*args, **kwargs):
             self = args[0]
             if not self.session_id:
                 self.login()
             return func(*args, **kwargs)
+
         return _doauth
 
     def _filter(self, obj_list, **kwargs):
@@ -266,7 +275,9 @@ class Api:
         ]:
             if param in kwargs:
                 data[param] = kwargs[param]
-        response = requests.post(url=url, json=data, headers=self.headers, verify=self.verify)
+        response = requests.post(
+            url=url, json=data, headers=self.headers, verify=self.verify
+        )
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
@@ -283,7 +294,9 @@ class Api:
         endpoint = "/sep/api/v2/clients/create"
         url = self._urlexpand(endpoint)
         kwargs["name"] = name
-        response = requests.post(url=url, json=kwargs, headers=self.headers, verify=self.verify)
+        response = requests.post(
+            url=url, json=kwargs, headers=self.headers, verify=self.verify
+        )
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
@@ -305,7 +318,9 @@ class Api:
             raise Exception("Either 'id' or 'name' must be specified")
         endpoint = "/sep/api/v2/clients/update"
         url = self._urlexpand(endpoint)
-        response = requests.post(url=url, json=kwargs, headers=self.headers, verify=self.verify)
+        response = requests.post(
+            url=url, json=kwargs, headers=self.headers, verify=self.verify
+        )
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
@@ -319,7 +334,9 @@ class Api:
         endpoint = "/sep/api/v2/clients/delete"
         url = self._urlexpand(endpoint)
         # for delete, we need to provide the data as a string and not form / json encoded
-        response = requests.post(url=url, data=str(id), headers=self.headers, verify=self.verify)
+        response = requests.post(
+            url=url, data=str(id), headers=self.headers, verify=self.verify
+        )
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
@@ -349,7 +366,9 @@ class Api:
         endpoint = "/sep/api/v2/locations/{}".format(id)
         url = self._urlexpand(endpoint)
         data = {"id": id}
-        response = requests.get(url=url, json=data, headers=self.headers, verify=self.verify)
+        response = requests.get(
+            url=url, json=data, headers=self.headers, verify=self.verify
+        )
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
@@ -365,7 +384,9 @@ class Api:
         endpoint = "/sep/api/v2/locations/find/"
         url = self._urlexpand(endpoint)
         data = {"parent": parent}
-        response = requests.post(url=url, json=data, headers=self.headers, verify=self.verify)
+        response = requests.post(
+            url=url, json=data, headers=self.headers, verify=self.verify
+        )
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
@@ -382,7 +403,9 @@ class Api:
         endpoint = "/sep/api/v2/locations/create"
         url = self._urlexpand(endpoint)
         kwargs["name"] = name
-        response = requests.post(url=url, json=kwargs, headers=self.headers, verify=self.verify)
+        response = requests.post(
+            url=url, json=kwargs, headers=self.headers, verify=self.verify
+        )
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
@@ -404,7 +427,9 @@ class Api:
             raise Exception("Either 'id' or 'name' must be specified")
         endpoint = "/sep/api/v2/locations/update"
         url = self._urlexpand(endpoint)
-        response = requests.post(url=url, json=kwargs, headers=self.headers, verify=self.verify)
+        response = requests.post(
+            url=url, json=kwargs, headers=self.headers, verify=self.verify
+        )
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
@@ -418,7 +443,9 @@ class Api:
         endpoint = "/sep/api/v2/locations/delete"
         url = self._urlexpand(endpoint)
         # for delete, we need to provide the data as a string and not form / json encoded
-        response = requests.post(url=url, data=str(id), headers=self.headers, verify=self.verify)
+        response = requests.post(
+            url=url, data=str(id), headers=self.headers, verify=self.verify
+        )
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
@@ -432,7 +459,9 @@ class Api:
         endpoint = "/sep/api/v2/locations/resolveLocationToId"
         url = self._urlexpand(endpoint)
         # data is provided as is, but with a strange formatting
-        response = requests.post(url=url, data='"{}"'.format(name), headers=self.headers, verify=self.verify)
+        response = requests.post(
+            url=url, data='"{}"'.format(name), headers=self.headers, verify=self.verify
+        )
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
@@ -480,7 +509,9 @@ class Api:
         for param in ["object", "origin"]:
             if param in kwargs:
                 data[param] = kwargs[param]
-        response = requests.post(url=url, json=data, headers=self.headers, verify=self.verify)
+        response = requests.post(
+            url=url, json=data, headers=self.headers, verify=self.verify
+        )
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
@@ -506,7 +537,9 @@ class Api:
         if id:
             data["id"] = id
         url = self._urlexpand(endpoint)
-        response = requests.post(url=url, json=data, headers=self.headers, verify=self.verify)
+        response = requests.post(
+            url=url, json=data, headers=self.headers, verify=self.verify
+        )
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
@@ -523,7 +556,9 @@ class Api:
         kwargs["id"] = id
         endpoint = "/sep/api/v2/acls/update"
         url = self._urlexpand(endpoint)
-        response = requests.post(url=url, json=kwargs, headers=self.headers, verify=self.verify)
+        response = requests.post(
+            url=url, json=kwargs, headers=self.headers, verify=self.verify
+        )
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
@@ -537,7 +572,9 @@ class Api:
         endpoint = "/sep/api/v2/acls/delete"
         url = self._urlexpand(endpoint)
         # for delete, we need to provide the data as a string and not form / json encoded
-        response = requests.post(url=url, data=str(id), headers=self.headers, verify=self.verify)
+        response = requests.post(
+            url=url, data=str(id), headers=self.headers, verify=self.verify
+        )
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
@@ -581,7 +618,9 @@ class Api:
         endpoint = "/sep/api/v2/credentials/find"
         url = self._urlexpand(endpoint)
         data = {"type": type}
-        response = requests.post(url=url, json=data, headers=self.headers, verify=self.verify)
+        response = requests.post(
+            url=url, json=data, headers=self.headers, verify=self.verify
+        )
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
@@ -645,7 +684,9 @@ class Api:
         if "name" not in data:
             data["name"] = "auth.{}.{}".format(type, uuid.uuid4())
         url = self._urlexpand(endpoint)
-        response = requests.post(url=url, json=data, headers=self.headers, verify=self.verify)
+        response = requests.post(
+            url=url, json=data, headers=self.headers, verify=self.verify
+        )
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
@@ -662,7 +703,9 @@ class Api:
         kwargs["id"] = id
         endpoint = "/sep/api/v2/credentials/update"
         url = self._urlexpand(endpoint)
-        response = requests.post(url=url, json=kwargs, headers=self.headers, verify=self.verify)
+        response = requests.post(
+            url=url, json=kwargs, headers=self.headers, verify=self.verify
+        )
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
@@ -676,7 +719,9 @@ class Api:
         endpoint = "/sep/api/v2/credentials/delete"
         url = self._urlexpand(endpoint)
         # for delete, we need to provide the data as a string and not form / json encoded
-        response = requests.post(url=url, data=str(id), headers=self.headers, verify=self.verify)
+        response = requests.post(
+            url=url, data=str(id), headers=self.headers, verify=self.verify
+        )
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
@@ -726,7 +771,9 @@ class Api:
         for param in ["name", "types", "driveGroupNames", "mediaPoolNames"]:
             if param in kwargs:
                 data[param] = kwargs[param]
-        response = requests.post(url=url, json=data, headers=self.headers, verify=self.verify)
+        response = requests.post(
+            url=url, json=data, headers=self.headers, verify=self.verify
+        )
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
@@ -748,7 +795,9 @@ class Api:
         if not self.session_id:
             self.login()
         url = self._urlexpand(endpoint)
-        response = requests.post(url=url, json=kwargs, headers=self.headers, verify=self.verify)
+        response = requests.post(
+            url=url, json=kwargs, headers=self.headers, verify=self.verify
+        )
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
@@ -765,7 +814,9 @@ class Api:
         kwargs["name"] = name
         endpoint = "/sep/api/v2/datastores/update"
         url = self._urlexpand(endpoint)
-        response = requests.post(url=url, json=kwargs, headers=self.headers, verify=self.verify)
+        response = requests.post(
+            url=url, json=kwargs, headers=self.headers, verify=self.verify
+        )
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
@@ -779,7 +830,9 @@ class Api:
         endpoint = "/sep/api/v2/datastores/delete"
         url = self._urlexpand(endpoint)
         # for delete, we need to provide the data as a string and not form / json encoded
-        response = requests.post(url=url, data=str(name), headers=self.headers, verify=self.verify)
+        response = requests.post(
+            url=url, data=str(name), headers=self.headers, verify=self.verify
+        )
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
@@ -823,7 +876,9 @@ class Api:
         """
         endpoint = "/sep/api/v2/backups/findTasks"
         url = self._urlexpand(endpoint)
-        response = requests.post(url=url, json=kwargs, headers=self.headers, verify=self.verify)
+        response = requests.post(
+            url=url, json=kwargs, headers=self.headers, verify=self.verify
+        )
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
@@ -840,7 +895,9 @@ class Api:
         endpoint = "/sep/api/v2/backups/createTask"
         kwargs["name"] = name
         url = self._urlexpand(endpoint)
-        response = requests.post(url=url, json=kwargs, headers=self.headers, verify=self.verify)
+        response = requests.post(
+            url=url, json=kwargs, headers=self.headers, verify=self.verify
+        )
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
@@ -857,7 +914,9 @@ class Api:
         kwargs["name"] = name
         endpoint = "/sep/api/v2/backups/updateTask"
         url = self._urlexpand(endpoint)
-        response = requests.post(url=url, json=kwargs, headers=self.headers, verify=self.verify)
+        response = requests.post(
+            url=url, json=kwargs, headers=self.headers, verify=self.verify
+        )
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
@@ -870,7 +929,9 @@ class Api:
         """
         endpoint = "/sep/api/v2/backups/{}/deleteTask".format(name)
         url = self._urlexpand(endpoint)
-        response = requests.post(url=url, json=kwargs, headers=self.headers, verify=self.verify)
+        response = requests.post(
+            url=url, json=kwargs, headers=self.headers, verify=self.verify
+        )
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
@@ -914,7 +975,9 @@ class Api:
         """
         endpoint = "/sep/api/v2/backupevents/find"
         url = self._urlexpand(endpoint)
-        response = requests.post(url=url, json=kwargs, headers=self.headers, verify=self.verify)
+        response = requests.post(
+            url=url, json=kwargs, headers=self.headers, verify=self.verify
+        )
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
@@ -939,7 +1002,9 @@ class Api:
         if not self.session_id:
             self.login()
         url = self._urlexpand(endpoint)
-        response = requests.post(url=url, json=kwargs, headers=self.headers, verify=self.verify)
+        response = requests.post(
+            url=url, json=kwargs, headers=self.headers, verify=self.verify
+        )
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
@@ -956,7 +1021,9 @@ class Api:
         kwargs["id"] = id
         endpoint = "/sep/api/v2/backupevents/update"
         url = self._urlexpand(endpoint)
-        response = requests.post(url=url, json=kwargs, headers=self.headers, verify=self.verify)
+        response = requests.post(
+            url=url, json=kwargs, headers=self.headers, verify=self.verify
+        )
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
@@ -970,7 +1037,9 @@ class Api:
         endpoint = "/sep/api/v2/backupevents/delete"
         url = self._urlexpand(endpoint)
         # for delete, we need to provide the data as a string and not form / json encoded
-        response = requests.post(url=url, data=str(id), headers=self.headers, verify=self.verify)
+        response = requests.post(
+            url=url, data=str(id), headers=self.headers, verify=self.verify
+        )
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
@@ -1003,7 +1072,7 @@ class Api:
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
-    
+
     @_auth
     def backup_find(self, **kwargs):
         """
@@ -1011,12 +1080,14 @@ class Api:
         """
         endpoint = "/sep/api/v2/backups/find"
         url = self._urlexpand(endpoint)
-        response = requests.post(url=url, headers=self.headers, json=kwargs, verify=self.verify)
+        response = requests.post(
+            url=url, headers=self.headers, json=kwargs, verify=self.verify
+        )
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
-    
+
     @_auth
     def backup_create(self, name, **kwargs):
         """
@@ -1025,7 +1096,9 @@ class Api:
         endpoint = "/sep/api/v2/backups/create"
         url = self._urlexpand(endpoint)
         kwargs["name"] = name
-        response = requests.post(url=url, headers=self.headers, json=kwargs, verify=self.verify)
+        response = requests.post(
+            url=url, headers=self.headers, json=kwargs, verify=self.verify
+        )
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
@@ -1038,7 +1111,9 @@ class Api:
         """
         endpoint = "/sep/api/v2/backups/update"
         url = self._urlexpand(endpoint)
-        response = requests.post(url=url, headers=self.headers, json=kwargs, verify=self.verify)
+        response = requests.post(
+            url=url, headers=self.headers, json=kwargs, verify=self.verify
+        )
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
@@ -1054,7 +1129,9 @@ class Api:
         kwargs["taskName"] = taskName
         kwargs["mediaPoolName"] = mediaPoolName
         kwargs["backupLevel"] = backupLevel
-        response = requests.post(url=url, json=[kwargs], headers=self.headers, verify=self.verify)
+        response = requests.post(
+            url=url, json=[kwargs], headers=self.headers, verify=self.verify
+        )
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
@@ -1095,7 +1172,9 @@ class Api:
         """
         endpoint = "/sep/api/v2/mediapools/find"
         url = self._urlexpand(endpoint)
-        response = requests.post(url=url, headers=self.headers, json=kwargs, verify=self.verify)
+        response = requests.post(
+            url=url, headers=self.headers, json=kwargs, verify=self.verify
+        )
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
@@ -1109,7 +1188,9 @@ class Api:
         endpoint = "/sep/api/v2/mediapools/create"
         url = self._urlexpand(endpoint)
         kwargs["name"] = name
-        response = requests.post(url=url, headers=self.headers, json=kwargs, verify=self.verify)
+        response = requests.post(
+            url=url, headers=self.headers, json=kwargs, verify=self.verify
+        )
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
@@ -1122,7 +1203,9 @@ class Api:
         """
         endpoint = "/sep/api/v2/mediapools/update"
         url = self._urlexpand(endpoint)
-        response = requests.post(url=url, headers=self.headers, json=kwargs, verify=self.verify)
+        response = requests.post(
+            url=url, headers=self.headers, json=kwargs, verify=self.verify
+        )
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
@@ -1135,7 +1218,9 @@ class Api:
         """
         endpoint = "/sep/api/v2/mediapools/deleteByEntity"
         url = self._urlexpand(endpoint)
-        response = requests.post(url=url, headers=self.headers, json={"name": name}, verify=self.verify)
+        response = requests.post(
+            url=url, headers=self.headers, json={"name": name}, verify=self.verify
+        )
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
@@ -1146,7 +1231,7 @@ class Api:
     @_auth
     def media_list(self):
         """
-        List all media 
+        List all media
         """
         endpoint = "/sep/api/v2/media"
         url = self._urlexpand(endpoint)
@@ -1159,7 +1244,7 @@ class Api:
     @_auth
     def media_get(self, name):
         """
-        Get a media 
+        Get a media
         """
         endpoint = "/sep/api/v2/media/{}".format(name)
         url = self._urlexpand(endpoint)
@@ -1176,7 +1261,9 @@ class Api:
         """
         endpoint = "/sep/api/v2/media/find"
         url = self._urlexpand(endpoint)
-        response = requests.post(url=url, headers=self.headers, json=kwargs, verify=self.verify)
+        response = requests.post(
+            url=url, headers=self.headers, json=kwargs, verify=self.verify
+        )
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
@@ -1192,7 +1279,9 @@ class Api:
         kwargs["name"] = name
         kwargs["poolName"] = poolName
         kwargs["mediaType"] = mediaType
-        response = requests.post(url=url, headers=self.headers, json=kwargs, verify=self.verify)
+        response = requests.post(
+            url=url, headers=self.headers, json=kwargs, verify=self.verify
+        )
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
@@ -1205,7 +1294,9 @@ class Api:
         """
         endpoint = "/sep/api/v2/media/update"
         url = self._urlexpand(endpoint)
-        response = requests.post(url=url, headers=self.headers, json=kwargs, verify=self.verify)
+        response = requests.post(
+            url=url, headers=self.headers, json=kwargs, verify=self.verify
+        )
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
@@ -1218,7 +1309,12 @@ class Api:
         """
         endpoint = "/sep/api/v2/media/{}/deleteForced".format(name)
         url = self._urlexpand(endpoint)
-        response = requests.post(url=url, headers=self.headers, json={"forceRemoveData": forceRemoveData, "initialize": initialize}, verify=self.verify)
+        response = requests.post(
+            url=url,
+            headers=self.headers,
+            json={"forceRemoveData": forceRemoveData, "initialize": initialize},
+            verify=self.verify,
+        )
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
@@ -1234,7 +1330,9 @@ class Api:
         endpoint = "/sep/api/v2/drives/{}/execute".format(id)
         data = {"action": action}
         url = self._urlexpand(endpoint)
-        response = requests.post(url=url, headers=self.headers, json=data, verify=self.verify)
+        response = requests.post(
+            url=url, headers=self.headers, json=data, verify=self.verify
+        )
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
@@ -1250,7 +1348,9 @@ class Api:
         """
         endpoint = "/sep/api/groups"
         url = self._urlexpand(endpoint)
-        response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
+        response = requests.get(
+            url=url, auth=(self.username, self.password), verify=self.verify
+        )
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
@@ -1262,7 +1362,9 @@ class Api:
         """
         endpoint = "/sep/api/groups/{}".format(id)
         url = self._urlexpand(endpoint)
-        response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
+        response = requests.get(
+            url=url, auth=(self.username, self.password), verify=self.verify
+        )
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
@@ -1274,8 +1376,7 @@ class Api:
         """
         return self._filter(self.group_list(), **kwargs)
 
-
-    #API V2 (updated to api/v2)
+    # API V2 (updated to api/v2)
     def group_create(self, id=None, **kwargs):
         """
         Create a new group
@@ -1284,7 +1385,12 @@ class Api:
         url = self._urlexpand(endpoint)
         if id:
             kwargs["id"] = id
-        response = requests.post(url=url, auth=(self.username, self.password), json=kwargs, verify=self.verify)
+        response = requests.post(
+            url=url,
+            auth=(self.username, self.password),
+            json=kwargs,
+            verify=self.verify,
+        )
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
@@ -1306,7 +1412,12 @@ class Api:
         """
         endpoint = "/sep/api/v2/groups/delete"
         url = self._urlexpand(endpoint)
-        response = requests.post(url=url, auth=(self.username, self.password), verify=self.verify, data=str(id))
+        response = requests.post(
+            url=url,
+            auth=(self.username, self.password),
+            verify=self.verify,
+            data=str(id),
+        )
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
@@ -1320,7 +1431,9 @@ class Api:
         """
         endpoint = "/sep/api/roles"
         url = self._urlexpand(endpoint)
-        response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
+        response = requests.get(
+            url=url, auth=(self.username, self.password), verify=self.verify
+        )
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
@@ -1340,7 +1453,9 @@ class Api:
         """
         endpoint = "/sep/api/roleRelations"
         url = self._urlexpand(endpoint)
-        response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
+        response = requests.get(
+            url=url, auth=(self.username, self.password), verify=self.verify
+        )
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
@@ -1352,7 +1467,9 @@ class Api:
         """
         endpoint = "/sep/api/roleRelations/{}".format(id)
         url = self._urlexpand(endpoint)
-        response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
+        response = requests.get(
+            url=url, auth=(self.username, self.password), verify=self.verify
+        )
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
@@ -1376,7 +1493,9 @@ class Api:
         }
         if id:
             data["id"] = id
-        response = requests.post(url=url, auth=(self.username, self.password), json=data, verify=self.verify)
+        response = requests.post(
+            url=url, auth=(self.username, self.password), json=data, verify=self.verify
+        )
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
@@ -1397,7 +1516,9 @@ class Api:
         """
         endpoint = "/sep/api/roleRelations/{}/delete".format(id)
         url = self._urlexpand(endpoint)
-        response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
+        response = requests.get(
+            url=url, auth=(self.username, self.password), verify=self.verify
+        )
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
@@ -1412,7 +1533,9 @@ class Api:
         """
         endpoint = "/sep/api/v2/externalgroups"
         url = self._urlexpand(endpoint)
-        response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
+        response = requests.get(
+            url=url, auth=(self.username, self.password), verify=self.verify
+        )
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
@@ -1425,12 +1548,13 @@ class Api:
         """
         endpoint = "/sep/api/v2/externalgroups/{}".format(id)
         url = self._urlexpand(endpoint)
-        response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
+        response = requests.get(
+            url=url, auth=(self.username, self.password), verify=self.verify
+        )
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
-
 
     # Updated to api/v2
     def external_group_find(self, **kwargs):
@@ -1444,7 +1568,7 @@ class Api:
         :param type:                The type of the external group. Valid values are "NONE", "AD" and "LDAP".
         :param mtime:               The time at which the notification object was modified at last.
         :param usercomment:         A comment by the user about the external group.
-        
+
         """
         endpoint = "/sep/api/v2/externalgroups/find"
         url = self._urlexpand(endpoint)
@@ -1456,16 +1580,17 @@ class Api:
             "relation",
             "type",
             "mtime",
-            "usercomment"
+            "usercomment",
         ]:
             if param in kwargs:
                 data[param] = kwargs[param]
-        response = requests.post(url=url, json=data, headers=self.headers, verify=self.verify)
+        response = requests.post(
+            url=url, json=data, headers=self.headers, verify=self.verify
+        )
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
-
 
     # Updated to api/v2
     def external_group_create(self, id, enabled=True, **kwargs):
@@ -1476,7 +1601,12 @@ class Api:
         url = self._urlexpand(endpoint)
         kwargs["externalId"] = id
         kwargs["enabled"] = enabled
-        response = requests.post(url=url, auth=(self.username, self.password), json=kwargs, verify=self.verify)
+        response = requests.post(
+            url=url,
+            auth=(self.username, self.password),
+            json=kwargs,
+            verify=self.verify,
+        )
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
@@ -1494,8 +1624,15 @@ class Api:
             if len(external_groups) == 1:
                 kwargs["id"] = external_groups[0]["id"]
             else:
-                raise Exception(f"Found {len(external_groups)} external groups with externalId={kwargs["externalId"]}. Please provide a unique id instead.")
-        response = requests.post(url=url, auth=(self.username, self.password), json=kwargs, verify=self.verify)
+                raise Exception(
+                    f"Found {len(external_groups)} external groups with externalId={kwargs["externalId"]}. Please provide a unique id instead."
+                )
+        response = requests.post(
+            url=url,
+            auth=(self.username, self.password),
+            json=kwargs,
+            verify=self.verify,
+        )
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
@@ -1515,7 +1652,9 @@ class Api:
         """
         endpoint = "/sep/api/v2/externalgroups/delete"
         url = self._urlexpand(endpoint)
-        response = requests.post(url=url, auth=(self.username, self.password), json=id, verify=self.verify)
+        response = requests.post(
+            url=url, auth=(self.username, self.password), json=id, verify=self.verify
+        )
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
@@ -1531,10 +1670,17 @@ class Api:
             if len(external_groups) == 1:
                 kwargs["id"] = external_groups[0]["id"]
             else:
-                raise Exception(f"Found {len(external_groups)} external groups with externalId={kwargs["externalId"]}. Please provide a unique id instead.")
+                raise Exception(
+                    f"Found {len(external_groups)} external groups with externalId={kwargs["externalId"]}. Please provide a unique id instead."
+                )
         endpoint = f"/sep/api/v2/externalgroups/{kwargs["id"]}/groups"
         url = self._urlexpand(endpoint)
-        response = requests.post(url=url, auth=(self.username, self.password), json=[groups], verify=self.verify)
+        response = requests.post(
+            url=url,
+            auth=(self.username, self.password),
+            json=[groups],
+            verify=self.verify,
+        )
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
@@ -1550,10 +1696,14 @@ class Api:
             if len(external_groups) == 1:
                 kwargs["id"] = external_groups[0]["id"]
             else:
-                raise Exception(f"Found {len(external_groups)} external groups with externalId={kwargs["externalId"]}. Please provide a unique id instead.")
+                raise Exception(
+                    f"Found {len(external_groups)} external groups with externalId={kwargs["externalId"]}. Please provide a unique id instead."
+                )
         endpoint = f"/sep/api/v2/externalgroups/{kwargs["id"]}/groups"
         url = self._urlexpand(endpoint)
-        response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
+        response = requests.get(
+            url=url, auth=(self.username, self.password), verify=self.verify
+        )
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
@@ -1567,7 +1717,9 @@ class Api:
         """
         endpoint = "/sep/api/v2/schedules"
         url = self._urlexpand(endpoint)
-        response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
+        response = requests.get(
+            url=url, auth=(self.username, self.password), verify=self.verify
+        )
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
@@ -1579,7 +1731,9 @@ class Api:
         """
         endpoint = "/sep/api/v2/schedules/{}".format(name)
         url = self._urlexpand(endpoint)
-        response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
+        response = requests.get(
+            url=url, auth=(self.username, self.password), verify=self.verify
+        )
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
@@ -1591,7 +1745,12 @@ class Api:
         """
         endpoint = "/sep/api/v2/schedules/find"
         url = self._urlexpand(endpoint)
-        response = requests.post(url=url, auth=(self.username, self.password), json=kwargs, verify=self.verify)
+        response = requests.post(
+            url=url,
+            auth=(self.username, self.password),
+            json=kwargs,
+            verify=self.verify,
+        )
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
@@ -1604,7 +1763,12 @@ class Api:
         endpoint = "/sep/api/v2/schedules/create"
         url = self._urlexpand(endpoint)
         kwargs["name"] = name
-        response = requests.post(url=url, auth=(self.username, self.password), json=kwargs, verify=self.verify)
+        response = requests.post(
+            url=url,
+            auth=(self.username, self.password),
+            json=kwargs,
+            verify=self.verify,
+        )
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
@@ -1617,7 +1781,12 @@ class Api:
         endpoint = "/sep/api/v2/schedules/update"
         kwargs["name"] = name
         url = self._urlexpand(endpoint)
-        response = requests.post(url=url, auth=(self.username, self.password), json=kwargs, verify=self.verify)
+        response = requests.post(
+            url=url,
+            auth=(self.username, self.password),
+            json=kwargs,
+            verify=self.verify,
+        )
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
@@ -1629,7 +1798,9 @@ class Api:
         """
         endpoint = "/sep/api/v2/schedules/delete"
         url = self._urlexpand(endpoint)
-        response = requests.post(url=url, auth=(self.username, self.password),json=name, verify=self.verify)
+        response = requests.post(
+            url=url, auth=(self.username, self.password), json=name, verify=self.verify
+        )
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
@@ -1643,7 +1814,9 @@ class Api:
         """
         endpoint = "/sep/api/v2/commands"
         url = self._urlexpand(endpoint)
-        response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
+        response = requests.get(
+            url=url, auth=(self.username, self.password), verify=self.verify
+        )
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
@@ -1655,7 +1828,9 @@ class Api:
         """
         endpoint = "/sep/api/v2/commands/{}".format(name)
         url = self._urlexpand(endpoint)
-        response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
+        response = requests.get(
+            url=url, auth=(self.username, self.password), verify=self.verify
+        )
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
@@ -1667,7 +1842,12 @@ class Api:
         """
         endpoint = "/sep/api/v2/commands/find"
         url = self._urlexpand(endpoint)
-        response = requests.post(url=url, auth=(self.username, self.password), json=kwargs, verify=self.verify)
+        response = requests.post(
+            url=url,
+            auth=(self.username, self.password),
+            json=kwargs,
+            verify=self.verify,
+        )
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
@@ -1679,7 +1859,12 @@ class Api:
         """
         endpoint = "/sep/api/v2/commands/create"
         url = self._urlexpand(endpoint)
-        response = requests.post(url=url, auth=(self.username, self.password), json=kwargs, verify=self.verify)
+        response = requests.post(
+            url=url,
+            auth=(self.username, self.password),
+            json=kwargs,
+            verify=self.verify,
+        )
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
@@ -1693,7 +1878,12 @@ class Api:
         kwargs["name"] = name
         kwargs["command"] = command
         url = self._urlexpand(endpoint)
-        response = requests.post(url=url, auth=(self.username, self.password), json=kwargs, verify=self.verify)
+        response = requests.post(
+            url=url,
+            auth=(self.username, self.password),
+            json=kwargs,
+            verify=self.verify,
+        )
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
@@ -1705,7 +1895,9 @@ class Api:
         """
         endpoint = "/sep/api/v2/commands/delete"
         url = self._urlexpand(endpoint)
-        response = requests.post(url=url, auth=(self.username, self.password),json=name, verify=self.verify)
+        response = requests.post(
+            url=url, auth=(self.username, self.password), json=name, verify=self.verify
+        )
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
@@ -1719,7 +1911,9 @@ class Api:
         """
         endpoint = "/sep/api/v2/commandevents"
         url = self._urlexpand(endpoint)
-        response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
+        response = requests.get(
+            url=url, auth=(self.username, self.password), verify=self.verify
+        )
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
@@ -1731,7 +1925,9 @@ class Api:
         """
         endpoint = "/sep/api/v2/commandevents/{}".format(id)
         url = self._urlexpand(endpoint)
-        response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
+        response = requests.get(
+            url=url, auth=(self.username, self.password), verify=self.verify
+        )
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
@@ -1743,7 +1939,12 @@ class Api:
         """
         endpoint = "/sep/api/v2/commandevents/find"
         url = self._urlexpand(endpoint)
-        response = requests.post(url=url, auth=(self.username, self.password), json=kwargs, verify=self.verify)
+        response = requests.post(
+            url=url,
+            auth=(self.username, self.password),
+            json=kwargs,
+            verify=self.verify,
+        )
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
@@ -1755,7 +1956,12 @@ class Api:
         """
         endpoint = "/sep/api/v2/commandevents/create"
         url = self._urlexpand(endpoint)
-        response = requests.post(url=url, auth=(self.username, self.password), json=kwargs, verify=self.verify)
+        response = requests.post(
+            url=url,
+            auth=(self.username, self.password),
+            json=kwargs,
+            verify=self.verify,
+        )
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
@@ -1770,7 +1976,12 @@ class Api:
         kwargs["name"] = name
         kwargs["clientId"] = clientId
         url = self._urlexpand(endpoint)
-        response = requests.post(url=url, auth=(self.username, self.password), json=kwargs, verify=self.verify)
+        response = requests.post(
+            url=url,
+            auth=(self.username, self.password),
+            json=kwargs,
+            verify=self.verify,
+        )
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
@@ -1782,7 +1993,9 @@ class Api:
         """
         endpoint = "/sep/api/v2/commandevents/delete"
         url = self._urlexpand(endpoint)
-        response = requests.post(url=url, auth=(self.username, self.password),json = id, verify=self.verify)
+        response = requests.post(
+            url=url, auth=(self.username, self.password), json=id, verify=self.verify
+        )
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
@@ -1796,13 +2009,15 @@ class Api:
         """
         endpoint = "/sep/api/v2/drivegroups"
         url = self._urlexpand(endpoint)
-        response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
+        response = requests.get(
+            url=url, auth=(self.username, self.password), verify=self.verify
+        )
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
-    def drive_group_get(self, id = None, name = None):
+    def drive_group_get(self, id=None, name=None):
         """
         Get a drive group
         """
@@ -1811,13 +2026,13 @@ class Api:
 
         endpoint = "/sep/api/v2/drivegroups/{}".format(id)
         url = self._urlexpand(endpoint)
-        response = requests.get(url=url, auth=(self.username, self.password), verify=self.verify)
+        response = requests.get(
+            url=url, auth=(self.username, self.password), verify=self.verify
+        )
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
-        
-            
 
     def drive_group_find(self, **kwargs):
         """
@@ -1829,7 +2044,9 @@ class Api:
     def drive_group_resolveDriveGroupToId(self, name):
         endpoint = "/sep/api/v2/drivegroups/resolveDriveGroupToId/"
         url = self._urlexpand(endpoint)
-        response = requests.post(url=url, auth=(self.username, self.password), json = name, verify=self.verify)
+        response = requests.post(
+            url=url, auth=(self.username, self.password), json=name, verify=self.verify
+        )
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
