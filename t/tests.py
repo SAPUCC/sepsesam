@@ -119,6 +119,12 @@ class TestSepSesam(unittest.TestCase):
         self.assertEqual(
             [group["name"] for group in relating_groups], ["OPERATOR", "BACKUP"]
         )
+        relating_groups = api.external_group_get_relations(
+            id="1"
+        )
+        self.assertEqual(
+            [group["name"] for group in relating_groups], ["OPERATOR", "BACKUP"]
+        )
 
         # external_group_delete
         api.external_group_delete(1)
