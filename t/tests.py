@@ -119,6 +119,12 @@ class TestSepSesam(unittest.TestCase):
         self.assertEqual(
             [group["name"] for group in relating_groups], ["OPERATOR", "BACKUP"]
         )
+        relating_groups = api.external_group_get_relations(
+            id="1"
+        )
+        self.assertEqual(
+            [group["name"] for group in relating_groups], ["OPERATOR", "BACKUP"]
+        )
 
         # external_group_delete
         api.external_group_delete(1)
@@ -133,6 +139,36 @@ class TestSepSesam(unittest.TestCase):
                 **{"name": "UnittestGroup", "enabled": True, "rolesList": ["ReadOnly"]},
             )["id"],
             5,
+        )
+
+        # group_list
+        self.assertEqual(
+            api.group_list()[5]["name"],
+            "UnittestGroup"
+        )
+
+        # group_find
+        self.assertEqual(
+            api.group_find(name="UnittestGroup")[0]["name"],
+            "UnittestGroup"
+        )
+
+        # group_get
+        self.assertEqual(
+            api.group_get(5)["name"],
+            "UnittestGroup"
+        )
+
+        # group_update
+        self.assertEqual(
+            api.group_update(id="5", name="UnittestGroupRenamed")["name"],
+            "UnittestGroupRenamed"
+        )
+
+        # group_get_roles
+        self.assertEqual(
+            api.group_get_roles(id="5")[0]["name"],
+            "ReadOnly"
         )
 
         # group_delete
