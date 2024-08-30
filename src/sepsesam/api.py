@@ -1338,15 +1338,13 @@ class Api:
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
         return data
 
-    #################### Version 1 API ####################
-
-    ### v1 GROUP HANDLING ###
+    ### v2 GROUP HANDLING ###
 
     def group_list(self):
         """
         List all groups
         """
-        endpoint = "/sep/api/groups"
+        endpoint = "/sep/api/v2/groups"
         url = self._urlexpand(endpoint)
         response = requests.get(
             url=url, auth=(self.username, self.password), verify=self.verify
@@ -1360,7 +1358,7 @@ class Api:
         """
         Get a group
         """
-        endpoint = "/sep/api/groups/{}".format(id)
+        endpoint = f"/sep/api/v2/groups/{id}"
         url = self._urlexpand(endpoint)
         response = requests.get(
             url=url, auth=(self.username, self.password), verify=self.verify
@@ -1398,14 +1396,22 @@ class Api:
 
     def group_update(self, id, **kwargs):
         """
-        Update group
+        Update group. Roles can not be updated once the group is created.
         """
-        data = self.group_get(id=id)
-        kwargs = update(data, kwargs)
-        self.group_delete(id=id)
-        return self.group_create(**kwargs)
+        endpoint = "/sep/api/v2/groups/update"
+        url = self._urlexpand(endpoint)
+        kwargs["id"] = id
+        response = requests.post(
+            url=url,
+            auth=(self.username, self.password),
+            json=kwargs,
+            verify=self.verify,
+        )
+        self._process_error(response)
+        data = response.json()
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        return data
 
-    # UPDATED: api/v2
     def group_delete(self, id):
         """
         Delete a group
@@ -1417,6 +1423,22 @@ class Api:
             auth=(self.username, self.password),
             verify=self.verify,
             data=str(id),
+        )
+        self._process_error(response)
+        data = response.json()
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        return data
+
+    def group_get_roles(self, id):
+        """
+        List roles assigned to a group
+        """
+        endpoint = f"/sep/api/v2/groups/{id}/roles"
+        url = self._urlexpand(endpoint)
+        response = requests.get(
+            url=url,
+            auth=(self.username, self.password),
+            verify=self.verify,
         )
         self._process_error(response)
         data = response.json()
