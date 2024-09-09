@@ -32,12 +32,10 @@ class TestSepSesam(unittest.TestCase):
 
         # backup_task_delete
         api.backup_task_delete("Unittest_BackupTask")
-        with self.assertRaises(sepsesam.api.SEPSesamAPIError):
-            api.backup_task_get("Unittest_BackupTask")
-            self.assertEqual(
-                api.backup_task_get("Unittest_BackupTask")["error"],
-                "object.not.found.id",
-            )
+        self.assertEqual(
+            api.backup_task_get("Unittest_BackupTask"),
+            None
+        )
 
     """Managing Clients"""
 

@@ -861,10 +861,17 @@ class Api:
         endpoint = "/sep/api/v2/backups/tasks/{}".format(name)
         url = self._urlexpand(endpoint)
         response = requests.get(url=url, headers=self.headers, verify=self.verify)
-        self._process_error(response)
-        data = response.json()
-        log.debug("Got response:\n{}".format(pprint.pformat(data)))
-        return data
+        try:
+            self._process_error(response)
+            data = response.json()
+            log.debug("Got response:\n{}".format(pprint.pformat(data)))
+            return data
+        except SEPSesamAPIError as e:
+            if e.error == "object.not.found.id":
+                log.debug("Backup task not found.")
+                return None
+            else:
+                raise e
 
     @_auth
     def backup_task_find(self, **kwargs):
