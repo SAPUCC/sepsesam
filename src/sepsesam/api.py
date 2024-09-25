@@ -988,6 +988,8 @@ class Api:
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        if "name" in kwargs:
+            return self._filter(data, **kwargs)
         return data
 
     @_auth
