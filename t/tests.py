@@ -37,6 +37,62 @@ class TestSepSesam(unittest.TestCase):
             None
         )
 
+    """Managing backup events"""
+    def test_backupEventFind(self):
+        # Create prereqs
+        api.backup_task_create(
+            "unittest_be_backup_task",
+            **{"client": api.client_list()[0]["name"], "source": "/tmp"},
+        )
+        api.schedule_create(
+            **{"name": "unittest_be_schedule", "absFlag": True, "tu": True, "pBase": "DAILY"}
+        )
+        api.media_pool_create(
+            "unittest_be",
+            **{"eol": "28", "driveGroupId": "1"}
+        )
+        api.backup_event_create(
+            "unittest_be_backup_task",
+            **{
+                "name": "unittest_be_backup_event_1",
+                "scheduleName": "unittest_be_schedule",
+                "fdiType": {
+                    "value": "F",
+                    "cfdi": "FULL"
+                },
+                "mediaPool": "unittest_be"
+            }
+        )
+        api.backup_event_create(
+            "unittest_be_backup_task",
+            **{
+                "name": "unittest_be_backup_event_2",
+                "scheduleName": "unittest_be_schedule",
+                "fdiType": {
+                    "value": "F",
+                    "cfdi": "FULL"
+                },
+                "mediaPool": "unittest_be"
+            }
+        )
+        self.assertEqual(
+            len(api.backup_event_find(
+                name="unittest_be_backup_event_1"
+            )),
+            1
+        )
+
+        # Delete all backup events
+        backup_events = api.backup_event_list()
+        backup_event_ids = [backup_event["id"] for backup_event in backup_events]
+        for backup_event_id in backup_event_ids:
+            api.backup_event_delete(backup_event_id)
+
+        # Clean up
+        api.media_pool_delete("unittest_be")
+        api.schedule_delete("unittest_be_schedule")
+        api.backup_task_delete("unittest_be_backup_task")
+
     """Managing Clients"""
 
     def test_Clients(self):
