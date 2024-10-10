@@ -73,6 +73,16 @@ class SEPSesamAPIError(Exception):
         self.type = type
         self.url = url
 
+    def __repr__(self):
+        return f"""
+SEPSesamAPIError:
+    status_code: {self.status_code},
+    error: {self.error},
+    message: {self.message},
+    parameter: {self.parameter},
+    type: {self.type},
+    url: {self.url}
+"""
 
 class Api:
     """
