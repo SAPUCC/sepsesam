@@ -1,3 +1,4 @@
+import time
 import unittest
 import sepsesam.api
 
@@ -350,16 +351,25 @@ class TestSepSesam(unittest.TestCase):
 
     def test_drive_group(self):
         # test if there are already drive_groups
-        if api.drive_group_list() != []:
-            # check if get and list produce the same result
-            self.assertEqual(
-                api.drive_group_list()[0]["name"], api.drive_group_get(1)["name"]
-            )
+        drive_groups_available = False
+        for i in range(10):
+            if len(api.drive_group_list()) > 1:
+                drive_groups_available = True
+                break
+            print(f"Drive groups not yet available. Retrying ({i}/10)")
+            time.sleep(5)
 
-            # check if drive_group_get() is able to access drive groups by name and id
-            self.assertEqual(
-                api.drive_group_get(1), api.drive_group_get(None, "Test-Drives")
-            )
+        self.assertTrue(drive_groups_available)
+
+        # check if get and list produce the same result
+        self.assertEqual(
+            api.drive_group_list()[0]["name"], api.drive_group_get(1)["name"]
+        )
+
+        # check if drive_group_get() is able to access drive groups by name and id
+        self.assertEqual(
+            api.drive_group_get(1), api.drive_group_get(None, "Test-Drives")
+        )
 
     """Managing backup events"""
     def test_backupEventFind(self):
