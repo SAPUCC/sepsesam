@@ -196,7 +196,7 @@ class Api:
         response = requests.post(url=url, json=data, verify=self.verify)
         self._process_error(response)
         resp_data = response.json()
-        self.session_id = resp_data
+        self.session_id = resp_data.get('sessionId', '')
         self.headers = {"X-SEP-Session": self.session_id}
         log.debug("Got response:\n{}".format(pprint.pformat(resp_data)))
         return True

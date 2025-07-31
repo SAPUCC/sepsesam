@@ -4,7 +4,7 @@ import sepsesam.api
 
 """ Configure before executing unittest suite """
 cred = {
-    "url": "http://localhost:11401",
+    "url": "https://localhost:11401",
     "username": "Administrator",
     "password": "sesam",
 }
@@ -347,85 +347,84 @@ class TestSepSesam(unittest.TestCase):
         names = [schedule["name"] for schedule in api.schedule_list()]
         self.assertNotIn("APISchedule1", names)
 
-    # FIXME: These tests fail, because for some reason the drive group 'Test-Drives' is not always available during a pipeline run.
     """Drive group handling"""
-    # def test_drive_group(self):
-    #     # test if there are already drive_groups
-    #     drive_groups_available = False
-    #     for i in range(10):
-    #         if len(api.drive_group_list()) > 1:
-    #             drive_groups_available = True
-    #             break
-    #         print(f"Drive groups not yet available. Retrying ({i}/10)")
-    #         time.sleep(5)
+    def test_drive_group(self):
+        # test if there are already drive_groups
+        drive_groups_available = False
+        for i in range(10):
+            if len(api.drive_group_list()) > 0:
+                drive_groups_available = True
+                break
+            print(f"Drive groups not yet available. Retrying ({i}/10)")
+            time.sleep(5)
 
-    #     self.assertTrue(drive_groups_available)
+        self.assertTrue(drive_groups_available)
 
-    #     # check if get and list produce the same result
-    #     self.assertEqual(
-    #         api.drive_group_list()[0]["name"], api.drive_group_get(1)["name"]
-    #     )
+        # check if get and list produce the same result
+        self.assertEqual(
+            api.drive_group_list()[0]["name"], api.drive_group_get(1)["name"]
+        )
 
-    #     # check if drive_group_get() is able to access drive groups by name and id
-    #     self.assertEqual(
-    #         api.drive_group_get(1), api.drive_group_get(None, "Test-Drives")
-    #     )
+        # check if drive_group_get() is able to access drive groups by name and id
+        self.assertEqual(
+            api.drive_group_get(1), api.drive_group_get(None, "Test-Drives")
+        )
 
     """Managing backup events"""
-    # def test_backupEventFind(self):
-    #     # Create prereqs
-    #     api.backup_task_create(
-    #         "unittest_be_backup_task",
-    #         **{"client": api.client_list()[0]["name"], "source": "/tmp"},
-    #     )
-    #     api.schedule_create(
-    #         **{"name": "unittest_be_schedule", "absFlag": True, "tu": True, "pBase": "DAILY"}
-    #     )
-    #     api.media_pool_create(
-    #         "unittest_be",
-    #         **{"eol": "28", "driveGroupId": "1"}
-    #     )
-    #     api.backup_event_create(
-    #         "unittest_be_backup_task",
-    #         **{
-    #             "name": "unittest_be_backup_event_1",
-    #             "scheduleName": "unittest_be_schedule",
-    #             "fdiType": {
-    #                 "value": "F",
-    #                 "cfdi": "FULL"
-    #             },
-    #             "mediaPool": "unittest_be"
-    #         }
-    #     )
-    #     api.backup_event_create(
-    #         "unittest_be_backup_task",
-    #         **{
-    #             "name": "unittest_be_backup_event_2",
-    #             "scheduleName": "unittest_be_schedule",
-    #             "fdiType": {
-    #                 "value": "F",
-    #                 "cfdi": "FULL"
-    #             },
-    #             "mediaPool": "unittest_be"
-    #         }
-    #     )
-    #     self.assertEqual(
-    #         len(api.backup_event_find(
-    #             name="unittest_be_backup_event_1"
-    #         )),
-    #         1
-    #     )
+    def test_backupEventFind(self):
+        # Create prereqs
+        api.backup_task_create(
+            "unittest_be_backup_task",
+            **{"client": api.client_list()[0]["name"], "source": "/tmp"},
+        )
+        api.schedule_create(
+            **{"name": "unittest_be_schedule", "absFlag": True, "tu": True, "pBase": "DAILY"}
+        )
+        api.media_pool_create(
+            "unittest_be",
+            **{"eol": "28", "driveGroupId": "1"}
+        )
+        api.backup_event_create(
+            "unittest_be_backup_task",
+            **{
+                "name": "unittest_be_backup_event_1",
+                "scheduleName": "unittest_be_schedule",
+                "fdiType": {
+                    "value": "F",
+                    "cfdi": "FULL"
+                },
+                "mediaPool": "unittest_be"
+            }
+        )
+        api.backup_event_create(
+            "unittest_be_backup_task",
+            **{
+                "name": "unittest_be_backup_event_2",
+                "scheduleName": "unittest_be_schedule",
+                "fdiType": {
+                    "value": "F",
+                    "cfdi": "FULL"
+                },
+                "mediaPool": "unittest_be"
+            }
+        )
+        self.assertEqual(
+            len(api.backup_event_find(
+                name="unittest_be_backup_event_1"
+            )),
+            1
+        )
 
-    #     # Delete all backup events
-    #     backup_events = api.backup_event_list()
-    #     backup_event_ids = [backup_event["id"] for backup_event in backup_events]
-    #     for backup_event_id in backup_event_ids:
-    #         api.backup_event_delete(backup_event_id)
+        # Delete all backup events
+        backup_events = api.backup_event_list()
+        backup_event_ids = [backup_event["id"] for backup_event in backup_events]
+        for backup_event_id in backup_event_ids:
+            api.backup_event_delete(backup_event_id)
 
-    #     # Clean up
-    #     api.media_pool_delete("unittest_be")
-    #     api.schedule_delete("unittest_be_schedule")
-    #     api.backup_task_delete("unittest_be_backup_task")
+        # Clean up
+        api.media_pool_delete("unittest_be")
+        api.schedule_delete("unittest_be_schedule")
+        api.backup_task_delete("unittest_be_backup_task")
 
 if __name__ == "__main__":
     unittest.main()
