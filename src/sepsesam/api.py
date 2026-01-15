@@ -362,7 +362,6 @@ class Api:
         endpoint = "/sep/api/v2/locations"
         url = self._urlexpand(endpoint)
         response = requests.get(url=url, headers=self.headers, verify=self.verify)
-        print(response.text)
         self._process_error(response)
         data = response.json()
         log.debug("Got response:\n{}".format(pprint.pformat(data)))
@@ -921,7 +920,7 @@ class Api:
         return data
 
     @_auth
-    def backup_task_update(self, name, **kwargs):
+    def backup_task_update(self, name, client, **kwargs):
         """
         Update a backup task
 
@@ -929,10 +928,11 @@ class Api:
         https://wiki.sep.de/wiki/index.php/File:SEP_sesam-REST-API-V2-Jaglion.pdf
         """
         kwargs["name"] = name
+        kwargs["client"] = client
         endpoint = "/sep/api/v2/backups/updateTask"
         url = self._urlexpand(endpoint)
         response = requests.post(
-            url=url, json=kwargs, headers=self.headers, verify=self.verify
+            url=url, json={ "backupTask": kwargs }, headers=self.headers, verify=self.verify
         )
         self._process_error(response)
         data = response.json()
@@ -1030,7 +1030,7 @@ class Api:
         return data
 
     @_auth
-    def backup_event_update(self, id, **kwargs):
+    def backup_event_update(self, id, object, media_pool, **kwargs):
         """
         Update a backup event
 
@@ -1038,6 +1038,8 @@ class Api:
         https://wiki.sep.de/wiki/index.php/File:SEP_sesam-REST-API-V2-Jaglion.pdf
         """
         kwargs["id"] = id
+        kwargs["object"] = object
+        kwargs["mediaPool"] = media_pool
         endpoint = "/sep/api/v2/backupevents/update"
         url = self._urlexpand(endpoint)
         response = requests.post(
@@ -1216,12 +1218,15 @@ class Api:
         return data
 
     @_auth
-    def media_pool_update(self, **kwargs):
+    def media_pool_update(self, id, name, drive_group_id, **kwargs):
         """
         Update a media pool
         """
         endpoint = "/sep/api/v2/mediapools/update"
         url = self._urlexpand(endpoint)
+        kwargs["id"] = id
+        kwargs["name"] = name
+        kwargs["driveGroupId"] = drive_group_id
         response = requests.post(
             url=url, headers=self.headers, json=kwargs, verify=self.verify
         )
@@ -1307,12 +1312,18 @@ class Api:
         return data
 
     @_auth
-    def media_update(self, **kwargs):
+    def media_update(self, id, locked, mediaType, name, poolName, sesamDate, **kwargs):
         """
         Update a media
         """
         endpoint = "/sep/api/v2/media/update"
         url = self._urlexpand(endpoint)
+        kwargs["id"] = id
+        kwargs["locked"] = locked
+        kwargs["mediaType"] = mediaType
+        kwargs["name"] = name
+        kwargs["poolName"] = poolName
+        kwargs["sesamDate"] = sesamDate
         response = requests.post(
             url=url, headers=self.headers, json=kwargs, verify=self.verify
         )
@@ -2085,6 +2096,29 @@ class Api:
         url = self._urlexpand(endpoint)
         response = requests.post(
             url=url, auth=(self.username, self.password), json=name, verify=self.verify
+        )
+        self._process_error(response)
+        data = response.json()
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        return data
+    
+    def drive_group_create(self, name, **kwargs):
+        endpoint = "/sep/api/v2/drivegroups/create"
+        kwargs["name"] = name
+        url = self._urlexpand(endpoint)
+        response = requests.post(
+            url=url, auth=(self.username, self.password), json=kwargs, verify=self.verify
+        )
+        self._process_error(response)
+        data = response.json()
+        log.debug("Got response:\n{}".format(pprint.pformat(data)))
+        return data
+    
+    def drive_group_delete(self, id):
+        endpoint = "/sep/api/v2/drivegroups/delete"
+        url = self._urlexpand(endpoint)
+        response = requests.post(
+            url=url, auth=(self.username, self.password), json=id, verify=self.verify
         )
         self._process_error(response)
         data = response.json()
