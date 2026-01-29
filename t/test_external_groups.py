@@ -1,8 +1,9 @@
 import unittest
-from sepsesam.api import SEPSesamAPIError
 from t.config import api
 
-#testing external groups
+# testing external groups
+
+
 class TestExternalGroups(unittest.TestCase):
     group_ids = []
     group_names = []
@@ -10,7 +11,7 @@ class TestExternalGroups(unittest.TestCase):
     def setUp(self):
         self.group_ids = []
         self.group_names = []
-        self.create_command("unittest_external_group")
+        self.create_external_group("unittest_external_group")
 
     def tearDown(self):
         for id in self.group_ids:
@@ -21,7 +22,8 @@ class TestExternalGroups(unittest.TestCase):
 
     def test_external_group_list(self):
         original_length = len(api.external_group_list())
-        self.create_command("second_unittest_external_group")
+        self.create_external_group("second_unittest_external_group")
+        self.create_external_group("third_unittest_external_group")
         self.assertTrue(len(api.external_group_list()) > original_length)
         self.assertTrue(
             any(
@@ -38,7 +40,8 @@ class TestExternalGroups(unittest.TestCase):
 
     def test_external_group_get(self):
         self.assertEqual(
-            api.external_group_get(id=self.group_ids[0])["externalId"], "unittest_external_group"
+            api.external_group_get(id=self.group_ids[0])[
+                "externalId"], "unittest_external_group"
         )
 
     def test_external_group_find(self):
@@ -63,7 +66,7 @@ class TestExternalGroups(unittest.TestCase):
             "renamed_unittest_external_group",
         )
 
-    def test_external_group_realtion_update(self):
+    def test_external_group_relation_update(self):
         groups = ["OPERATOR", "BACKUP"]
         relating_groups = api.external_group_update_relations(
             externalId="unittest_external_group", groups=groups
@@ -93,8 +96,8 @@ class TestExternalGroups(unittest.TestCase):
             [group["name"] for group in relating_groups], ["OPERATOR", "BACKUP"]
         )
 
-    #helper methods
-    def create_command(self, externalId: str):
+    ### HELPER METHODS ###
+    def create_external_group(self, externalId: str):
         result = api.external_group_create(externalId=externalId, enabled=True)
         self.group_ids.append(result["id"])
         self.group_names.append(result["externalId"])

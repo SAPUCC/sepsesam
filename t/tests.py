@@ -1,40 +1,40 @@
 import unittest
 
-#testing backup tasks
-from t.test_backup_tasks import TestBackupTasks
+# testing backup events
+from .test_backup_events import TestBackupEvents
 
-#testing clients
-from t.test_clients import TestClients
+# testing backup tasks
+from .test_backup_tasks import TestBackupTasks
 
-#testing external groups
-from t.test_external_groups import TestExternalGroups
+# testing clients
+from .test_clients import TestClients
 
-#testing groups
-from t.test_groups import TestGroups
+# testing command events
+from .test_command_events import TestCommandEvents
 
-#testing locations
-from t.test_locations import TestLocations
+# testing commands
+from .test_commands import TestCommands
 
-#testing commands
-from t.test_commands import TestCommands
+# testing drive groups
+from .test_drive_groups import TestDriveGroups
 
-#testing command events
-from t.test_command_events import TestCommandEvents
+# testing external groups
+from .test_external_groups import TestExternalGroups
 
-#testing schedules
-from t.test_schedule import TestSchedules
+# testing groups
+from .test_groups import TestGroups
 
-#testing backup events
-from t.test_backup_events import TestBackupEvents
+# testing locations
+from .test_locations import TestLocations
 
-#testing drive groups
-from t.test_drive_groups import TestDriveGroups
+# testing media pools
+from .test_media_pools import TestMediaPools
 
-#testing media pools
-from t.test_media_pools import TestMediaPools
+# testing media
+from .test_media import TestMedia
 
-#testing media
-from t.test_media import TestMedia
+# testing schedules
+from .test_schedule import TestSchedules
 
 if __name__ == "__main__":
     unittest.main()

@@ -2,7 +2,9 @@ import unittest
 from t.config import api
 import logging
 
-#testing drive groups
+# testing drive groups
+
+
 class TestDriveGroups(unittest.TestCase):
     logger = logging.getLogger("sepsesam")
     old_level = logger.level
@@ -19,7 +21,7 @@ class TestDriveGroups(unittest.TestCase):
         for dg in self.drive_group_ids:
             try:
                 api.drive_group_delete(int(dg))
-            except:
+            except Exception:
                 pass
         self.logger.setLevel(self.old_level)
 
@@ -27,7 +29,8 @@ class TestDriveGroups(unittest.TestCase):
         self.assertEqual(self.drive_groups[0], "unittest_drive_group")
 
     def test_drive_group_delete(self):
-        self.assertEqual(api.drive_group_delete(int(self.drive_group_ids[0])), self.drive_group_ids[0])
+        self.assertEqual(api.drive_group_delete(
+            int(self.drive_group_ids[0])), self.drive_group_ids[0])
         self.drive_group_ids.pop(0)
 
     def test_drive_group_list(self):
@@ -45,18 +48,23 @@ class TestDriveGroups(unittest.TestCase):
         )
 
     def test_drive_group_get(self):
-        self.assertEqual(api.drive_group_get(self.drive_group_ids[0])["usercomment"], "unittest_comment")
+        self.assertEqual(api.drive_group_get(self.drive_group_ids[0])[
+                         "usercomment"], "unittest_comment")
 
     def test_drive_group_find(self):
-        self.assertTrue(len(api.drive_group_find(**{"usercomment":"unittest_comment"})) == 1) 
+        self.assertTrue(len(api.drive_group_find(
+            **{"usercomment": "unittest_comment"})) == 1)
         self.create_drive_group("second_unittest_drive_group")
-        self.assertTrue(len(api.drive_group_find(**{"usercomment":"unittest_comment"})) == 2) 
+        self.assertTrue(len(api.drive_group_find(
+            **{"usercomment": "unittest_comment"})) == 2)
 
     def test_drive_group_ResolveDriveGroupToId(self):
-        self.assertEqual(api.drive_group_resolveDriveGroupToId(self.drive_groups[0]), self.drive_group_ids[0])
+        self.assertEqual(api.drive_group_resolveDriveGroupToId(
+            self.drive_groups[0]), self.drive_group_ids[0])
 
-    #helper methods
+    ### HELPER METHODS ###
     def create_drive_group(self, name):
-        result = api.drive_group_create(name, **{"usercomment":"unittest_comment"}) 
+        result = api.drive_group_create(
+            name, **{"usercomment": "unittest_comment"})
         self.drive_groups.append(result["name"])
         self.drive_group_ids.append(result["id"])

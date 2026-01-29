@@ -2,31 +2,35 @@ import unittest
 import logging
 from t.config import api
 
-#testing commands
+# testing commands
+
+
 class TestCommands(unittest.TestCase):
     logger = logging.getLogger("sepsesam")
     old_level = logger.level
     command_names = []
-    
+
     def setUp(self):
         self.command_names = []
         self.create_command("unittest_command", "unittest_user")
-    
+
     def tearDown(self):
         self.logger.setLevel(logging.CRITICAL)
         try:
             for name in self.command_names:
                 self.deleteCommand(name)
-        except:
+        except Exception:
             pass
         self.logger.setLevel(self.old_level)
 
     def test_command_creation(self):
-        result = self.create_command("second_unittest_command", "unittest_user")
+        result = self.create_command(
+            "second_unittest_command", "unittest_user")
         self.assertEqual(result["name"], "second_unittest_command")
 
     def test_command_deletion(self):
-        self.assertEqual(api.command_delete("unittest_command"), "unittest_command")
+        self.assertEqual(api.command_delete(
+            "unittest_command"), "unittest_command")
         self.command_names.pop(0)
 
     def test_command_list(self):
@@ -46,11 +50,14 @@ class TestCommands(unittest.TestCase):
         )
 
     def test_command_get(self):
-        self.assertEqual(api.command_get("unittest_command")["owner"], "unittest_user")
+        self.assertEqual(api.command_get("unittest_command")
+                         ["owner"], "unittest_user")
 
     def test_command_find(self):
-        result = self.create_command("second_unittest_command",  "unittest_user")
-        self.assertTrue(len(api.command_find(**{"owner": "unittest_user"})) > 1)
+        self.create_command(
+            "second_unittest_command",  "unittest_user")
+        self.assertTrue(len(api.command_find(
+            **{"owner": "unittest_user"})) > 1)
 
     def test_command_update(self):
         self.assertEqual(
@@ -60,16 +67,16 @@ class TestCommands(unittest.TestCase):
             "third_unittest_user",
         )
 
-    #helper methods
+    ### HELPER METHODS ###
     def create_command(self, name: str, owner: str):
         result = api.command_create(
-                **{
-                    "name": name,
-                    "owner": owner,
-                    "type": "EXECUTE",
-                    "command": "echo 'command'",
-                }
-            )
+            **{
+                "name": name,
+                "owner": owner,
+                "type": "EXECUTE",
+                "command": "echo 'command'",
+            }
+        )
         self.command_names.append(result["name"])
         return result
 

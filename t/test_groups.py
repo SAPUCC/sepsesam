@@ -1,15 +1,18 @@
 import unittest
 from t.config import api
 
-#testing groups
+# testing groups
+
+
 class TestGroups(unittest.TestCase):
     def setUp(self):
-        if(self._testMethodName != 'test_group_create'):
-            api.group_create(5, **{"name": "unittest_group", "enabled": True, "rolesList": ["ReadOnly"]})
-    
+        if (self._testMethodName != 'test_group_create'):
+            api.group_create(
+                5, **{"name": "unittest_group", "enabled": True, "rolesList": ["ReadOnly"]})
+
     def tearDown(self):
         api.group_delete(5)
-        
+
     def test_group_create(self):
         self.assertEqual(
             api.group_create(
