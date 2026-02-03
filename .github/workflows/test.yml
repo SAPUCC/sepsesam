@@ -28,4 +28,4 @@ jobs:
     - name: Install sepsesam module
       run: sudo python3 -m pip install .
     - name: Execute pyunit tests
-      run: python3 t/tests.py
+      run: python3 -m unittest t/tests.py
