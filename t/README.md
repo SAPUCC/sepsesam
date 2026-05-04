@@ -7,6 +7,7 @@ python3 -m pip install --editable ./
 ```
 
 ### Run tests
+> Configure in config.py
 ```sh
 python3 -m unittest t/tests.py
 ```
