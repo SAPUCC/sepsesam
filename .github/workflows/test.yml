@@ -46,5 +46,9 @@ jobs:
         sudo python3 -m pip install requests --break-system-packages
         sudo python3 -m pip install . --break-system-packages
 
+    - name: Start SEP sesam server
+      run: |
+        sudo /opt/sesam/bin/sesam/sm_main start
+
     - name: Execute pyunit tests
       run: python3 -m unittest t/tests.py
