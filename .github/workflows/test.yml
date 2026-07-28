@@ -1,4 +1,4 @@
-name: sepsesam api CI on ubuntu-latest
+name: sepsesam api CI on debian 13
 
 on: 
   push:
@@ -13,19 +13,38 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: debian13
 
     steps:
+    - name: Install tools for act
+      env:
+        DEBIAN_FRONTEND: noninteractive
+      run: |
+        apt-get update
+        apt-get install -y curl sudo
+        
     - uses: actions/checkout@v4
+
     - name: Add sesam repository key
-      run: curl https://download.sep.de/linux/repositories/debian/key.asc | sudo apt-key add -
+      run: |
+        mkdir -p /etc/apt/keyrings
+        curl -fsSL https://download.sep.de/linux/repositories/debian/key.asc -o /etc/apt/keyrings/sesam.asc
+
     - name: Configure sesam apt sources
-      run: echo 'deb https://download.sep.de/linux/repositories/debian/ bookworm main' | sudo tee -a /etc/apt/sources.list
+      run: echo "deb [signed-by=/etc/apt/keyrings/sesam.asc] https://download.sep.de/linux/repositories/debian/ trixie main" | sudo tee /etc/apt/sources.list
+
     - name: Update apt sources
       run: sudo apt-get update -y
+
     - name: Install sesam server
-      run: sudo apt-get install sesam-srv python3 -y
+      env:
+          DEBIAN_FRONTEND: noninteractive
+      run: sudo -E apt-get install -y --no-install-recommends sesam-srv python3 python3-pip
+
     - name: Install sepsesam module
-      run: sudo python3 -m pip install .
+      run: |
+        sudo python3 -m pip install requests --break-system-packages
+        sudo python3 -m pip install . --break-system-packages
+
     - name: Execute pyunit tests
       run: python3 -m unittest t/tests.py

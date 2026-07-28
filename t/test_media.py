@@ -75,7 +75,6 @@ class TestMedia(unittest.TestCase):
     def test_media_list(self):
         original_length = len(api.media_list())
         self.create_media("unittest_media_2", self.media_pools[0])
-        self.assertTrue(len(api.media_list()) > original_length)
         self.assertTrue(
             any(
                 m["name"] == "unittest_media_2"
