@@ -1,4 +1,4 @@
-FROM --platform=linux/amd64 debian:13
+FROM --platform=linux/amd64 ubuntu-22.04
 ENV DEBIAN_FRONTEND noninteractive
 RUN apt update -y
 RUN apt install curl gpg -y
