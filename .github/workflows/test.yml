@@ -1,4 +1,4 @@
-name: sepsesam api CI on ubuntu 22.04
+name: sepsesam api CI on ubuntu 24.04
 
 on: 
   push:
